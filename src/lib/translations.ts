@@ -15,6 +15,9 @@ export const translations = {
       onThisPage: "Nesta página",
       previousArticle: "Artigo anterior",
       nextArticle: "Próximo artigo",
+      filteringByTag: (tag: string) => `tag: ${tag}`,
+      clearFilter: "ver todos",
+      noPostsForTag: (tag: string) => `Nenhum post com a tag "${tag}".`,
     },
     footer: {
       rights: "Todos os direitos reservados.",
@@ -26,7 +29,7 @@ export const translations = {
       subtitle: "Thoughts on development, engineering, and product.",
       readingTime: (min: number) => `${min} min read`,
       publishedOn: "Published on",
-      backToList: "← back to blog",
+      backToList: "back to blog",
       switchToOther: "Ler em português",
       noTranslation: "This post hasn't been translated yet.",
       noPostsYet: "No posts here yet.",
@@ -34,6 +37,9 @@ export const translations = {
       onThisPage: "On this page",
       previousArticle: "Previous article",
       nextArticle: "Next article",
+      filteringByTag: (tag: string) => `tag: ${tag}`,
+      clearFilter: "see all",
+      noPostsForTag: (tag: string) => `No posts tagged "${tag}".`,
     },
     footer: {
       rights: "All rights reserved.",
