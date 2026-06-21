@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
 import readingTime from "reading-time";
+import GithubSlugger from "github-slugger";
 import type { Lang } from "./i18n";
 
 export type TocItem = {
@@ -10,24 +11,16 @@ export type TocItem = {
   level: 2 | 3;
 };
 
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
 export function extractToc(content: string): TocItem[] {
+  const slugger = new GithubSlugger();
   const withoutCode = content.replace(/```[\s\S]*?```/g, "");
   const items: TocItem[] = [];
-  for (const line of withoutCode.split("\n")) {
+  for (const line of withoutCode.split(/\r?\n/)) {
     const match = /^(#{2,3})\s+(.+)$/.exec(line);
     if (!match) continue;
     const level = match[1].length as 2 | 3;
     const text = match[2].trim();
-    items.push({ text, slug: slugify(text), level });
+    items.push({ text, slug: slugger.slug(text), level });
   }
   return items;
 }

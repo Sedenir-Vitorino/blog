@@ -97,3 +97,15 @@ pre[data-theme*=" "] {
 .article-content ol li::before {
   display: none;
 }
+
+/* Animação de entrada dos cards da listagem */
+.post-card {
+  opacity: 0;
+  transform: translateY(1.25rem);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.post-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
