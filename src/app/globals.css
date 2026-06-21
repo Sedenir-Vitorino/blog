@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #ffffff;
+  --foreground: #09090b;
+}
+
+.dark {
+  --background: #09090b;
+  --foreground: #fafafa;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-jetbrains-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  font-feature-settings: "calt" 1, "liga" 1;
+}
+
+::selection {
+  background-color: #18181b;
+  color: #fafafa;
+}
+
+.dark ::selection {
+  background-color: #fafafa;
+  color: #18181b;
+}
+
+/* Shiki dual-theme */
+code[data-theme*=" "],
+code[data-theme*=" "] span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+
+pre[data-theme*=" "] {
+  background-color: var(--shiki-light-bg);
+}
+
+.dark code[data-theme*=" "],
+.dark code[data-theme*=" "] span {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
+}
+
+.dark pre[data-theme*=" "] {
+  background-color: var(--shiki-dark-bg);
+}
+
+/* CSS counter para numeração automática de h2 dentro de posts */
+.article-content {
+  counter-reset: section;
+}
+
+.article-content h2 {
+  counter-increment: section;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.article-content h2::before {
+  content: counter(section, decimal-leading-zero);
+  margin-right: 0.75rem;
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.article-content h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.25rem;
+  bottom: 0.25rem;
+  width: 2px;
+  background: #22c55e;
+}
+
+/* Bullets verdes em listas não-ordenadas dentro do artigo */
+.article-content ul li {
+  position: relative;
+  padding-left: 1.25rem;
+}
+
+.article-content ul li::before {
+  content: "•";
+  position: absolute;
+  left: 0.25rem;
+  top: 0;
+  color: #22c55e;
+  font-weight: bold;
+}
+
+/* Garante que ol > li não herda o bullet */
+.article-content ol li::before {
+  display: none;
+}
