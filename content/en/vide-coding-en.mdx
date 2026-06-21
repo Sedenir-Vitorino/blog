@@ -1,0 +1,259 @@
+---
+title: "Vibe coding: hype, reality, and when it actually makes sense"
+description: "In February 2025, Andrej Karpathy named vibe coding in a tweet. A year later, he himself called the term passé and adopted a new one: agentic engineering. Between the two ends of that arc lies a trail of careless prompts, exposed databases, and one embarrassing statistic: 45% of AI-generated code carries an OWASP vulnerability."
+date: 2026-06-21
+lang: en
+translationKey: "vibe-coding-hype-real-quando-faz-sentido-2026-06"
+tags: [ai, vibe-coding, agentic-engineering, claude-code, process, opinion]
+draft: false
+---
+
+On **February 2, 2025**, Andrej Karpathy — OpenAI co-founder, former Tesla AI lead — posted a seemingly offhand tweet that ended up in Wikipedia, became Collins Dictionary's Word of the Year for 2025, and shifted the industry's vocabulary:
+
+> *"There's a new kind of coding I call 'vibe coding', where you fully give in to the vibes, embrace exponentials, and forget that the code even exists. (...) I 'Accept All' always, I don't read the diffs anymore. When I get error messages I just copy paste them in with no comment, usually that fixes it. The code grows beyond my usual comprehension (...) it's not really coding — I just see stuff, say stuff, run stuff, and copy paste stuff, and it mostly works."*
+
+Eleven months later, in December 2025, the same Karpathy wrote another line that ricocheted just as loudly:
+
+> *"I've never felt this much behind as a programmer."*
+
+And in February 2026, he coined the successor: **agentic engineering**. Vibe coding, according to the man who named it, is passé.
+
+That one-year arc fits in a single post. Worth understanding what happened in between.
+
+## What vibe coding is, stripped of romance
+
+Karpathy's original definition is radical: you describe in natural language, accept everything the LLM produces, don't read the diff, and when something breaks, paste the stack trace back in. The process ends when "it works". You don't really know what's running.
+
+Note this is different from "using AI to code". Vibe coding (in the strict sense) implies a **voluntary surrender of understanding**. It's the "screw it, let's go" version of software development.
+
+That's why the term caught fire. It named a practice that already existed, gave it social permission, and captured a feeling — that reading code line by line was becoming a pastime for those who got left behind.
+
+## The hype: why everyone became a vibe coder
+
+The adoption numbers are absurd. As of mid-2026:
+
+- **85% of professional developers** use AI tools at least weekly.
+- **84% adopted some form of vibe coding**, but only **29% trust the output** (Stack Overflow 2025 / GitClear).
+- Karpathy, in an interview at Sequoia AI Ascent 2026, admitted that in **November 2025 he wrote 80% of his code manually. By December, only 20%.**
+- **Linus Torvalds**, in January 2026, wrote in the AudioNoise README: *"the Python visualizer tool has been basically written by vibe-coding"*. Yes, that Linus.
+
+The promise is obvious: democratization. A founder without an engineering team can ship an MVP in 72 hours. A designer can prototype an idea without waiting in the dev queue. The barrier to creating software became narrative.
+
+And it's real. **That part of the story isn't fake hype.**
+
+<iframe
+  width="100%"
+  style={{ aspectRatio: "16/9", borderRadius: "8px", marginTop: "1.5rem", width:"100%" }}
+  src="https://www.youtube.com/embed/96jN2OCOfLs"
+  title="Andrej Karpathy: From Vibe Coding to Agentic Engineering — Sequoia AI Ascent 2026"
+  allowFullScreen
+/>
+
+## The reality: the bill came due in 2026
+
+In parallel to the euphoria, security and code quality researchers started measuring the damage. The numbers are uncomfortable:
+
+### Security
+
+- **45% of AI-generated code samples contain OWASP Top 10 vulnerabilities**, per Veracode (study covering 100+ LLMs across Java, Python, C#, and JavaScript).
+- **86% fail to defend against XSS. 88% are vulnerable to log injection.**
+- Georgia Tech's **Vibe Security Radar** tracked CVEs directly attributable to AI-generated code: **6 in January 2026, 15 in February, 35 in March**. Estimated real count across the open-source ecosystem: 400–700 cases.
+- **GitGuardian** documented **28.65 million hardcoded secrets** in public GitHub commits during 2025 — a 34% jump (the largest single-year increase ever recorded). AI-assisted commits expose secrets at **3.2% vs the 1.5% baseline**.
+- **Escape.tech** scanned 1,400 vibe-coded production applications: **65% had security issues, 58% had at least one critical vulnerability**, more than 400 exposed secrets and 175 instances of leaked PII.
+
+### Quality
+
+- **CodeRabbit's** analysis of 470 open-source pull requests showed AI co-authored code contains **1.7x more "major" issues**, **75% more misconfigurations**, and **2.74x more security vulnerabilities** than human code.
+- **About 20% of generated samples reference packages that don't exist** — a pattern attackers exploit through **slopsquatting**: registering the hallucinated names as malicious packages on npm/PyPI before the dev runs `npm install`.
+- A **METR** study with experienced open-source developers found something strange: using AI tools, they were **19% SLOWER**. They themselves, before the study, predicted they'd be 24% faster. After the study, they still believed they'd been 20% faster. Perceived speedup doesn't match measured speedup.
+
+### Concrete cases
+
+The incidents are no longer anecdotal:
+
+- **Moltbook (February 2026)** — a social network for AI agents, built entirely through vibe coding. The founder publicly stated he "didn't write one line of code". Wiz Security discovered a Supabase configured with **public read and write access**: 1.5 million API keys and 35,000 emails exposed. The LLM had generated the "permissive setup to ease development". Nobody reviewed it.
+- **Lovable (May 2025)** — the Swedish vibe coding platform had **170 out of 1,645 generated applications** with vulnerabilities allowing access to personal data.
+- **Replit AI (July 2025)** — SaaStr's founder documented that the agent **deleted a production database despite explicit instructions not to change anything**.
+- **rsync 3.4.3 (May 2026)** — users reported incremental backups broke. Digging in, they discovered that since version 3.4.1 dozens of commits had been made by "tridge and claude". It became a GitHub issue titled *"Please Do Not Vibe Fuck Up This Software"*.
+
+And maybe the most symbolic symptom: **GitHub acknowledged in February 2026** a phenomenon dubbed the *"Eternal September for open source"* — projects like cURL ended their bug bounty programs because AI-generated security reports were burying maintainers.
+
+<Warning title="The blunt summary">
+  AI-assisted engineers ship commits **3 to 4x faster**, but introduce security findings **10x faster**. The productivity is real. So is the debt.
+</Warning>
+
+## The pivot: from vibe coding to agentic engineering
+
+In February 2026, Karpathy did something most buzzword-coiners never do: he killed his own term.
+
+In his X post, he wrote that LLMs got too good and that original vibe coding — *"accept all", no diff reading* — became the exception. The new default looks different:
+
+> *"Programming via LLM agents is increasingly becoming a default workflow for professionals, except with more oversight and scrutiny. The goal is to claim the leverage from the use of agents but without any compromise on the quality of the software."*
+
+He proposed a new name: **agentic engineering**. *"Agentic"* because you don't write code directly 99% of the time — you orchestrate agents who do, while acting as oversight. *"Engineering"* to emphasize there's art, science, and expertise involved. **It's not vibes. It's engineering.**
+
+The practical difference is large. The two flows, side by side:
+
+<svg
+  viewBox="0 0 820 720"
+  xmlns="http://www.w3.org/2000/svg"
+  role="img"
+  aria-label="Flow comparison: Vibe Coding vs Agentic Engineering"
+  style={{
+    width: "100%",
+    height: "auto",
+    maxWidth: "820px",
+    margin: "1.5rem auto",
+    display: "block",
+    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
+  }}
+>
+  <defs>
+    <marker id="vc-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+    </marker>
+  </defs>
+
+  <text x="190" y="25" textAnchor="middle" fontWeight="bold" fontSize="15" fill="currentColor">🎲 VIBE CODING</text>
+  <text x="630" y="25" textAnchor="middle" fontWeight="bold" fontSize="15" fill="currentColor">⚙️ AGENTIC ENGINEERING</text>
+
+  <rect x="70" y="50" width="240" height="50" fill="none" stroke="currentColor" strokeWidth="1.5" rx="4" />
+  <text x="190" y="80" textAnchor="middle" fontSize="13" fill="currentColor">Natural language prompt</text>
+
+  <rect x="70" y="140" width="240" height="50" fill="none" stroke="currentColor" strokeWidth="1.5" rx="4" />
+  <text x="190" y="170" textAnchor="middle" fontSize="13" fill="currentColor">"Accept All"</text>
+
+  <rect x="70" y="230" width="240" height="50" fill="none" stroke="currentColor" strokeWidth="1.5" rx="4" />
+  <text x="190" y="260" textAnchor="middle" fontSize="13" fill="currentColor">Run</text>
+
+  <rect x="70" y="320" width="240" height="50" fill="none" stroke="currentColor" strokeWidth="1.5" rx="4" />
+  <text x="190" y="350" textAnchor="middle" fontSize="13" fill="currentColor">Paste stack trace</text>
+
+  <rect x="70" y="590" width="240" height="50" fill="none" stroke="currentColor" strokeWidth="2" rx="4" />
+  <text x="190" y="620" textAnchor="middle" fontSize="13" fontWeight="bold" fill="currentColor">Ship 🚀</text>
+
+  <line x1="190" y1="100" x2="190" y2="137" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#vc-arr)" />
+  <line x1="190" y1="190" x2="190" y2="227" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#vc-arr)" />
+  <line x1="190" y1="280" x2="190" y2="317" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#vc-arr)" />
+  <text x="200" y="303" fontSize="11" fontStyle="italic" fill="currentColor">error</text>
+
+  <path d="M 310 345 L 345 345 L 345 165 L 312 165" fill="none" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#vc-arr)" />
+
+  <path d="M 70 255 L 35 255 L 35 615 L 68 615" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="5,3" markerEnd="url(#vc-arr)" />
+  <text x="20" y="430" fontSize="11" fontStyle="italic" fill="currentColor" textAnchor="middle" transform="rotate(-90 20 430)">works?</text>
+
+  <rect x="510" y="50" width="240" height="50" fill="none" stroke="currentColor" strokeWidth="1.5" rx="4" />
+  <text x="630" y="80" textAnchor="middle" fontSize="13" fill="currentColor">Specs / Requirements</text>
+
+  <rect x="510" y="140" width="240" height="50" fill="none" stroke="currentColor" strokeWidth="1.5" rx="4" />
+  <text x="630" y="165" textAnchor="middle" fontSize="13" fill="currentColor">Context</text>
+  <text x="630" y="182" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.65">(CLAUDE.md, ROADMAP.md)</text>
+
+  <rect x="510" y="230" width="240" height="50" fill="none" stroke="currentColor" strokeWidth="1.5" rx="4" />
+  <text x="630" y="260" textAnchor="middle" fontSize="13" fill="currentColor">Architectural prompt</text>
+
+  <rect x="510" y="320" width="240" height="50" fill="none" stroke="currentColor" strokeWidth="1.5" rx="4" />
+  <text x="630" y="350" textAnchor="middle" fontSize="13" fill="currentColor">Review diff</text>
+
+  <rect x="510" y="460" width="240" height="50" fill="none" stroke="currentColor" strokeWidth="1.5" rx="4" />
+  <text x="630" y="490" textAnchor="middle" fontSize="13" fill="currentColor">Test</text>
+
+  <rect x="510" y="590" width="240" height="50" fill="none" stroke="currentColor" strokeWidth="2" rx="4" />
+  <text x="630" y="620" textAnchor="middle" fontSize="13" fontWeight="bold" fill="currentColor">Commit ✓</text>
+
+  <line x1="630" y1="100" x2="630" y2="137" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#vc-arr)" />
+  <line x1="630" y1="190" x2="630" y2="227" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#vc-arr)" />
+  <line x1="630" y1="280" x2="630" y2="317" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#vc-arr)" />
+
+  <line x1="630" y1="370" x2="630" y2="457" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#vc-arr)" />
+  <text x="640" y="418" fontSize="11" fontStyle="italic" fill="currentColor">ok</text>
+
+  <line x1="630" y1="510" x2="630" y2="587" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#vc-arr)" />
+  <text x="640" y="553" fontSize="11" fontStyle="italic" fill="currentColor">passes</text>
+
+  <path d="M 750 345 L 785 345 L 785 255 L 752 255" fill="none" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#vc-arr)" />
+  <text x="800" y="300" fontSize="11" fontStyle="italic" fill="currentColor" textAnchor="middle" transform="rotate(90 800 300)">don't get it</text>
+
+  <path d="M 510 485 L 475 485 L 475 255 L 508 255" fill="none" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#vc-arr)" />
+  <text x="460" y="370" fontSize="11" fontStyle="italic" fill="currentColor" textAnchor="middle" transform="rotate(-90 460 370)">fails</text>
+</svg>
+
+And the difference goes beyond the flowchart. Comparing the two postures:
+
+- **Mental posture** — vibe coding: total trust. Agentic engineering: calibrated technical skepticism.
+- **Who benefits** — vibe coding: anyone with a credit card. Agentic engineering: people who already understand architecture, security, and trade-offs.
+- **Fit for** — vibe coding: prototypes, throwaway scripts, exploration. Agentic engineering: production systems.
+- **Core skill** — vibe coding: knowing how to ask. Agentic engineering: knowing how to read code, judge context, redirect the agent.
+
+The irony: **agentic engineering disproportionately favors senior engineers**. People who understand system design, security patterns, and performance trade-offs become real force multipliers. People who don't keep shipping code that demos well and fails in production.
+
+## When vibe coding makes sense
+
+Being fair to the original practice: it has its place. Karpathy wasn't wrong when he described it — he was describing a work mode **fit for a specific context**.
+
+Vibe coding works well for:
+
+- **Prototypes and internal MVPs** that will get thrown out if the hypothesis fails.
+- **Personal scripts** — productivity automation, scrapers, one-off analyses.
+- **Learning a new stack** — generate, break, generate again, learn through experiment.
+- **Exploring unfamiliar APIs or libraries**, with no production commitment.
+- **Weekend side projects** where the goal is the journey, not the artifact.
+
+Zero problem vibe-coding in those situations. The problem is confusing them with production.
+
+## When it doesn't make sense (and never will)
+
+The inverse holds just as strongly:
+
+- **Anything touching other people's data.** Authentication, authorization, PII, financial data, health data. The Moltbook case is the adult version of the joke: one forgotten permissive config exposed 1.5 million keys.
+- **Multi-tenant SaaS.** Where an isolation flaw leaks one customer into another. RLS, query scoping, sanitization — things LLMs get wrong with worrying regularity (I wrote about this [in the post on SaaS security failures](/blog/saas-crescimento-falhas-seguranca)).
+- **Critical infrastructure.** See rsync above.
+- **Open-source libraries.** See "Eternal September" above.
+- **Any code that will be maintained by someone in 6, 12, 24 months** — yourself included. Vibe-coded technical debt accumulates at an estimated **3x the rate** of traditional code.
+
+## How I work with AI (without becoming a vibe coder)
+
+I have no qualms about using Claude Code every day. I think anyone not using it in 2026 is leaving productivity on the table. But how I use it is deliberate, and it boils down to a handful of principles:
+
+<Tip title="Principles for working with coding agents">
+  - **Documentation-first.** Before any line of code, I define scope, stack, and phases. For project that becomes `CLAUDE.md`, `REQUIREMENTS.md`, `ROADMAP.md`. The agent gets explicit context, not vibes.
+  - **Read every diff.** No exceptions. If I don't understand what the agent did, I ask it to explain, or I revert. "Accept All" doesn't exist in my flow.
+  - **AI is a junior, not a peer.** I review the way I review a good junior's PR: trusting the effort, not the result.
+  - **Architectural prompts, not outcome requests.** "Use Mantine v8, extract this logic into a custom hook, keep the component pure" produces good code. "Build a full auth system" produces dangerous code.
+  - **Tests are my responsibility.** I don't trust AI-generated tests. They tend to test what the code *does*, not what it *should* do.
+  - **Secrets never go through the agent.** Not in prompts, not in configs, not in example READMEs. `.env.example` with placeholders, always.
+</Tip>
+
+This isn't vibe coding. Karpathy would call it agentic engineering. Mario Zechner, one of the most clear-eyed critics, calls it "engineering, with agents". The name matters less than the posture.
+
+## What sticks
+
+Vibe coding served two purposes. Good: it democratized prototyping, showed there's a legitimate way to use AI to explore ideas quickly. Bad: it gave cultural cover for an entire generation that's shipping code to production they can't explain.
+
+The 2026 data suggests **the bill comes due between 2026 and 2027**. Companies that adopted vibe coding as the default production workflow will spend more on security remediation and refactoring than they saved in "perceived velocity". The METR research suggests something even more disturbing: the velocity might have been partly an illusion from the start.
+
+The honest take in 2026 is to accept the following:
+
+- AI writes **much more code** than it did a year ago.
+- That code is **less secure, on average**, than human code.
+- The gap between "it works" and "it's production-safe" **remains human work**, and likely will for a long time.
+- Whoever reads diffs will thrive. Whoever clicks "Accept All" will become a name in a post-mortem.
+
+The Karpathy line that stays with me isn't the original tweet. It's what he said in a recent interview:
+
+> *"I don't write code most of the time. But I read. A lot. I review. I correct. I redirect. And that's a different skill."*
+
+That's the frontier. Not between people who use AI and people who don't — that world is gone. It's between people who **read** what the AI wrote, and people who don't.
+
+Make your choice.
+
+## Sources
+
+- [Andrej Karpathy on X — the original tweet (02/02/2025)](https://x.com/karpathy/status/1886192184808149383)
+- [The New Stack — Vibe coding is passé. Karpathy has a new name for the future of software](https://thenewstack.io/vibe-coding-is-passe/)
+- [Wikipedia — Vibe coding](https://en.wikipedia.org/wiki/Vibe_coding)
+- [Cloud Security Alliance — Vibe Coding's Security Debt: The AI-Generated CVE Surge](https://labs.cloudsecurityalliance.org/research/csa-research-note-ai-generated-code-vulnerability-surge-2026/)
+- [Trend Micro — The Real Risk of Vibecoding](https://www.trendmicro.com/en_us/research/26/c/the-real-risk-of-vibecoding.html)
+- [Pixelmojo — Vibe Coding Hit 84% Adoption. 45% Has Vulnerabilities.](https://www.pixelmojo.io/blogs/vibe-coding-technical-debt-crisis-2026-2027)
+- [CodeRabbit — A semantic history of vibe coding](https://www.coderabbit.ai/blog/a-semantic-history-how-the-term-vibe-coding-went-from-a-tweet-to-prod)
+- [Kyros — The Vibe Coding Crisis: How AI-Generated Technical Debt Is Costing Companies Millions](https://usekyros.ai/blog/vibe-coding-crisis-ai-technical-debt)
