@@ -1,0 +1,150 @@
+---
+title: "SaaS is eating the world — and tearing open just as many holes"
+description: "The global SaaS market hit $299 billion and the average company runs 371 cloud applications. Meanwhile, 2026 is shaping up as the year of SaaS supply chain attacks — and the preferred entry point isn't the firewall anymore, it's an OAuth token from an integration nobody has reviewed in months."
+date: 2026-06-21
+lang: en
+translationKey: "saas-crescimento-falhas-seguranca-2026-06"
+tags: [cybersecurity, saas, oauth, supply-chain, architecture, multi-tenant]
+draft: false
+---
+
+In 2026, the global SaaS market is estimated at **US$ 299 billion**, with roughly **30,800 companies** operating in this model. The average organization uses **371 SaaS applications**, and the number of apps per employee keeps climbing. At the same time, **75% of organizations experienced a SaaS security incident in the last 12 months**, according to AppOmni, and third-party (supply chain) breaches doubled from 15% to 30% of all incidents in a single year, according to Verizon.
+
+These two numbers — soaring adoption and soaring incidents — aren't a coincidence. They're the same chart.
+
+## The market: SaaS became a commodity
+
+A few cross-sections that frame the scale:
+
+- **30,800 active SaaS companies** globally, projected to reach 72,000 in a few years.
+- The average company uses **371 applications** — some official, many through shadow IT.
+- **96% of businesses** already run some kind of SaaS automation.
+- The **AI-as-a-Service** segment projects a 38.4% CAGR through 2034.
+
+For developers, that means a massive addressable market and a steadily falling barrier to entry — anyone with a modern stack (Next.js, Postgres, Stripe) can ship a multi-tenant product in weeks. For attackers, it means **cheap, plentiful, poorly monitored targets**.
+
+## What changed in the attack game
+
+Until about five years ago, the attacker's playbook went: breach the perimeter (firewall, VPN, endpoint), move laterally, drop ransomware. In 2026, that's unnecessary work.
+
+<Warning title="The stat that says it all">
+  According to CrowdStrike, **79% of 2025 attacks were already "malware-free"** — no malicious code involved. The attacker just logged in with valid credentials. And **88% of breaches involved stolen or compromised credentials**, per Verizon.
+</Warning>
+
+Why bother with a zero-day when a client's Salesforce holds the entire contact and opportunity base, Slack holds the unfiltered internal chatter, and Workday holds payroll — and a single OAuth token unlocks all of it?
+
+The new cybercrime economy reflects this:
+
+- **Infostealers** (Lumma, Redline, Raccoon) are sold as-a-service for around **US$ 50/month**.
+- In the first half of 2025 alone, infostealers compromised more than **270,000 Slack credentials**.
+- The **OAuth token became the attacker's new "single sign-on"**: it bypasses MFA, looks like legitimate API traffic, and rarely gets the same scrutiny as interactive sessions.
+
+## The Salesforce saga: three acts, same plot
+
+The last 10 months produced the clearest possible demonstration of how SaaS supply chain attacks work in practice. Three incidents, **none** exploiting a vulnerability in the target platform — all going after the third-party integration.
+
+### Act I — Salesloft Drift (August 2025)
+
+Between August 8 and 18, 2025, the group tracked as **UNC6395** (also referred to as "Icarus" in some analyses) compromised **OAuth tokens from Drift**, Salesloft's integration with Salesforce. The result: data exfiltrated from **more than 700 organizations**, including Cloudflare, Zscaler, Palo Alto Networks, Tenable, Rubrik, CyberArk, and Workday.
+
+The technical playbook was lean:
+
+1. OAuth tokens stolen via prior compromise of Salesloft's GitHub repositories (March through June 2025).
+2. Authentication against Salesforce APIs as the legitimate Drift application — **MFA bypassed because there's no interactive session**.
+3. Automated SOQL queries against Accounts, Opportunities, Cases.
+4. Focus on **credentials stored in plaintext**: AWS keys, Snowflake tokens, VPN passwords pasted into support tickets.
+
+Salesforce revoked the tokens on 08/20, but the damage was already done.
+
+### Act II — Gainsight (November 2025)
+
+Same pattern, same group, new vendor. **Gainsight** (a customer success platform with deep Salesforce integration) had refresh tokens compromised. Another 200+ Salesforce instances hit. The malicious user-agent ("Salesforce-Multi-Org-Fetcher/1.0") was publicly documented, but most customers had no telemetry to detect it.
+
+### Act III — Klue (June 2026)
+
+This week. On **June 12, 2026**, **Klue** (a market intelligence platform) identified unauthorized activity in its integration infrastructure. The root cause: **a legacy credential, created years ago to test an integration that was never deployed to production**, that stayed active with broad permissions.
+
+The attackers:
+
+1. Used the forgotten credential to get into Klue's environment.
+2. **Pushed code into the backend that harvested OAuth tokens from customers** as they connected to Salesforce.
+3. Ran Python scripts (user-agent `python-urllib`) hitting **roughly a thousand queries in 15 minutes** against at least one environment, exfiltrating for over 6 hours.
+
+Confirmed victims so far: Huntress, Recorded Future, Tanium, Jamf, Sprout Social, Gong, Insurity. The Icarus group claimed responsibility with the cynical line "the data was borrowed, not stolen".
+
+<Note>
+  The common thread across all three: **none was a Salesforce vulnerability.** All three were failures at SaaS vendors that had legitimate permission to access Salesforce data. The attacker didn't breach you — they breached someone you trusted and clicked "Allow" for.
+</Note>
+
+## Brazil isn't out of this either
+
+While foreign press focuses on Salesforce, Brazil produced its own chapters:
+
+- **Dígitro Tecnologia** (April 2026) — a supplier of interception systems to more than 150 government agencies had **source code and databases leaked**. CTIR Gov classified the incident as critical. Government supply chain attack in the most literal sense.
+- **Civil Defense Alert** (June 2026) — the Cell Broadcast system was breached and used to push fake "extreme" alerts across seven states ([I wrote about that case here](/blog/ataque-hacker-defesa-civil-misantropia)).
+- **Alleged MORGUE leak** (April 2026) — a dark web listing offering 251 million CPF records attributed to Gov.br for US$ 500. The Ministry of Management denied any breach; analysts assess it as a recombination of old datasets. Either way, it exposes the problem: nobody can confirm in real time whether it leaked or not, because visibility is zero.
+
+The average cost of a breach in Brazil hit **R$ 7.19 million** in 2025 (IBM Cost of a Data Breach). In healthcare, R$ 11.43 million. In finance, R$ 8.92 million.
+
+## Why attacking SaaS is structurally different
+
+Most security teams are still built to defend the perimeter. SIEM, EDR, IDS, firewall — all focused on network and endpoint. SaaS breaks that stack at three points:
+
+### 1. Identity is the new perimeter
+
+An OAuth token is, in practice, a permanent SSO. When the attacker presents the token, the target platform sees a legitimate API call from the authorized application — no user session, no MFA prompt, no "anomalous" behavior in the traditional sense. They **are** the integration.
+
+### 2. Integrations don't get audited
+
+The average company connects **more than 200 applications via OAuth/API**. Each integration requests broad permissions at install time, someone clicks "Allow All", and that permission stays alive until someone manually revokes it — which rarely happens. **85% of SaaS users have more privileges than they need**, per market data.
+
+### 3. SaaS logs are opaque
+
+- Slack only keeps detailed security events on Enterprise Grid.
+- Workday buries logs in tenancy configurations few teams touch.
+- Traditional SIEMs don't ship with pre-built detections for "anomalous OAuth grant" or "suspicious SOQL query".
+
+The result: the average time to identify and contain a breach is still **241 days** (IBM 2025). In SaaS, that can mean your entire customer base is exfiltrated before anyone notices.
+
+## What this means if you're building SaaS
+
+As someone building a multi-tenant SaaS ([Prumo OS, in my case](/blog/prumo-os-architecture)), looking at these incidents isn't an academic exercise — it's a survival manual. A few things I'm treating as non-negotiable:
+
+<Tip title="Minimum checklist for a multi-tenant SaaS in 2026">
+  - **Mandatory MFA** for every user, no exception for "test account" or "service account".
+  - **Short-lived credentials** with automated rotation — Klue's credential stayed alive for years without anyone noticing.
+  - **OAuth tokens with minimum scope and short TTL**. Refresh tokens revoked actively, not passively.
+  - **Immutable logs** of who triggered what and when — outside the main database, outside the same attacker's reach.
+  - **Real Row-Level Security in Postgres**, not application-level filter trust.
+  - **Integration inventory**: do you know who has API access to your data right now? If you don't, you're in the same spot as Klue's victims.
+  - **Least privilege applied to service accounts**, not just humans.
+</Tip>
+
+And maybe the most important point, which shows up in **every** incident above: the credential that kills you is the one you forgot existed. That test account from 2022, that "temporary" token from the POC, that integration user nobody remembers the purpose of. Run an audit. Today, if you can.
+
+## Where this is heading
+
+Cyber Defense Magazine called 2026 "the year of SaaS breaches" early in the year. Six months in, with Klue happening as this post is written, that looks like a conservative forecast. The magazine frames the number as **trend tipping into epidemic** — and the data backs it.
+
+Three trends worth watching over the coming months:
+
+1. **Regulation will tighten.** SEC in the US, GDPR in Europe, LGPD/ANPD in Brazil — all will start asking why your organization had zero visibility into OAuth integrations. LGPD already treats a breach as a mandatory-notification event; what's missing is case law on what counts as "reasonable diligence" in choosing SaaS vendors.
+2. **SSPM (SaaS Security Posture Management)** will solidify as a category, the way CSPM did for cloud in 2020–2022.
+3. **Non-human identities** (service accounts, integration users, application tokens) will become the main focus — and most companies will discover they have 10x more non-human identities than human ones, with zero governance over them.
+
+---
+
+The industry is building SaaS faster than it can defend it. For builders, that's simultaneously a massive opportunity and a responsibility that, in 2026, can no longer be delegated to "the security team we'll hire once we grow".
+
+The next Klue might be your application. The question is whether you find out before or after Icarus does.
+
+## Sources
+
+- [Cyber Defense Magazine — Why 2026 Will Be The Year Of SaaS Breaches](https://www.cyberdefensemagazine.com/why-2026-will-be-the-year-of-saas-breaches/)
+- [The Hacker News — Salesforce Disables Klue App Integration After OAuth Token Abuse](https://thehackernews.com/2026/06/salesforce-disables-klue-app.html)
+- [Dark Reading — Salesforce Data Thefts Continue via Klue App Compromise](https://www.darkreading.com/cyberattacks-data-breaches/salesforce-data-thefts-klue-app-compromise)
+- [Obsidian Security — The Trusted Integration That Wasn't](https://www.obsidiansecurity.com/blog/klue-saas-supply-chain-attack-salesforce)
+- [Google Cloud Threat Intelligence — Salesloft Drift Campaign Analysis](https://cloud.google.com/blog/topics/threat-intelligence/data-theft-salesforce-instances-via-salesloft-drift)
+- [BetterCloud — 2026 SaaS Statistics](https://www.bettercloud.com/monitor/saas-statistics/)
+- [Swif — Data Breach Statistics for 2026](https://www.swif.ai/blog/data-breach-statistics)
+- [CTIR Gov — Recommendation 05/2026 (Dígitro)](https://www.gov.br/ctir/pt-br/assuntos/alertas-e-recomendacoes/recomendacoes/2026/recomendacao-05-2026)
