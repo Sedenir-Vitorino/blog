@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   description: "Blog pessoal sobre desenvolvimento, engenharia e produto.",
 };
 
-const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(t===null&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})()`;
+const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t!=='light'){document.documentElement.classList.add('dark')}}catch(e){}})()`;
 
 export default function RootLayout({
   children,
