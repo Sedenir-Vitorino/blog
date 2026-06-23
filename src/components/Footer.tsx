@@ -18,7 +18,7 @@ export default function Footer({ lang }: { lang: Lang }) {
 
         <div className="flex items-center gap-5">
           <a
-            href="mailto:sedenirvitorino@gmail.com"
+            href="mailto:contato@sedenir.dev"
             className="text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
           >
             Email
