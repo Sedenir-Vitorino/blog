@@ -1,5 +1,18 @@
 import type { Lang } from "./i18n";
 
+export const MONTH_NAMES: Record<Lang, readonly string[]> = {
+  pt: [
+    "", // index 0 unused — months are 1-indexed
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+  ],
+  en: [
+    "",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ],
+};
+
 export const translations = {
   pt: {
     blog: {
@@ -18,6 +31,16 @@ export const translations = {
       filteringByTag: (tag: string) => `tag: ${tag}`,
       clearFilter: "ver todos",
       noPostsForTag: (tag: string) => `Nenhum post com a tag "${tag}".`,
+      // sidebar
+      filters: "Filtros",
+      archive: "Arquivo",
+      tags: "Tags",
+      allPeriods: "Todos",
+      clearAll: "Limpar",
+      postCount: (n: number) => `${n} ${n === 1 ? "artigo" : "artigos"}`,
+      noPostsFound: "Nenhum post encontrado para essa combinação de filtros.",
+      searchPlaceholder: "Buscar artigos...",
+      searchClearLabel: "Limpar busca",
     },
     footer: {
       rights: "Todos os direitos reservados.",
@@ -40,6 +63,16 @@ export const translations = {
       filteringByTag: (tag: string) => `tag: ${tag}`,
       clearFilter: "see all",
       noPostsForTag: (tag: string) => `No posts tagged "${tag}".`,
+      // sidebar
+      filters: "Filters",
+      archive: "Archive",
+      tags: "Tags",
+      allPeriods: "All",
+      clearAll: "Clear all",
+      postCount: (n: number) => `${n} ${n === 1 ? "post" : "posts"}`,
+      noPostsFound: "No posts found for this filter combination.",
+      searchPlaceholder: "Search posts...",
+      searchClearLabel: "Clear search",
     },
     footer: {
       rights: "All rights reserved.",

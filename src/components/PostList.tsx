@@ -42,7 +42,11 @@ export default function PostList({ posts, lang, activeTag }: Props) {
 
     items.forEach((item) => observer.observe(item));
     return () => observer.disconnect();
-  }, []);
+    // Re-observe whenever the posts list changes (e.g. after filter navigation).
+    // Cards that already have .visible keep it (DOM node reused by key); cards
+    // that were below the fold and lacked .visible are observed fresh and
+    // animate in when they enter the viewport — preventing invisible holes.
+  }, [posts]);
 
   return (
     <ul
