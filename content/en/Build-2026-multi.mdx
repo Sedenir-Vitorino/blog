@@ -1,0 +1,141 @@
+---
+title: "Microsoft Build 2026: run Claude, Codex, and Copilot at the same time (and the hidden cost of it)"
+description: "On June 2-3, 2026, Microsoft unveiled the GitHub Copilot app — a desktop experience for orchestrating multiple agents in parallel, with Claude, Codex, and Copilot running on the same task in isolated git worktrees. The industry is converging on a model where the developer becomes a director, not a typist. But the bill started arriving in June."
+date: 2026-06-23
+lang: en
+translationKey: "build-2026-multi-agent-coding-2026-06"
+tags: [ai, claude-code, github-copilot, microsoft-build, agentic-engineering, tooling]
+draft: false
+---
+
+Microsoft Build 2026 took place on June 2-3 at Fort Mason Center in San Francisco. It was one of the densest developer events in years — and almost none of what was announced is about Windows.
+
+Satya Nadella's central thesis: **the unit of software development is no longer the line, the function, or the file. It's the entire project orchestrated by multiple simultaneous agents.**
+
+If that sounds like a slogan, the concrete announcements are quite specific. Let me unpack what matters.
+
+## The announcement that most changes day-to-day: GitHub Copilot app
+
+In technical preview since June 3, the **GitHub Copilot app** is a new desktop experience for orchestrating **multiple agents in parallel on the same task**.
+
+Core functionality:
+
+- **Single "My Work" view** consolidating active sessions, issues, pull requests, and background automations **across every connected repository**.
+- **Parallel agent sessions run in isolated git worktrees**. The app handles setup and cleanup automatically. Agents don't step on each other.
+- Kick off work in VS Code or the CLI, **finish from your phone** if needed.
+
+Available for Copilot Pro, Pro+, Business, and Enterprise. The free plan doesn't get the desktop app.
+
+About running **Claude, Codex, and Copilot simultaneously**: Microsoft's thesis is that each model has a distinct bias around how it handles trade-offs (verbosity, security, performance, simplicity). Dispatching the same task to all three and comparing outputs becomes a decision tool, not parallel production. The model that best convinces wins the merge.
+
+Anthropic, in parallel, published the **2026 Agentic Coding Trends Report** with a term entering the vocabulary fast: **repository intelligence**. The definition is direct — AI that understands not just individual lines but the relationships and intent behind an entire codebase.
+
+The mental model shift is the important part: the "**unit of AI assistance**" is no longer the line. Nor the function. Nor the file. **It's the project.**
+
+{/* SUGGESTED IMAGE: screenshot of the GitHub Copilot app "My Work" view showing parallel sessions. TODO: capture from the app once GA, or use official Microsoft announcement image. */}
+
+## Microsoft Agent Framework 1.0 GA
+
+Less viral but structurally more important: the **Microsoft Agent Framework (MAF) reached 1.0 GA** on April 2, 2026. Convergence of AutoGen and Semantic Kernel into a single supported platform, with identical APIs for .NET and Python.
+
+What MAF delivers:
+
+- **Agent Harness**: the layer where model reasoning meets real execution — shell, filesystem, human-in-the-loop approvals, context management across long-running sessions.
+- **Hosted Agents in Foundry**: deploy the agent as a container, with managed infrastructure, identity, automatic scaling, OpenTelemetry observability, and versioning.
+- **Scale to zero**: pay nothing while the agent is idle. Scales back up on the next request with filesystem intact.
+- **Per-session isolation**: every session gets its own VM-isolated sandbox with persistent state.
+- **GitHub Copilot SDK as a backend**: you can build MAF agents using Copilot's capabilities (shell, file ops, URL fetching, MCP integration) within the framework's standard API.
+
+For anyone working with **C#/.NET** (part of my Prumo OS stack), MAF is probably the most mature entry point for agentic workflows outside the Python ecosystem. That was a visible gap until April.
+
+## Full Build 2026 coverage
+
+Day 2 of Build was the day of practical demos with GitHub Copilot and VS Code — worth watching to get the tone of the announcements:
+
+<div className="relative !w-full !max-w-none aspect-video mt-6 rounded-lg overflow-hidden">
+  <iframe
+    src="https://www.youtube.com/embed/xDXnWL-Mmz0"
+    title="Microsoft Build 2026 Day 2 LIVE — GitHub Copilot, VS Code, and more"
+    allowFullScreen
+    className="absolute inset-0 !w-full !h-full border-0"
+  />
+</div>
+
+## The seven MAI models Microsoft announced
+
+Microsoft jumped into the proprietary model game in force. Seven new models under the **MAI** brand:
+
+- **MAI-Thinking-1** — reasoning model competing with GPT-5.4 and Claude Opus 4.6.
+- **MAI-Code-1** — tuned specifically for GitHub and VS Code.
+- Five others focused on vertical domains.
+
+The play behind it: **Azure AI Foundry can pick the right model for each task**. You're not locked into a choice. The catalog combines Microsoft's own models, partner models (OpenAI, Anthropic), and open-source models.
+
+For anyone designing production systems, this changes **lock-in math**. You design model-agnostic architecture from day one. The model becomes a configuration detail, not an architecture decision.
+
+## The other pieces that matter
+
+- **Microsoft IQ** — context layer now GA across Copilot, Foundry, and Copilot Studios. Combines Work IQ (M365 signals), Fabric IQ (structured business data), and the new Web IQ (web grounding at scale).
+- **Frontier Tuning** (private preview) — agents learn how your company operates within compliance boundaries.
+- **Project Rayfin** — managed backend on Microsoft Fabric for agents to go from prototype straight to production.
+- **Microsoft Scout** — agent with its own Entra identity, governed, with policy rules and admin visibility into what the agent does in background.
+- **Agent Control Specification (ACS)** — vendor-neutral spec for runtime agent governance. If anyone adopts it, it becomes the industry standard.
+- **CodeAct** — pattern where the agent writes small code snippets instead of calling tools. Converges with Claude Code's approach.
+
+## And the bill started arriving
+
+The part nobody highlighted on stage but hits your wallet:
+
+### GitHub AI Credits — June 1, 2026
+
+Copilot now **consumes AI Credits**. Heavy operations (long context, multi-agent, intensive tool use) burn credits from your plan. It used to be flat fee, now it's metering. The official justification: *"to ensure a reliable and predictable experience for existing customers"*. The real one: multi-agent inference costs are high, and flat pricing would create wrong incentives.
+
+For you, this means **raw scripting in Copilot for exploration got expensive**. Vibe coding now comes with a per-use bill.
+
+### Copilot Free/Pro/Pro+ data used for training — April 24, 2026
+
+Starting April 24, **interaction data** (inputs, outputs, code snippets, and associated context) from Copilot Free, Pro, and Pro+ users started being used to **train and improve models**. Business and Enterprise plans are excluded by contract.
+
+This became immediate controversy. For anyone working on private code in personal projects with the Pro plan, it's a serious operational issue. For anyone using Copilot to explore techniques on unpublished code, it's structural leakage.
+
+The practical exits: **upgrade to Business**, or **migrate to Claude Code** with local workspace, or accept that your exploration code now feeds the next model.
+
+## The angle that matters for SaaS builders
+
+For anyone shipping their own products in 2026 (my Prumo OS case), the most relevant announcement wasn't the Copilot app. It was the convergence on a clear pattern:
+
+<Tip title="What changed in practice for developers">
+  **The barrier between "using AI to code" and "building a product that has AI" became identity and governance administration, not technical capability.**
+
+  Microsoft Scout with its own Entra identity. Frontier Tuning with compliance boundaries. ACS as governance spec. MAF with OpenTelemetry observability built-in.
+
+  What this means for a 1-2 person team building a multi-tenant SaaS: **the production primitives for agents became accessible**. You no longer have to reinvent identity, sandboxing, scaling, observability. You consume those services and focus on the domain.
+
+  The trade-off is strategic: do you want to live inside the Microsoft ecosystem (Foundry + Azure + MAF + Entra) or prefer a more portable stack (Vercel + Claude API + your own infra)? **Both work in 2026. The difference becomes lock-in vs flexibility.**
+</Tip>
+
+## Where this lands
+
+Three clear trends for the next 6 months:
+
+1. **Multi-agent becomes default**, not feature. You won't ask "which IDE do you use" anymore. You'll ask "which agents do you orchestrate". The gap between senior and junior dev will be how well you conduct a symphony of agents — not how fast you type.
+2. **Pricing shifts from flat to metering** fast. GitHub started. Others will follow. Anyone shipping needs to start treating **AI inference as a separate cost line**, not overhead.
+3. **The training-data discussion becomes contractual**, not political. People working on private code will migrate to enterprise plans or self-hosted stacks. Personal plans become open lab.
+
+---
+
+Build 2026 wasn't about the future. It was about the present. **The multi-agent orchestration paradigm is already the default in June** — not in 2027. Anyone still working in single-agent flow (myself included, throughout chunks of the day) is in a transitional model.
+
+I argued in the [vibe coding post](/blog/vibe-coding-hype-real-quando-faz-sentido) that the frontier in 2026 is between people who read what AI writes and people who click "Accept All". What Build 2026 adds: the reading can now be **comparative across multiple agents**. You read Claude's diff, you read Codex's diff, you read Copilot's diff, and you decide which one understood the problem best.
+
+That's the work.
+
+## Sources
+
+- [Microsoft Developer Blog — Build 2026 recap](https://developer.microsoft.com/blog/build-recap)
+- [Microsoft Build 2026 Live Blog](https://news.microsoft.com/build-2026-live-blog/microsoft-build-2026-live/)
+- [Microsoft Agent Framework at BUILD 2026](https://devblogs.microsoft.com/agent-framework/microsoft-agent-framework-at-build-2026-announce/)
+- [Tom's Guide — Biggest Microsoft Build 2026 announcements](https://www.tomsguide.com/news/live/microsoft-build-2026)
+- [Notebookcheck — Microsoft Build 2026: What to expect](https://www.notebookcheck.net/Microsoft-Build-2026-What-to-expect-from-the-June-2-keynote.1311546.0.html)
+- [Microsoft Build 2026 — The Announcements (independent index)](https://heisenberg-alt.github.io/build-2026/)
+- [GitHub Blog — News & Insights](https://github.blog/news-insights/)
