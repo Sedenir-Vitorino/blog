@@ -1,0 +1,111 @@
+---
+title: "Two attacks in four days, a package with 15,000 weekly downloads, and npm v12 arriving to try to stop the bleeding"
+description: "Injective SDK and Jscrambler were compromised in July 2026, fitting the same pattern that already hit Axios, Red Hat, and node-ipc this year. npm v12, expected this month, promises to end automatic install scripts — but experts say that doesn't fix the real problem."
+date: 2026-07-14
+lang: en
+translationKey: "npm-v12-supply-chain-2026-07"
+tags: [cybersecurity, npm, supply-chain, javascript, devops, open-source]
+draft: false
+---
+
+Over four days in July 2026, two popular npm packages were hijacked by attackers: first an SDK used to build applications on the Injective blockchain, then Jscrambler's official package — a security company that, ironically, sells JavaScript code protection. Neither attack targeted a blockchain or application vulnerability. Both went after the same thing: the developer's machine, at the exact moment they type `npm install`.
+
+This isn't an isolated incident. According to Sonatype's 2026 supply chain report, **nearly 455,000 malicious packages** were published to open source registries in 2025 alone — a **75% jump year over year** — pushing the cumulative total of blocked malicious packages past **1.2 million**.
+
+## The week that sums up the problem
+
+### July 8 — the Injective SDK
+
+An attacker slipped a malicious commit into the repository behind `@injectivelabs/sdk-ts`, a TypeScript SDK used to build on the Injective blockchain and pulled roughly **175,000 times a month**. The commit came from an account with a real history of contributions to the project, which kept it from tripping the usual automated alarms.
+
+The code, disguised as harmless analytics, captured wallet recovery phrases and private keys the moment a wallet was created or loaded, sending them to an attacker-controlled server.
+
+<Warning title="ignore-scripts didn't help here">
+  The theft happened at **runtime**, not at install time — dodging the `npm install --ignore-scripts` protection that has become standard advice against this kind of attack in recent years.
+</Warning>
+
+Injective's team responded fast: the compromised version was fixed within roughly **49 minutes**. Even so, the malicious package had already been downloaded 310 times and had auto-propagated into 18 related packages that pinned it as a dependency.
+
+### July 11 — Jscrambler
+
+Three days later it was Jscrambler's turn — a company whose own product is JavaScript code obfuscation and protection. An attacker published version 8.14.0 of the package using a stolen publishing credential, adding an undocumented `preinstall` hook that downloaded and executed a platform-specific native binary for Linux, macOS, and Windows.
+
+The payload — a Rust-compiled infostealer — went after cloud credentials (AWS, Azure, Google Cloud), npm and GitHub tokens, Bitwarden vaults, and configuration files from AI tools like Claude Desktop and Cursor.
+
+<Note>
+  Socket detected the malicious version **6 minutes** after publication. Even so, the attacker managed to publish five malicious releases over three hours before a clean version took the top spot in the listing. Version 8.14.0, the first compromised release, was never pulled from the registry — any lockfile still pinned to it keeps installing the infostealer today.
+</Note>
+
+In total, **1,479 downloads** of the malicious versions occurred before removal, according to the company's official advisory.
+
+## The pattern repeating all year
+
+Put the two July incidents next to others that already happened in 2026, and a pattern becomes obvious: the target is never the final application — it's the implicit trust the JavaScript ecosystem places in anything published to the registry.
+
+- **March 2026 — Axios.** Attackers linked to the North Korean group Sapphire Sleet (also tracked as BlueNoroff and APT38) hijacked the account of Axios's lead maintainer — an HTTP library with about **100 million weekly downloads** — and published malicious versions with a dependency that installed a remote access trojan via a `postinstall` hook.
+- **May 2026 — node-ipc.** Three versions of the package, used by more than **10 million projects a week**, were published simultaneously with an 80 KB payload aimed at stealing cloud credentials, SSH keys, and CI/CD secrets.
+- **June 2026 — Red Hat / Miasma.** An employee account compromised via a malicious VS Code extension allowed the publication of **32 packages** under the `@redhat-cloud-services` namespace, used in the Hybrid Cloud Console. The attack even produced valid SLSA provenance attestations — the genuine build pipeline was simply already infected.
+- **July 2026 — Injective and Jscrambler**, described above.
+
+<Summary title="The common denominator">
+  None of these attacks exploited a code flaw in the final application. All of them exploited the same thing: the implicit permission any installed package gets to execute arbitrary code on the machine running `npm install` — whether through a lifecycle script or through code triggered the first time the package is used.
+</Summary>
+
+## Why it keeps happening
+
+npm's trust model was born in an era where the main concern was convenience: `preinstall`, `install`, and `postinstall` exist to make native builds easier, but historically any package — including transitive dependencies nobody chose directly — gets that execution right by default.
+
+The share of packages that genuinely *need* this is small: according to data cited in the change announcement, only about **2% of npm packages** use install scripts out of real necessity. The other 98% carry the right to execute arbitrary code without ever using that power — until someone decides to abuse it.
+
+## What npm v12 changes
+
+Expected to ship later in July 2026, npm v12 is described by the GitHub/Microsoft team itself as the most significant security redesign in the tool's 16-year history. Three historically permissive defaults are flipping to explicit opt-in:
+
+<Tip title="npm v12's three default changes">
+  - **Blocked install scripts**: `npm install` no longer automatically runs `preinstall`, `install`, `postinstall`, or native builds via `node-gyp`.
+  - **Blocked Git dependencies**: resolving packages directly from custom Git URLs is no longer the default, closing a route previously used to bypass script blocking.
+  - **Blocked remote sources** by default, shrinking the surface from which a project can pull code without explicit review.
+</Tip>
+
+Teams already running `npm install` in CI/CD pipelines without preparing will find builds breaking silently — not with an error message, but with failures that return exit code 0 the moment v12 becomes the default. Version 11.16.0 already emits advisory-mode warnings, and the `npm approve-scripts` command lets teams audit dependencies and build a local allowlist directly in `package.json`.
+
+<Warning title="Not a silver bullet">
+  Security researchers are emphatic: blocking install scripts doesn't fix the deeper problem. If an attacker controls a legitimate maintainer's account — as happened with Axios, Jscrambler, and Red Hat — the malicious code ships as a trusted, signed release. Blocking `postinstall` doesn't help when the payload fires on the package's first `import`, as in the Injective case.
+</Warning>
+
+## What this means for developers
+
+Dependency security can no longer be treated as solely the package maintainer's responsibility. A few practices that stopped being optional in 2026:
+
+- **Lock versions and review dependency updates before accepting them**, especially for high-traffic packages — they're exactly the preferred targets.
+- **Prepare for npm v12 now**, running `npm approve-scripts` in advisory mode and fixing what breaks before the change becomes mandatory.
+- **Rotate credentials exposed to CI/CD** regularly, and treat any environment that installed a compromised version as potentially fully compromised.
+- **Monitor announcements for packages** you run in production — tools like Socket and StepSecurity publish alerts within minutes, but someone on your team still needs to read and act on them.
+- **Don't rely only on lifecycle-script-based detection.** As the Injective case showed, the payload can fire at runtime, not install time.
+
+## Where this goes from here
+
+The consensus among researchers is that npm v12 closes an important door, but not the main one. As long as controlling a maintainer's account remains enough to publish a malicious version as an official, signed release, supply chain attacks will keep being the cheapest path to compromising thousands of machines at once — far cheaper than hunting for a zero-day in each individual application.
+
+Worth watching over the coming months:
+
+1. **Real-world adoption of v12** — how many projects actually migrate before enforcement, versus how many only discover the problem when a production build breaks.
+2. **Stronger publishing authentication** — mandatory MFA, short-lived publishing tokens, and cryptographic provenance (like SLSA, which already proved insufficient on its own in the Red Hat case).
+3. **Runtime detection**, not just install-time — since the most recent attacks are shifting exactly toward that blind spot.
+
+---
+
+The JavaScript ecosystem is in a race where defenders respond in minutes and attackers adapt in hours. npm v12 is a real structural step, but the lesson from July 2026 is the same as March, May, and June: the next compromised account could belong to a package sitting in your `package.json` right now.
+
+## Sources
+
+- [Socket — jscrambler npm Package Compromised in Supply Chain Attack](https://socket.dev/blog/jscrambler-supply-chain-attack)
+- [StepSecurity — Behind the Scenes: How StepSecurity Detected and Helped Remediate the Jscrambler Attack](https://www.stepsecurity.io/blog/behind-the-scenes-how-stepsecurity-detected-and-helped-remediate-the-largest-npm-supply-chain-attack)
+- [Startup Fortune — Two npm attacks in four days show crypto's weak point is the supply chain](https://startupfortune.com/two-npm-attacks-in-four-days-show-cryptos-weak-point-is-the-supply-chain/)
+- [TechTimes — npm v12 Ships This Month, Blocking Install Scripts That Enabled Year of Supply Chain Attacks](https://www.techtimes.com/articles/319890/20260708/npm-v12-ships-this-month-blocking-install-scripts-that-enabled-year-supply-chain-attacks.htm)
+- [Infosecurity Magazine — GitHub to Update npm to Thwart Software Supply Chain Attacks](https://www.infosecurity-magazine.com/news/github-update-npm-supply-chain/)
+- [Cybernews — NPM v12 security overhaul: experts say it's not enough](https://cybernews.com/security/npm-security-overhaul-adress-supply-chain-attacks/)
+- [Unit 42 (Palo Alto Networks) — The npm Threat Landscape: Attack Surface and Mitigations](https://unit42.paloaltonetworks.com/monitoring-npm-supply-chain-attacks/)
+- [Wiz — Miasma: Supply Chain Attack Targeting RedHat npm Packages](https://www.wiz.io/blog/miasma-supply-chain-attack-targeting-redhat-npm-packages)
+- [Red Hat — RHSB-2026-006: Supply chain compromise of @redhat-cloud-services npm packages](https://access.redhat.com/security/vulnerabilities/RHSB-2026-006)
+- [StepSecurity — Active Supply Chain Attack: Malicious node-ipc Versions Published to npm](https://www.stepsecurity.io/blog/node-ipc-npm-supply-chain-attack)
