@@ -1,0 +1,81 @@
+---
+title: "Abrir uma pasta no Cursor pode rodar código malicioso sozinho — e a Cursor sabe disso há sete meses"
+description: "Uma falha zero-day no Cursor para Windows deixa qualquer repositório com um git.exe forjado na raiz executar código automaticamente, sem clique, sem aviso, sem confirmação. A Mindgard reportou em dezembro de 2025; divulgou tudo publicamente em julho de 2026, depois de sete meses de silêncio."
+date: 2026-07-16
+lang: pt
+translationKey: "cursor-zero-day-git-exe-2026-07"
+tags: [cibersegurança, cursor, ia, ferramentas-dev, vscode, ide]
+draft: false
+---
+
+Na terça-feira, 14 de julho de 2026, a empresa de segurança Mindgard publicou os detalhes técnicos completos de uma falha zero-day no Cursor — o editor de código com IA usado por mais de 7 milhões de desenvolvedores e mais de 1 milhão de assinantes pagantes. O motivo de tornar tudo público não foi encontrar audiência: foi o último recurso depois de sete meses tentando, sem sucesso, que a empresa corrigisse o problema.
+
+## Como o ataque funciona
+
+O mecanismo é desconcertantemente simples. Quando o Cursor abre um projeto no Windows, ele procura o binário do Git em vários lugares — inclusive dentro da própria pasta do workspace. Se um atacante colocar um executável chamado `git.exe` na raiz de um repositório, o Cursor executa esse arquivo automaticamente como parte da resolução normal de caminho, sem diálogo de confirmação, sem aviso, sem qualquer indicação de que um binário do próprio repositório está prestes a rodar.
+
+<Warning title="Não precisa de IA, prompt injection ou engenharia social">
+  A Mindgard é enfática nesse ponto: a exploração não depende de manipulação de modelo, jailbreak, injeção de prompt indireta ou qualquer tradecraft sofisticado. Basta um desenvolvedor abrir um projeto que contenha esse `git.exe` forjado na raiz — algo que acontece o tempo todo ao revisar código open source, avaliar um candidato em entrevista técnica, ou colaborar com contribuidores externos.
+</Warning>
+
+Como prova de conceito segura, a Mindgard renomeou a Calculadora do Windows para `git.exe` e a colocou na raiz de um repositório. Só abrir a pasta no Cursor foi suficiente para disparar a execução — repetidamente, a cada nova consulta interna que o editor faz ao Git, enquanto o projeto permanecer aberto. Num ataque real, esse binário seria substituído por um ladrão de credenciais, um keylogger ou um carregador de ransomware, rodando com os mesmos privilégios de quem está logado — incluindo acesso a chaves SSH, tokens de nuvem e ao próprio código-fonte.
+
+## A linha do tempo da divulgação
+
+- **15 de dezembro de 2025** — a Mindgard reporta a falha ao canal oficial de segurança do Cursor.
+- **Janeiro de 2026** — sem resposta, a Mindgard tenta contato via LinkedIn. O CISO da empresa responde, atribui o silêncio a uma falha na automação do HackerOne, e convida a Mindgard pessoalmente para o programa de recompensas por bugs.
+- **Fevereiro de 2026 em diante** — a falha é resubmetida no HackerOne, confirmada como reproduzível pela própria equipe do Cursor. Depois disso, silêncio total: pedidos de status, escaladas e contato direto com a liderança não obtêm resposta.
+- **14 de julho de 2026** — depois de mais de 70 novas versões lançadas sem correção (a Mindgard fala em 197+ builds ao todo desde o relatório inicial), e ainda reproduzível na versão 3.2.16 testada em 30 de abril, a empresa decide pela divulgação total.
+
+<Note>
+  A página de segurança do Cursor promete reconhecer relatórios de vulnerabilidade em até 5 dias úteis. Passaram-se sete meses. Como resumiu a Mindgard: "divulgação coordenada só funciona quando existe coordenação."
+</Note>
+
+## Não é a primeira vez — nem a última
+
+Colocado ao lado de outras falhas do Cursor reveladas só em 2026, o padrão preocupa quem depende do editor no dia a dia:
+
+- **Janeiro de 2026** — CVE-2026-22708, corrigida na versão 2.3.
+- **Fevereiro de 2026** — CVE-2026-26268, uma escalada via hooks do Git, corrigida na versão 2.5.
+- **Abril de 2026** — as vulnerabilidades "DuneSlide" (CVE-2026-50548 e CVE-2026-50549), com pontuação CVSS de 9,8 sobre 10, resolvidas na versão 3.0.
+- **Abril de 2026** — a cadeia "NomShub", descoberta pela Straiker: injeção de prompt indireta via `README.md` combinada com um desvio de sandbox, abusando do recurso de túnel remoto do Cursor pra dar a um atacante acesso persistente via shell — sem exigir nenhuma interação do usuário além de abrir o repositório malicioso. No macOS, onde o Cursor roda sem restrições de sandbox porque o binário é assinado e notarizado, o impacto era ainda maior.
+
+<Summary title="O fio condutor">
+  Em nenhum desses casos o ponto de entrada foi o modelo de IA em si sendo manipulado com sucesso — foi a superfície de execução automática que cerca o modelo: resolução de caminho de binários, hooks do Git, recursos de tunelamento remoto. É a mesma categoria de risco que já vimos em ataques de cadeia de suprimentos do npm: confiança implícita concedida a qualquer coisa dentro de um repositório clonado.
+</Summary>
+
+## Mitigações enquanto não sai correção
+
+<Tip title="O que fazer até o Cursor corrigir">
+  - **Não abra repositórios não confiáveis diretamente no host.** Use uma VM descartável ou o Windows Sandbox pra qualquer projeto clonado de fonte externa.
+  - **Em frotas Windows corporativas, use AppLocker ou Windows App Control** com regras de bloqueio por caminho — não por hash, já que o binário do atacante pode ter qualquer hash. Uma regra como `%USERPROFILE%\source\repos\*\git.exe` cobre o padrão descrito pela Mindgard.
+  - **Monitore processos filhos do Cursor.exe** que não deveriam existir; como o Windows não tem bloqueio nativo de processo filho por processo pai, isso normalmente exige uma ferramenta de EDR.
+  - **Audite repositórios clonados antes de abrir.** `git.exe`, `npx.exe`, `node.exe` e `where.exe` não têm motivo pra estar na raiz de um projeto legítimo.
+</Tip>
+
+## O contraponto: o VS Code isolando os próprios agentes
+
+Enquanto o caso do Cursor expõe o risco de dar a agentes de IA acesso irrestrito ao sistema de arquivos, o VS Code tomou, na mesma semana, um caminho na direção oposta. A versão 1.129, lançada dias antes, introduziu o "agent host": Copilot, Claude e Codex passam a rodar cada um em processo isolado próprio, baseado no novo Agent Host Protocol. A justificativa declarada pela Microsoft é evitar que a trava de um agente derrube o editor inteiro — mas o efeito colateral é também arquitetural do ponto de vista de segurança: cada agente fica mais contido, em vez de compartilhar o mesmo processo de execução do editor principal.
+
+Os dois casos, lado a lado, mostram o mesmo problema visto de ângulos opostos: à medida que editores de código incorporam agentes de IA com permissão de executar comandos, ler arquivos e rodar processos, a arquitetura de isolamento desses agentes deixa de ser detalhe de implementação e vira decisão de segurança de primeira ordem.
+
+## O que isso significa pra quem desenvolve
+
+- **Trate seu editor de IA como parte da superfície de ataque**, não só como ferramenta de produtividade — ele tem acesso ao mesmo nível de privilégio que você.
+- **Cheque diálogos de confiança de repositório com ceticismo.** O Cursor mostra um aviso "confia neste repositório?" ao abrir projetos, mas a Mindgard não confirmou publicamente se a resolução do Git roda antes ou depois dessa checagem — o que, na prática, pode tornar o diálogo cosmético para esse vetor específico.
+- **Prefira isolamento de processo e sandboxing** ao avaliar qual editor ou ferramenta de IA usar em ambientes corporativos, especialmente quando lidando com repositórios de terceiros ou candidatos em entrevista técnica.
+- **Acompanhe o histórico de CVEs da ferramenta que você usa**, não só a versão mais recente — um padrão de múltiplas falhas críticas no mesmo ano é sinal de arquitetura, não de azar pontual.
+
+---
+
+O caso Cursor levanta uma pergunta desconfortável que vai além de uma única falha técnica: qual é, na prática, o processo de segurança de uma ferramenta avaliada em US$ 60 bilhões e usada por mais da metade das empresas da Fortune 500? Sete meses de silêncio depois de um relatório reproduzível não é um detalhe de rodapé — é a história.
+
+## Fontes
+
+- [Mindgard — Cursor 0day: When Full Disclosure Becomes the Only Protection Left](https://mindgard.ai/blog/cursor-0day-when-full-disclosure-becomes-the-only-protection-left)
+- [The Hacker News — Cursor Flaw Lets Malicious Cloned Repositories Trigger Windows Code Execution](https://thehackernews.com/2026/07/cursor-flaw-lets-malicious-cloned.html)
+- [SecurityWeek — Unpatched Cursor Vulnerability Exposes Users to Code Execution](https://www.securityweek.com/unpatched-cursor-vulnerability-exposes-users-to-code-execution/)
+- [SecurityWeek — Cursor AI Vulnerability Exposed Developer Devices (NomShub)](https://www.securityweek.com/cursor-ai-vulnerability-exposed-developer-devices/)
+- [Cyber Security News — Critical Cursor 0-Day Flaw Allows Malicious Git Repos to Trigger Automatic Windows Code Execution](https://cybersecuritynews.com/critical-cursor-0-day-flaw/)
+- [NT Compatible — Visual Studio Code 1.129 Overhauls AI Architecture with New Agent Host](https://www.ntcompatible.com/story/visual-studio-code-1129-overhauls-ai-architecture-with-new-agent-host-and-redesigned-agents-panel)
+- [VS Code — Release Notes 1.129 (Insiders)](https://code.visualstudio.com/updates/v1_129)
