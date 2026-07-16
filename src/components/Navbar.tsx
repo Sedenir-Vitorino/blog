@@ -26,6 +26,7 @@ export default function Navbar({ lang }: { lang: Lang }) {
           href={`/${lang}/blog`}
           className="font-semibold text-base tracking-tight text-zinc-900 dark:text-zinc-50"
         >
+          <span className="text-zinc-400 dark:text-zinc-500">Blog|</span>
           Sedenir
           <span className="text-zinc-400 dark:text-zinc-500">.dev</span>
         </Link>
