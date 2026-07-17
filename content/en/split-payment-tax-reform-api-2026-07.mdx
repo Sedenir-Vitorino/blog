@@ -1,0 +1,100 @@
+---
+title: "The government already published the Swagger for real-time tax collection — and most Brazilian devs haven't seen it yet"
+description: "Split Payment: starting January 2027, payment systems in Brazil will have to query a public API from the Federal Revenue Service before settling any Pix, boleto, or wire transfer. The channel Mano Deyvin broke down the full technical flow — here's the summary plus links straight to the official documentation."
+date: 2026-07-17
+lang: en
+translationKey: "split-payment-reforma-tributaria-2026-07"
+tags: [payments, tax-reform, api, backend, brazil, fintech]
+draft: false
+---
+
+In June 2026, Brazil's federal government published a Swagger file — a complete OpenAPI v3 contract, with JSON schemas and request/response examples — for an API with a single purpose: separating the tax portion from a payment before the money ever reaches the seller's account. This was first brought up by the channel **Mano Deyvin**, who broke down technically what this change means for anyone building payment systems, marketplaces, or SaaS in Brazil. Watch below (in Portuguese):
+
+<div className="relative !w-full !max-w-none aspect-video mt-6 rounded-lg overflow-hidden">
+  <iframe
+    src="https://www.youtube.com/embed/35pEhb_BzZI"
+    title="Split Payment: the government API that will change every payment system in Brazil — Mano Deyvin"
+    allowFullScreen
+    className="absolute inset-0 !w-full !h-full border-0"
+  />
+</div>
+
+Building on what he raised, we went straight to the official documentation and legislation to reinforce every point with more context and direct links — so you don't have to rely only on the summary, and instead have everything you need to start the integration.
+
+## What changes: the end of tax float
+
+Today, when a customer pays R$ 1,000 for your product, the full amount lands in your account. Within a set deadline, you calculate the tax owed and remit it separately. The gap between receiving the full amount and passing along the tax has a name — **tax float** — and companies with a structured finance operation already calculate exactly how long that money can keep earning yield in the till before it becomes tax paid.
+
+**Split Payment**, the mechanism created by the tax reform, eliminates that gap. The separation between what's yours and what's the government's now happens **before** the money reaches you, not after.
+
+<Note>
+  Under Complementary Law nº 214/2025, which regulates Brazil's Consumption Tax Reform, Split Payment is defined in articles 31 through 36 as the automatic collection of IBS and CBS taxes by electronic payment service providers, at the exact moment a purchase or service is financially settled — not afterward.
+</Note>
+
+## The legal basis, in order
+
+- **LC 214/2025** — enacted in January 2025, establishes the CBS (federal) and IBS (state/municipal) taxes and defines, in articles 31 through 36, the Split Payment model.
+- **Decreto 12.955/2026** — regulates specifically the CBS portion of the mechanism.
+- **Resolução CG IBS nº 6/2026** — does the same for the IBS portion, on the Steering Committee's side.
+- **Ato Conjunto RFB/CG IBS nº 2**, published June 3, 2026 — released the two documents that matter to developers: the **Integration Manual v1.0.0** and the public platform's **Swagger/OpenAPI v3**, both available at `consumo.tributos.gov.br`.
+
+<Warning title="This isn't a pilot or an MVP">
+  As the video points out, this isn't a proposal under discussion: there's already an enacted law, a signed decree, a published resolution, and an API contract available for review. Technical enforcement begins in January 2027.
+</Warning>
+
+## The technical flow, step by step
+
+1. **The buyer initiates payment** — via Pix, boleto, or wire transfer. Nothing changes from the payer's side.
+2. **The PSP (payment service provider) intercepts before settlement** — instead of crediting the amount straight to the seller, it now must first query the public Split Payment platform.
+3. **The platform evaluates and instructs** — it receives the payment data, validates the format, generates a unique identifier (a `resource ID`, used later for reconciliation), and returns the segregation instruction: how much goes to CBS, how much to IBS.
+4. **The PSP executes the segregation** — the CBS share goes straight to the Federal Revenue Service, the IBS share goes to the IBS Steering Committee, and the net amount goes to the seller.
+5. **You receive the net amount** — with no tax attached, because, technically, that portion was never yours to begin with.
+
+<Summary title="What the API does — and deliberately doesn't do">
+  The platform doesn't calculate the tax, doesn't decide the rate, and doesn't validate whether the amount is correct. It does exactly three things: syntactic and semantic validation of the payload, generation of the `resource ID` for traceability, and routing — sending CBS to the Federal Revenue Service and IBS to the Steering Committee. Calculating the tax itself, based on tax rules, the seller's CNPJ rate, and the nature of the transaction, remains your system's job.
+</Summary>
+
+## The connection to electronic invoicing
+
+Your system's calculation doesn't happen in isolation — it connects to NF-e (electronic invoice) issuance. Technical Note 2025.002 added Split Payment-specific fields to the electronic invoice's XML. Without those fields filled in correctly, the entire flow stalls: the full pipeline depends on your system issuing the invoice with the new fields, the PSP querying the platform, the platform validating and returning the instruction, and the PSP then segregating and settling. Each link in that chain has a different technical owner — and you're one of them.
+
+## Timeline: what changes and when
+
+<Tip title="The dates that matter for developers">
+  - **2026** — an open sandbox environment, with no real charges and no risk of enforcement action if something breaks. This is the window to integrate and test.
+  - **January 2027** — start of Phase 1, restricted to B2B and six payment methods: boleto, dynamic Pix, automatic Pix, static Pix, wire transfer (TED), and TEF. Cards, vouchers, and crypto are pushed to Phase 2 — that's a delay, not an exemption.
+  - **2029 to 2032** — CBS reaches full enforcement; IBS transitions gradually.
+  - **2033** — full enforcement for both taxes, with Split Payment as a consolidated fiscal reality in Brazil.
+</Tip>
+
+If your product operates with Pix, boleto, or wire transfer — which covers most of Brazilian B2B and practically every SaaS — January 2027 is the date that actually matters, not 2033.
+
+## What to do now
+
+The video summarizes it in three practical steps:
+
+1. **Read the integration manual and the Swagger** at `consumo.tributos.gov.br`. It's free, it's published, and it's literally the technical contract you'll need to implement.
+2. **Check whether your NF-e issuer already supports Technical Note 2025.002.** If it doesn't, it's time to push your vendor — or, if you maintain that module in-house, start mapping the new fields now.
+3. **Map out the PSPs you use and ask each one for their integration roadmap** with the Split Payment platform. If your payment provider doesn't integrate with the hub, the flow breaks on your end — and you need to know where each vendor stands before January 2027.
+
+<Warning title="A note on timing">
+  2026 is the sandbox year with no real charges. Shipping a last-minute tax integration in December 2026 with a January deadline is the scenario nobody wants to live through — especially for something directly tied to invoicing and tax remittance.
+</Warning>
+
+## A note on the video
+
+Mano Deyvin's video was produced in partnership with Appmax, a payment platform he cites as having native Split Payment support. We're not evaluating that or any other market solution in this post — the goal here is technical: understanding the API contract the government published and what it requires from anyone building payment systems. It's worth researching the available options and comparing them before deciding which payment partner to integrate with.
+
+---
+
+Brazil built a technical infrastructure to collect tax in real time, at the moment of payment. The law is enacted, the decree is signed, the Swagger is published. Whoever starts testing now, during the no-charge sandbox year, goes through the January 2027 transition without a scramble. Whoever puts it off will be racing against a regulatory deadline that doesn't tend to grant extensions.
+
+## Sources
+
+- [Mano Deyvin — video on Split Payment and the public tax API (YouTube)](https://www.youtube.com/watch?v=35pEhb_BzZI)
+- [Planalto — Complementary Law nº 214, January 16, 2025](https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm)
+- [Avalara Brasil — Split Payment na LC 214/2025: como será o recolhimento automático](https://site.avalarabrasil.com.br/reforma-tributaria/split-payment-lei-complementar-214-2025/)
+- [Barbieri Advogados — LC 214/2025: guia completo da lei da Reforma Tributária](https://barbieriadvogados.com/lc-214/)
+- [Systax — Os Modelos de Split Payment na LC nº 214/2025](https://www.systax.com.br/artigos-e-novidades/os-modelos-de-split-payment-na-lc-no-214-2025-estrutura-operacionalizacao-e-desafios/)
+- [Contabeis.com.br — Split Payment: entenda a nova lei tributária e seus impactos nas empresas](https://www.contabeis.com.br/artigos/72216/split-payment-entenda-a-nova-lei-tributaria-e-seus-impactos-nas-empresas/)
+- [Public Split Payment platform — Integration manual and Swagger/OpenAPI](https://consumo.tributos.gov.br)

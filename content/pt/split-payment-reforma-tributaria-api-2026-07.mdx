@@ -1,0 +1,100 @@
+---
+title: "O governo já publicou o Swagger do imposto em tempo real — e a maioria dos devs brasileiros ainda não viu"
+description: "Split Payment: a partir de janeiro de 2027, sistemas de pagamento no Brasil vão ter que consultar uma API pública da Receita Federal antes de liquidar qualquer transação Pix, boleto ou TED. O canal Mano Deyvin destrinchou o fluxo técnico completo — trazemos o resumo e os links pra você ir direto na documentação oficial."
+date: 2026-07-17
+lang: pt
+translationKey: "split-payment-reforma-tributaria-2026-07"
+tags: [pagamentos, reforma-tributaria, api, backend, brasil, fintech]
+draft: false
+---
+
+Em junho de 2026, o governo federal publicou um Swagger — um contrato OpenAPI versão 3 completo, com schemas JSON e exemplos de requisição e resposta — pra uma API com uma função só: separar o imposto do seu pagamento antes que o dinheiro chegue na sua conta. Quem trouxe isso à tona foi o canal **Mano Deyvin**, que destrinchou tecnicamente o que essa mudança significa pra quem desenvolve sistema de pagamento, marketplace ou SaaS no Brasil. Assista abaixo:
+
+<div className="relative !w-full !max-w-none aspect-video mt-6 rounded-lg overflow-hidden">
+  <iframe
+    src="https://www.youtube.com/embed/35pEhb_BzZI"
+    title="Split Payment: a API do governo que vai mudar todo sistema de pagamento no Brasil — Mano Deyvin"
+    allowFullScreen
+    className="absolute inset-0 !w-full !h-full border-0"
+  />
+</div>
+
+A partir do que ele levantou, fomos atrás da documentação oficial e da legislação pra reforçar cada ponto com mais contexto e com os links diretos — pra você não depender só do resumo, e sim ter em mãos tudo que precisa pra começar a integração.
+
+## O que muda: o fim do float fiscal
+
+Hoje, quando um cliente paga R$ 1.000 pelo seu produto, o valor cheio cai na sua conta. Dentro de um prazo definido, você apura o imposto devido e recolhe separadamente. O intervalo entre receber o valor integral e repassar o imposto tem nome — **float fiscal** — e empresas com financeiro estruturado já calculam exatamente quanto tempo esse dinheiro pode ficar rendendo no caixa antes de virar imposto pago.
+
+O **Split Payment**, mecanismo criado pela reforma tributária, elimina esse intervalo. A segregação entre o que é seu e o que é do governo passa a acontecer **antes** de o dinheiro chegar até você, não depois.
+
+<Note>
+  Segundo a Lei Complementar nº 214/2025, que regulamenta a Reforma Tributária do Consumo, o Split Payment é definido nos artigos 31 a 36 como o recolhimento automático de IBS e CBS pelos prestadores de serviço de pagamento eletrônico, no momento exato da liquidação financeira da compra ou prestação de serviço — não depois dela.
+</Note>
+
+## A base legal, em ordem
+
+- **LC 214/2025** — sancionada em janeiro de 2025, institui os tributos CBS (federal) e IBS (estados e municípios) e define, entre os artigos 31 e 36, o modelo de Split Payment.
+- **Decreto 12.955/2026** — regulamenta especificamente a parte de CBS do mecanismo.
+- **Resolução CG IBS nº 6/2026** — faz o mesmo para a parte de IBS, do lado do Comitê Gestor.
+- **Ato Conjunto RFB/CG IBS nº 2**, publicado em 3 de junho de 2026 — trouxe os dois documentos que interessam a quem programa: o **Manual de Integração v1.0.0** e o **Swagger/OpenAPI v3** da plataforma pública, disponíveis em `consumo.tributos.gov.br`.
+
+<Warning title="Isso não é MVP nem projeto piloto">
+  Como destaca o vídeo, essa não é uma proposta em discussão: já existe lei sancionada, decreto assinado, resolução publicada e contrato de API disponível para consulta. A obrigatoriedade técnica começa em janeiro de 2027.
+</Warning>
+
+## O fluxo técnico, passo a passo
+
+1. **Comprador inicia o pagamento** — via Pix, boleto ou TED. Nada muda do ponto de vista de quem paga.
+2. **O PSP (provedor de serviço de pagamento) intercepta antes de liquidar** — em vez de creditar o valor direto pro vendedor, ele passa a ter a obrigação de consultar a plataforma pública de Split Payment primeiro.
+3. **A plataforma avalia e instrui** — recebe os dados do pagamento, valida o formato, gera um identificador único (o `resource ID`, usado depois pra conciliação) e retorna a instrução de segregação: quanto vai para CBS, quanto vai para IBS.
+4. **O PSP executa a segregação** — a fatia de CBS vai direto pra Receita Federal, a de IBS vai pro Comitê Gestor do IBS, e o valor líquido vai pro fornecedor.
+5. **Você recebe o valor líquido** — sem o imposto, porque, tecnicamente, esse valor nunca foi seu.
+
+<Summary title="O que a API faz — e o que ela deliberadamente não faz">
+  A plataforma não calcula o imposto, não decide alíquota e não valida se o valor está correto. Ela faz só três coisas: validação sintática e semântica do payload, geração do `resource ID` para rastreabilidade, e roteamento — mandar CBS pra Receita e IBS pro Comitê Gestor. Quem calcula o imposto, com base nas regras de tributação, na alíquota do CNPJ e na natureza da operação, continua sendo o seu sistema.
+</Summary>
+
+## A conexão com a nota fiscal
+
+O cálculo do seu sistema não fica isolado — ele se conecta à emissão da NF-e. A Nota Técnica 2025.002 adicionou campos específicos para Split Payment no XML da nota fiscal eletrônica. Sem esses campos preenchidos corretamente, o fluxo inteiro trava: o pipeline completo depende do seu sistema emitir a nota com os campos novos, do PSP consultar a plataforma, da plataforma validar e devolver a instrução, e do PSP então segregar e liquidar. Cada elo dessa cadeia tem um responsável técnico diferente — e um deles é você.
+
+## Cronograma: o que muda e quando
+
+<Tip title="As datas que importam pra quem programa">
+  - **2026** — ambiente de sandbox aberto, sem cobrança real e sem risco de processo se algo quebrar. É a janela pra integrar e testar.
+  - **Janeiro de 2027** — início da Fase 1, restrita a B2B e a seis meios de pagamento: boleto, Pix dinâmico, Pix automático, Pix estático, TED e TEF. Cartão, voucher e cripto ficam pra Fase 2 — não é isenção, é adiamento.
+  - **2029 a 2032** — CBS em regime pleno; IBS em transição gradual.
+  - **2033** — regime pleno para os dois tributos, com o Split Payment como realidade fiscal consolidada no Brasil.
+</Tip>
+
+Se o seu produto opera com Pix, boleto ou TED — o que cobre a maior parte do B2B brasileiro e praticamente todo SaaS —, janeiro de 2027 é a data que importa de verdade, não 2033.
+
+## O que fazer agora
+
+O vídeo resume em três passos práticos:
+
+1. **Leia o manual de integração e o Swagger** em `consumo.tributos.gov.br`. É gratuito, está publicado, e é literalmente o contrato técnico que você vai precisar implementar.
+2. **Verifique se o seu emissor de NF-e já suporta a Nota Técnica 2025.002.** Se não suporta, é hora de cobrar o fornecedor — ou, se você mantém esse módulo internamente, mapear os campos novos desde já.
+3. **Mapeie os PSPs que você usa e pergunte o roadmap de integração de cada um** com a plataforma de Split Payment. Se o seu provedor de pagamento não integrar com o hub, o fluxo quebra do seu lado — e você precisa saber onde cada fornecedor está antes de janeiro de 2027.
+
+<Warning title="Sobre timing">
+  2026 é ano de sandbox sem cobrança real. Subir uma integração fiscal de última hora em dezembro de 2026, com deadline pra janeiro, é o cenário que ninguém quer viver — especialmente em algo que se conecta direto com nota fiscal e recolhimento de tributo.
+</Warning>
+
+## Uma nota sobre o vídeo
+
+O vídeo do Mano Deyvin foi produzido em parceria com a Appmax, plataforma de pagamentos que ele cita como tendo suporte nativo a Split Payment. Não avaliamos essa ou outras soluções de mercado neste post — o objetivo aqui é técnico: entender o contrato de API que o governo publicou e o que ele exige de quem constrói sistemas de pagamento. Vale pesquisar as opções disponíveis e comparar antes de decidir com qual parceiro de pagamento integrar.
+
+---
+
+O Brasil construiu uma infraestrutura técnica pra coletar imposto em tempo real, no ato do pagamento. A lei está promulgada, o decreto está assinado, o Swagger está publicado. Quem começar a testar agora, no ano de sandbox sem cobrança, atravessa a transição de janeiro de 2027 sem sobressalto. Quem deixar pra depois vai estar competindo contra um prazo regulatório que não costuma dar prorrogação.
+
+## Fontes
+
+- [Mano Deyvin — vídeo sobre Split Payment e a API pública de tributação (YouTube)](https://www.youtube.com/watch?v=35pEhb_BzZI)
+- [Planalto — Lei Complementar nº 214, de 16 de janeiro de 2025](https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm)
+- [Avalara Brasil — Split Payment na LC 214/2025: como será o recolhimento automático](https://site.avalarabrasil.com.br/reforma-tributaria/split-payment-lei-complementar-214-2025/)
+- [Barbieri Advogados — LC 214/2025: guia completo da lei da Reforma Tributária](https://barbieriadvogados.com/lc-214/)
+- [Systax — Os Modelos de Split Payment na LC nº 214/2025](https://www.systax.com.br/artigos-e-novidades/os-modelos-de-split-payment-na-lc-no-214-2025-estrutura-operacionalizacao-e-desafios/)
+- [Contabeis.com.br — Split Payment: entenda a nova lei tributária e seus impactos nas empresas](https://www.contabeis.com.br/artigos/72216/split-payment-entenda-a-nova-lei-tributaria-e-seus-impactos-nas-empresas/)
+- [Plataforma pública de Split Payment — Manual de integração e Swagger/OpenAPI](https://consumo.tributos.gov.br)
