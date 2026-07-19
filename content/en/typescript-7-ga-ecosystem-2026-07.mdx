@@ -1,0 +1,67 @@
+---
+title: "TypeScript 7.0 already shipped - and the ecosystem hasn't caught up yet"
+description: "After more than two years of work, Microsoft rewrote the entire TypeScript compiler in Go. Builds up to 12x faster, yes - but ESLint, Vue, Svelte, and Astro are stuck until version 7.1, which isn't expected until October. The topic dominating technical conversations this week."
+date: 2026-07-19
+lang: en
+translationKey: "typescript-7-ga-ecossistema-2026-07"
+tags: [typescript, javascript, compilers, devtools, performance]
+draft: false
+---
+
+If you opened any tech feed over the past ten days, you've probably seen it: on July 8, 2026, Microsoft shipped **TypeScript 7.0**, with the entire compiler rewritten from scratch in Go. One analyst called it "the biggest structural change to the toolchain since TypeScript first appeared in 2012" - and the numbers back up the hype. But a week after launch, a second conversation took over dev group chats: part of the ecosystem simply doesn't run on it yet.
+
+## The idea behind the rewrite
+
+TypeScript was always, ironically, written in TypeScript - running on Node.js like any other JavaScript package. It worked fine, but it scaled poorly: on large projects, type-checking became a noticeable bottleneck in daily work, with editors freezing and CI pipelines taking minutes just to validate types.
+
+The rewrite project, internally codenamed **Project Corsa**, was announced in March 2025 by Anders Hejlsberg, TypeScript's creator. The choice of Go - instead of Rust, the more common pick in recent JavaScript tooling rewrites - raised eyebrows at the time, but the logic was straightforward: a native binary, no Node.js startup overhead, real parallelism through shared memory.
+
+<Note>
+  The path here was well documented in stages: a preview with basic type-checking support in mid-2025, a public beta on April 21, 2026, a release candidate on June 18, and finally GA on July 8 - about three weeks after the RC, within the window Microsoft itself had estimated ("within a month," with no fixed published date).
+</Note>
+
+## The numbers behind the hype
+
+Microsoft describes the gain as "typically between 8x and 12x" on full builds. The most-cited example: type-checking the VS Code codebase itself dropped from **125.7 seconds** on TypeScript 6.0 to **10.6 seconds** on 7.0 - nearly a 12x speedup. Playwright, another large reference project, went from 11.1 seconds to 1.1 seconds.
+
+<Warning title="An average is not a guarantee">
+  Worth flagging what several technical write-ups already have: those numbers are averages of genuinely different measurements - project size, hardware, `tsconfig` setup. Smaller projects tend to see smaller absolute gains, even with similar multipliers. TypeScript 7.0 is a port, not a behavior rewrite: type-checking semantics stay identical to the prior version, so the gain is purely execution speed.
+</Warning>
+
+## What broke - and why
+
+This is where the second wave of conversation comes from. TypeScript 7.0 moved the language server architecture to a Language Server Protocol model - the right direction long-term, but with an immediate side effect: **version 7.0 doesn't expose a stable programmatic API**. A large chunk of the tooling ecosystem was built directly on top of that API.
+
+<Summary title="Who's blocked, one week after launch">
+  `typescript-eslint`, a dependency of practically every project with typed linting, closed the request for TS7 support as "not planned" - not "in progress." ESLint core, as a consequence, stays blocked behind it. Vue, Svelte, and Astro can't run type-checking in templates until the stable API lands in version 7.1, expected sometime around October 2026, following the historical three-to-four-month gap between major releases.
+</Summary>
+
+The practical line that separates who can migrate already from who can't yet is simple: **anything that shells out to `tsc` on the command line works today**. Anything that depends on embedding the compiler programmatically - typed linters, template type-checking in frameworks, build tools that introspect types - has to wait.
+
+<Tip title="If you don't want your own migration blocked">
+  Microsoft shipped the `@typescript/typescript6` package, which exposes a `tsc6` executable and re-exports the TypeScript 6.0 API. This lets you run the 7.0 compiler for command-line type-checking while other tools in your project keep depending on the old API - without a conflict over which `tsc` gets called.
+</Tip>
+
+## What this actually means today
+
+A readiness check published on July 16 - one week after launch - sums up the current state well: the compiler itself is stable, with no showstopper bugs reported in week one. The problem isn't Go, it's the surrounding tooling.
+
+If your workflow is plain `tsc` in CI, or a bundler that only invokes the compiler binary, migrating is a today thing: `npm install -D typescript` already resolves to the stable version, and any code that compiled cleanly under 6.0 (with `stableTypeOrdering` on and no `ignoreDeprecations` flag set) compiles identically under 7.0. If your stack depends on `typescript-eslint`, Vue, Svelte, or Astro for integrated type-checking, the practical answer is to wait for 7.1 - forcing the migration now will probably break more than it fixes.
+
+## The open question
+
+What's still missing an official answer is exactly when the friction ends. The October estimate for version 7.1 comes from the TypeScript team's own comparison to the historical gap between major releases - it isn't a published, committed date, it's a pattern-based projection. In the meantime, teams running any of these blocked frameworks face a real decision: migrate partially now (CI and build on 7.0, template checking still on 6.0) or wait for the full package.
+
+---
+
+TypeScript 7.0 delivers exactly what it promised on the compiler side - and after more than two years of public work, that's not a small thing. But the real launch experience, for a good share of people relying on a framework with integrated type-checking, is still "hold on" - and the second half of this story only ends when 7.1 moves from estimate to release.
+
+## Sources
+
+- [Dennis Morello - TypeScript 7 Is Here: The Compiler Got Rewritten in Go](https://morello.dev/blog/typescript-7-is-here)
+- [DigitalApplied - TypeScript 7.0 Is GA: The 10x Compiler Migration Playbook](https://www.digitalapplied.com/blog/typescript-7-0-ga-native-compiler-migration-playbook-2026)
+- [DigitalApplied - TypeScript 7 One Week In: Migration Readiness Check](https://www.digitalapplied.com/blog/typescript-7-native-compiler-early-adopter-migration-readiness)
+- [TechTimes - TypeScript 7 Now Stable: 10× Faster Builds, But Not for Vue or Svelte Yet](https://www.techtimes.com/articles/320049/20260710/typescript-7-now-stable-10-faster-builds-not-vue-svelte-yet.htm)
+- [InfoWorld - Go-based TypeScript 7.0 reaches release candidate stage](https://www.infoworld.com/article/4191918/typescript-7-0-reaches-release-candidate-stage.html)
+- [Visual Studio Magazine - TypeScript 7.0 RC Moves Microsoft's Go Rewrite Into the Mainline Compiler](https://visualstudiomagazine.com/articles/2026/06/22/typescript-7-0-rc-moves-microsofts-go-rewrite-into-the-mainline-compiler.aspx)
+- [Tech Insider Ireland - TypeScript 7.0 RC: Go Compiler 10x Faster](https://tech-insider.org/ie/typescript-7-native-compiler-2026/)

@@ -1,0 +1,82 @@
+---
+title: "The 'just run AI locally' advice hides a bill almost nobody shows you"
+description: "There's a wave of people recommending local AI like it's simple and cheap. In practice, the efficiency of these models on diverse tasks is very low - with a few narrow exceptions - and getting close to a real cloud-grade model pushes the hardware investment from thousands into the tens of thousands of dollars fast."
+date: 2026-07-19
+lang: en
+translationKey: "custo-real-ia-local-2026-07"
+tags: [ai, hardware, llm, infrastructure, costs]
+draft: false
+---
+
+There's a strong wave of content recommending "just run AI locally" as a universal fix: privacy, no subscription, no dependence on anyone. The problem is that most of that advice skips the uncomfortable part: for most real use cases, a local model's efficiency is far below a cloud model's, and the exception - having something genuinely competitive - costs a lot more than any "build your local AI for under $600" post lets on.
+
+I went digging for the real numbers on hardware, VRAM, and performance to put this bill together.
+
+## What fits on a consumer GPU
+
+The practical rule today is straightforward: 7B-parameter models need at least 12GB of VRAM, the 13B-to-30B range works better with 24GB, and 70B models need something close to 32GB, already pushing into flagship cards like the RTX 5090 or requiring two GPUs paired together.
+
+But "fits in memory" isn't the same as "works well." A recurring comment from people who have tested this path in depth sums up the problem: models running on an RTX 4090 tend to hallucinate badly enough that they simply aren't worth the trouble for anything requiring factual precision - executive summaries, production code, legal analysis, basically anything beyond casual conversation or loose text generation.
+
+<Note>
+  This doesn't mean small models are useless. They work well for narrowly scoped tasks: simple code autocomplete, summarizing a short document, answering questions within a restricted domain. The problem is generalizing that capability to "diverse work" - that's exactly where efficiency collapses.
+</Note>
+
+## The illusion of "the big model" on a single machine
+
+When someone wants to move past the 7B-30B range and run something genuinely competitive - a model like the full DeepSeek R1, with 671 billion parameters, that actually competes with frontier models on reasoning, math, and code - the memory requirement jumps to a completely different tier. At full precision, the model needs over 1.3 TB of VRAM. Even with aggressive 4-bit quantization, it still needs close to 400GB of model weights, plus headroom for context - the total lands around 448GB of memory just to load the model.
+
+That leaves three real paths, and none of them is cheap.
+
+### Path 1: the "budget" home rig
+
+One configuration tested by enthusiasts uses an AMD EPYC processor, 512GB of DDR4 RAM, and four used RTX 3090 GPUs, all assembled for roughly $2,000. It works: the full model runs. But speed sits around 4 tokens per second, which rules out any real-time interaction and only makes sense for batch tasks running unhurried in the background.
+
+### Path 2: the Mac Studio - which got more expensive right in 2026
+
+For a while, the Mac Studio with an M3 Ultra chip and 512GB of unified memory was cited as the elegant way out: no GPU cluster, power draw under 200W, and a speed of 16 to 18 tokens per second running DeepSeek R1 671B at 4-bit, fast enough to be genuinely usable.
+
+<Warning title="That option doesn't exist anymore the way it used to">
+  In 2026, amid the global RAM price squeeze, Apple discontinued the 512GB Mac Studio configuration. The top tier now caps at 256GB, not enough memory to load the full model at 4-bit, and the price of the 256GB upgrade went up by $400. The path that used to be cited as "the smart move" for genuinely capable local AI is no longer available to buy.
+</Warning>
+
+### Path 3: datacenter hardware - the only path to production-grade speed
+
+To run the full model at FP8 precision with real throughput via batching - the way any cloud service delivers fast responses to multiple users at once - the market recommendation is a node with 4 to 8 NVIDIA H100 80GB GPUs. Just the GPU cost lands around $100,000, before server-grade CPU, memory, redundant power supplies, cooling, and dedicated electrical infrastructure.
+
+<Summary title="The real yardstick, summarized">
+  - **Small model (7B-14B) on a $600-1,200 GPU**: works, but with a hallucination rate too high for serious work on diverse tasks.
+  - **Mid-size model (32B-70B) on a $3,000-5,000 GPU**: reasonable quality, still below frontier models on complex reasoning.
+  - **Full frontier model (671B) at usable speed**: the Mac path is discontinued; the viable alternative today is datacenter hardware, in the ballpark of $100,000 in GPUs alone.
+</Summary>
+
+## Quantization isn't free magic
+
+The most common workaround for cutting cost is quantization: compressing the model's weights from 16-bit down to 4 or 5 bits, cutting memory use by up to 8x. It works well on technical benchmarks, with accuracy differences frequently under 1% on STEM-oriented tasks comparing the full-precision version against the quantized one. The problem is that "under 1% on a standardized benchmark" isn't the same as "no noticeable loss in your actual use case" - tasks that depend on nuance, long context, or complex instructions tend to feel the difference in ways no benchmark quite captures.
+
+## The math nobody runs: comparing against a cloud subscription
+
+Here's the point the "ditch the subscription, run local" advice usually skips: hardware isn't a one-time investment frozen in time. Frontier models change every few months, and hardware that runs today's model well may not run next year's at the same speed. A $20-to-$200-a-month subscription to a frontier cloud service, paid by someone who actually uses the tool for serious work, would take between 40 and 400 months, 3 to over 30 years, to break even against the $100,000 cost of a dedicated GPU node, before even counting electricity, maintenance, and the fact that two years from now that hardware will be competing against even better cloud models.
+
+## When local AI actually makes sense
+
+None of this means local AI is always a bad idea. For small teams handling sensitive data, legal, healthcare, regulated information that can't leave the company, a server with a dedicated GPU in the $4,000 range already serves a whole team well for internal chat, RAG over proprietary documents, and well-scoped automations. That's a defensible investment when the reason is compliance and data control, not saving on a subscription.
+
+<Tip title="The right question before building a rig">
+  Before buying hardware for local AI, it's worth asking: is my need sensitive-data privacy (local makes sense, even with a smaller model), or is it avoiding a subscription cost (in that case, run the full math, hardware, electricity, obsolescence, before comparing it to a monthly subscription price)?
+</Tip>
+
+---
+
+The efficiency of local AI on diverse tasks is, today, genuinely low, with a few specific exceptions around niche use, narrowly scoped tasks, or compliance requirements. Having something that consistently delivers work quality comparable to a frontier cloud model is possible, but the real entry price sits in the tens to hundreds of thousands of dollars in datacenter hardware, not the two or three thousand dollars that tend to show up in those "build your own local AI" videos and posts.
+
+## Sources
+
+- [ServeTheHome - New 512GB Unified Memory Apple Mac Studio is the Local AI Play](https://www.servethehome.com/new-512gb-unified-memory-apple-mac-studio-is-the-local-ai-play/)
+- [Groundy - Running DeepSeek R1 Locally: Hardware Requirements, Quantization, and Real Throughput](https://groundy.com/articles/running-deepseek-r1-locally-hardware-requirements-quantization-and-real-throughput/)
+- [Local AI Master - Best Mac for Local AI 2026: Every Apple Silicon Chip Ranked](https://localaimaster.com/blog/apple-silicon-ai-buying-guide)
+- [Notebookcheck - Apple increases RAM upgrade pricing for M3 Ultra Mac Studio, retires 512 GB option](https://www.notebookcheck.net/Apple-increases-RAM-upgrade-pricing-for-M3-Ultra-Mac-Studio-retires-512-GB-option.1244246.0.html)
+- [next BIG future - Running Deepseek R1 671B Versions Locally or 70B on Groq Remotely](https://nextbigfuture.substack.com/p/running-deepseek-r1-671b-locally-or-70b-on-groqhtml)
+- [Roberto Dias Duarte - Custo para Rodar DeepSeek-R1 Localmente: Análise de Hardware e Software](https://www.robertodiasduarte.com.br/custo-para-rodar-deepseek-r1-localmente-analise-de-hardware-e-software/)
+- [TerabyteShop - Melhor Hardware para Rodar IA Local em 2026](https://www.terabyteshop.com.br/blog/melhor-hardware-para-rodar-ia-local-em-2026)
+- [OpServices - Como Rodar uma IA Local: Guia para IA Open Source em 2026](https://www.opservices.com.br/como-rodar-uma-ia-local/)
