@@ -1,0 +1,87 @@
+---
+title: "A internet virou uma fábrica de landing pages geradas por IA - e a conta disso ainda não chegou"
+description: "Vibe coding, no-code e sites inteiros gerados por prompt prometem velocidade sem limite. Os problemas reais - segurança, SEO, teto de escala e dependência de plataforma - também estão crescendo na mesma velocidade, só que ainda não apareceram na tela de quem está construindo agora."
+date: 2026-07-19
+lang: pt
+translationKey: "problemas-futuros-ia-nocode-2026-07"
+tags: [ia, no-code, vibe-coding, seo, seguranca]
+draft: false
+---
+
+Hoje, um único operador com boas técnicas de prompt consegue gerar 500 posts de blog, 5 mil descrições de produto, 50 landing pages otimizadas pra SEO ou 200 campanhas de rede social em questão de dias, a um custo marginal quase zero. Esse é o tamanho da "escala sintética" que ferramentas de IA generativa e plataformas no-code já entregam hoje. O problema é que velocidade de produção e qualidade de resultado são coisas diferentes - e boa parte dos problemas que essa onda está criando só aparece depois que o site, o app ou a landing page já está no ar, com usuário real e dado real dentro.
+
+Fui atrás do que já está documentado sobre isso, em vez de especular.
+
+## O problema que não aparece na demonstração
+
+O termo "vibe coding" - descrever o que você quer em linguagem natural e deixar a IA escrever o código, sem revisar de verdade o que foi gerado - virou hábito diário pra centenas de milhares de pessoas construindo com ferramentas como Cursor, Lovable, Replit e Bolt. Funciona bem na demonstração. O problema aparece na segunda fase, quando esse app ganha usuários de verdade, autenticação, dados e uma URL pública.
+
+<Warning title="Os números já estão documentados, não são previsão">
+  Um estudo da Veracode publicado em 2025 encontrou vulnerabilidade de segurança conhecida em 45% do código gerado por IA analisado. Pesquisa citada pela IBM em junho de 2026 mostrou que pull requests assistidos por IA geram 2,74 vezes mais problemas de segurança que código escrito só por humanos. E uma nota técnica da Cloud Security Alliance, de abril de 2026, analisou 2,23 milhões de amostras de código geradas por 16 modelos diferentes: 19,7% continham o nome de um pacote de software que não existe de verdade - o modelo simplesmente inventou a dependência.
+</Warning>
+
+Essa última parte tem nome: **slopsquatting**. Atacantes registram, de propósito, os nomes de pacote que modelos de IA costumam alucinar, com código malicioso dentro. Quem aceita a sugestão da IA sem checar instala uma porta dos fundos sem saber.
+
+Os padrões que mais aparecem em brechas públicas de 2026 são recorrentes: controle de acesso quebrado, checagem de autorização feita só no navegador (e não no servidor), segredos e chaves de API expostos direto no código do lado do cliente, e bancos de dados de produção acessíveis publicamente porque uma trava básica nunca foi implementada. Num caso público, uma organização esportiva teve chaves de acesso AWS expostas no código-fonte do próprio site por mais de 700 dias sem perceber.
+
+<Note>
+  A questão não é que vibe coding seja ruim. É que a etapa de revisão de segurança - algo natural em desenvolvimento tradicional - está sendo pulada justamente pelo público que menos tem repertório pra notar o problema antes de acontecer.
+</Note>
+
+## A internet ficando genérica - e o Google já está reagindo
+
+O segundo problema é de conteúdo, não de código. Conforme mais e mais landing pages, artigos e páginas de produto são gerados em lote por IA, a diferenciação entre um site e outro despenca - e o Google não ficou parado assistindo isso acontecer.
+
+Em 2026, o Google rodou atualizações específicas contra esse padrão: a atualização de spam de março de 2026 mirou diretamente conteúdo automatizado de baixo valor e páginas geradas em escala sem originalidade, terminando em menos de 20 horas de rollout - uma das mais rápidas já feitas. As diretrizes de qualidade do Google já instruem avaliadores humanos a marcar como "qualidade mínima" qualquer página onde a maior parte do conteúdo principal é gerada por IA sem esforço, originalidade ou valor agregado - e isso alimenta diretamente o ranqueamento.
+
+<Summary title="AI não é a exclusão automática - mas o volume sem critério é">
+  Isso não significa que toda página com IA seja penalizada: em meados de 2026, 17% dos 20 primeiros resultados de busca do Google já continham conteúdo gerado por IA. O que os updates de 2026 estão filtrando especificamente é o padrão de "conteúdo oco" - texto que só resume o que já está na primeira página de resultados, sem trazer nada novo, e páginas quase idênticas publicadas em lote pra cobrir variações de palavra-chave.
+</Summary>
+
+Tem uma camada extra de risco só pra landing page comercial: em fevereiro de 2026, veio a público uma patente do Google descrevendo um sistema que avalia landing pages de comércio usando sinais como taxa de conversão, taxa de rejeição e qualidade de conteúdo - e, se a página tiver desempenho ruim, o próprio Google poderia gerar e mostrar uma versão alternativa no lugar dela, dentro dos resultados de busca pagos.
+
+<Warning title="Ainda é patente, não é recurso ativo - mas a direção importa">
+  Não há confirmação de que isso já esteja implementado de forma ampla na busca real. Mas a patente existe, foi concedida, e mostra a direção que o Google está tomando: quanto mais fraca e genérica for sua página, mais fácil fica pra uma plataforma terceira decidir substituí-la por conta própria - tirando de você o controle sobre marca, mensagem e desenho da própria página.
+</Warning>
+
+## O teto que o no-code esconde até você precisar dele
+
+Plataformas no-code prometem lançar um produto em semanas em vez de meses, sem depender de salário de desenvolvedor. Funciona muito bem pra validar uma ideia. O problema aparece quando o produto dá certo.
+
+Um cenário que se repete bastante no mundo de startups: uma empresa constrói o MVP numa plataforma no-code popular. O crescimento é forte. Chega a 5 mil usuários, depois 8 mil. Consultas de banco de dados começam a ficar lentas. Fluxos de trabalho complexos ficam frágeis e passam a falhar de forma imprevisível. E o time de engenharia - se é que existe um - não consegue otimizar nada, porque não tem controle sobre a infraestrutura por baixo da plataforma.
+
+<Tip title="Os pontos que valem checar antes de escolher no-code pra algo sério">
+  - **Teste seu fluxo de trabalho mais complexo** dentro da plataforma antes de comprometer o produto inteiro nela, não só a tela de cadastro simples.
+  - **Teste com volume de dado realista**, não com os poucos registros de exemplo do onboarding.
+  - **Avalie a portabilidade dos dados** - o quão fácil é exportar tudo se você precisar sair da plataforma no futuro.
+  - **Pergunte especificamente sobre requisitos de segurança e conformidade** antes de guardar dado sensível dentro da ferramenta.
+</Tip>
+
+O risco de dependência de fornecedor (vendor lock-in) é o outro lado dessa moeda: componentes proprietários e opções limitadas de exportação tornam a migração pra outra plataforma cara e complexa. Se a lógica de negócio inteira do seu produto está amarrada a um construtor visual específico, trocar de plataforma no futuro pode significar reconstruir do zero - não adaptar, reconstruir.
+
+## O que vai separar quem sobrevive de quem não sobrevive
+
+Nenhum desses problemas significa que vibe coding ou no-code sejam más ideias. Abandonar completamente essas ferramentas jogaria fora um ganho real de velocidade que só cresce à medida que a tecnologia melhora. O ponto é outro: a velocidade que essas ferramentas entregam hoje não vem com controle de qualidade embutido - isso continua sendo responsabilidade de quem constrói.
+
+Pra código gerado por IA que vai receber usuário real, dado real e conexão com serviço real, o caminho documentado que reduz risco de forma mensurável é simples de descrever e difícil de pular: nunca deixar segredo e chave de API no código do lado do cliente, ativar controle de acesso em nível de linha em qualquer banco de dado, forçar toda checagem de autorização no servidor - nunca só no navegador - e nunca expor ferramenta administrativa publicamente.
+
+Pra conteúdo gerado por IA que precisa ranquear e converter, o padrão que continua funcionando em 2026 é injetar o que a IA sozinha não tem: experiência real, resultado de cliente real, um ponto de vista sobre por que o senso comum está errado, exemplo específico que só você tem acesso. Volume sem critério parou de compensar há pelo menos um ano.
+
+E pra escolha de plataforma no-code, o ponto central é tratar a decisão como arquitetural, não só operacional: testar o cenário de maior carga antes de comprometer o produto inteiro nela, e ter clareza de qual é o plano se, um dia, for preciso sair.
+
+---
+
+A promessa de velocidade sem limite dessas ferramentas é real. O que normalmente falta no discurso ao redor delas é a segunda metade da frase: velocidade sem revisão gera dívida - de segurança, de qualidade de conteúdo, ou de arquitetura - que só aparece na fatura quando o produto já tem gente de verdade dependendo dele.
+
+## Fontes
+
+- [The Verge - Read this before you vibe-code another app](https://www.theverge.com/)
+- [IBM Think - Vibe Coding Security Risks Aren't Like Ordinary Security Risks](https://www.ibm.com/think/insights/vibe-coding-security-risks)
+- [Forbes - Vibe Coding Has A Massive Security Problem](https://www.forbes.com/sites/jodiecook/2026/03/20/vibe-coding-has-a-massive-security-problem/)
+- [Arnica - Vibe Coding Security Risks You Can't Ignore 2026](https://www.arnica.io/blog/vibe-coding-security-risks)
+- [SecureBlitz - 6 Best Vibe Coding Security Platforms of 2026](https://secureblitz.com/best-vibe-coding-security-platforms/)
+- [TechPluto - The Internet Is Quietly Becoming AI-Generated, And Google Is Panicking](https://www.techpluto.com/ai-generated-content-2026/)
+- [Solutions Digital Consulting - 2026 SEO Guide to Google Algorithm Updates](https://solutionsdigitalconsulting.com/blog/2026-google-algorithm-updates-the-definitive-guide/)
+- [Search Engine Land - Google patent hints it could replace your landing pages with AI versions](https://searchengineland.com/google-patent-hints-searchers-will-land-on-ai-generated-pages-and-not-web-pages-470499)
+- [The Bright Byte - Why Low-Code Became a Trap in 2026](https://thebrightbyte.com/playbook/expertise/why-low-code-became-a-trap-2025)
+- [Bubble - Drawbacks of No-Code Software: 6 Key Limitations](https://bubble.io/blog/drawbacks-of-no-code-software/)
