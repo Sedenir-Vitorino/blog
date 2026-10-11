@@ -21,7 +21,7 @@ function Code({ children, "data-language": dataLanguage, ...props }: CodeProps) 
     );
   }
   return (
-    <code className="px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800/80 text-[12.5px] font-medium text-green-600 dark:text-green-400">
+    <code className="px-1.5 py-0.5 rounded-[2px] border border-line bg-surface-2 font-mono text-[0.82em] text-ink [overflow-wrap:anywhere]">
       {children}
     </code>
   );
@@ -30,7 +30,7 @@ function Code({ children, "data-language": dataLanguage, ...props }: CodeProps) 
 function Pre({ children, ...props }: PreProps) {
   return (
     <pre
-      className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 p-4 overflow-x-auto my-6 text-[13px] leading-relaxed"
+      className="rounded-[2px] border border-line bg-surface-2 p-4 sm:p-5 overflow-x-auto my-8 font-mono text-[13.5px] leading-relaxed"
       {...props}
     >
       {children}
@@ -40,14 +40,14 @@ function Pre({ children, ...props }: PreProps) {
 
 export const mdxComponents: MDXComponents = {
   h1: ({ children }) => (
-    <h1 className="text-2xl font-bold mt-10 mb-5 text-zinc-900 dark:text-white tracking-tight">
+    <h1 className="font-serif text-[28px] sm:text-[32px] font-semibold leading-tight mt-12 mb-5 text-ink tracking-[-0.01em]">
       {children}
     </h1>
   ),
   h2: ({ children, id }) => (
     <h2
       id={id}
-      className="text-2xl font-bold mt-14 mb-5 text-zinc-900 dark:text-white tracking-tight"
+      className="font-serif text-[25px] sm:text-[29px] font-semibold leading-tight mt-16 mb-5 text-ink tracking-[-0.01em] scroll-mt-24"
     >
       {children}
     </h2>
@@ -55,47 +55,47 @@ export const mdxComponents: MDXComponents = {
   h3: ({ children, id }) => (
     <h3
       id={id}
-      className="text-lg font-semibold mt-10 mb-3 text-zinc-900 dark:text-white"
+      className="font-serif text-[20px] sm:text-[22px] font-semibold leading-snug mt-10 mb-3 text-ink scroll-mt-24"
     >
       {children}
     </h3>
   ),
   p: ({ children }) => (
-    <p className="text-[14px] leading-relaxed my-5 text-zinc-700 dark:text-zinc-300">
+    <p className="my-6">
       {children}
     </p>
   ),
   ul: ({ children }) => (
-    <ul className="my-5 text-[14px] leading-relaxed text-zinc-700 dark:text-zinc-300 list-none pl-0 space-y-1.5">
+    <ul className="my-6 list-none pl-0 space-y-2">
       {children}
     </ul>
   ),
   ol: ({ children }) => (
-    <ol className="list-decimal pl-6 my-5 text-[14px] leading-relaxed text-zinc-700 dark:text-zinc-300 marker:text-green-500 marker:font-semibold space-y-1.5">
+    <ol className="list-decimal pl-6 my-6 marker:text-accent marker:font-sans marker:font-semibold space-y-2">
       {children}
     </ol>
   ),
   li: ({ children }) => (
-    <li className="leading-relaxed">{children}</li>
+    <li>{children}</li>
   ),
   a: ({ href, children }) => (
     <a
       href={href}
-      className="text-green-500 hover:text-green-400 underline decoration-green-500/30 underline-offset-4 hover:decoration-green-500 transition-colors"
+      className="text-accent underline decoration-1 underline-offset-[3px] hover:decoration-2 transition-colors duration-150 [overflow-wrap:anywhere]"
     >
       {children}
     </a>
   ),
   blockquote: ({ children }) => (
-    <blockquote className="border-l-2 border-green-500/60 pl-5 my-6 text-[14px] italic text-zinc-600 dark:text-zinc-400">
+    <blockquote className="border-l-2 border-accent-strong pl-5 sm:pl-6 my-8 italic text-muted [&>p]:my-3">
       {children}
     </blockquote>
   ),
   hr: () => (
-    <hr className="my-10 border-t border-zinc-200 dark:border-zinc-800" />
+    <hr className="my-12 border-t border-line" />
   ),
   strong: ({ children }) => (
-    <strong className="font-bold text-zinc-900 dark:text-white">{children}</strong>
+    <strong className="font-semibold text-ink">{children}</strong>
   ),
   img: ({ src, alt, ...rest }) => (
     // eslint-disable-next-line @next/next/no-img-element
@@ -103,7 +103,7 @@ export const mdxComponents: MDXComponents = {
       src={src as string}
       alt={(alt as string) ?? ""}
       {...rest}
-      className="max-w-full h-auto rounded-md my-6"
+      className="max-w-full h-auto rounded-[2px] border border-line my-8"
     />
   ),
   code: Code,

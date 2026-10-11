@@ -2,110 +2,215 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Tokens da identidade visual (grafite / azul aço / cobre).
+ * - accent: cobre para texto e links (ajustado para contraste AA em cada tema)
+ * - accent-strong: cobre original, só para fundos, réguas e indicadores decorativos
+ * - band: faixas escuras (cabeçalho, abertura, rodapé)
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #09090b;
+  --bg: #f0f2f1;
+  --surface: #f7f8f7;
+  --surface-2: #e8ebea;
+  --ink: #20272d;
+  --muted: #5a656e;
+  --line: #d5dadb;
+  --line-strong: #b9c0c4;
+  --accent: #8c5a35;
+  --accent-strong: #b98357;
+
+  --band: #20272d;
+  --band-ink: #f0f2f1;
+  --band-muted: #bcc4ca;
+  --band-line: #3a454e;
+  --band-accent: #c68f63;
+
+  --steel: #24394b;
+  --on-steel: #eff1f0;
+  --on-steel-muted: #bcc4ca;
+
+  --code-bg: #e8ebea;
 }
 
 .dark {
-  --background: #09090b;
-  --foreground: #fafafa;
+  --bg: #20272d;
+  --surface: #262e35;
+  --surface-2: #1a2025;
+  --ink: #eff1f0;
+  --muted: #9aa4ac;
+  --line: #36414a;
+  --line-strong: #4a5761;
+  --accent: #d09c72;
+  --accent-strong: #b98357;
+
+  --band: #161b20;
+  --band-ink: #eff1f0;
+  --band-muted: #bcc4ca;
+  --band-line: #2e3840;
+  --band-accent: #c68f63;
+
+  --code-bg: #1a2025;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-band: var(--band);
+  --color-band-ink: var(--band-ink);
+  --color-band-muted: var(--band-muted);
+  --color-band-line: var(--band-line);
+  --color-band-accent: var(--band-accent);
+  --color-steel: var(--steel);
+  --color-on-steel: var(--on-steel);
+  --color-on-steel-muted: var(--on-steel-muted);
+
+  --font-serif: var(--font-source-serif), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: var(--font-jetbrains-mono), ui-monospace, "SF Mono", Menlo, monospace;
-  font-feature-settings: "calt" 1, "liga" 1;
+  color: var(--ink);
+  background: var(--bg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background-color: #18181b;
-  color: #fafafa;
+  background-color: var(--accent-strong);
+  color: #20272d;
 }
 
-.dark ::selection {
-  background-color: #fafafa;
-  color: #18181b;
+:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
 }
 
-/* Shiki dual-theme */
+/* Shiki dual-theme (fundo vem do token --code-bg) */
 code[data-theme*=" "],
 code[data-theme*=" "] span {
   color: var(--shiki-light);
-  background-color: var(--shiki-light-bg);
+  background-color: transparent;
 }
 
 pre[data-theme*=" "] {
-  background-color: var(--shiki-light-bg);
+  background-color: var(--code-bg);
 }
 
 .dark code[data-theme*=" "],
 .dark code[data-theme*=" "] span {
   color: var(--shiki-dark);
-  background-color: var(--shiki-dark-bg);
 }
 
-.dark pre[data-theme*=" "] {
-  background-color: var(--shiki-dark-bg);
-}
-
-/* CSS counter para numeração automática de h2 dentro de posts */
+/* ── Corpo do artigo ─────────────────────────────────────── */
 .article-content {
   counter-reset: section;
+  max-width: 70ch;
+  font-family: var(--font-serif);
+  font-size: 1.0625rem; /* 17px */
+  line-height: 1.75;
+  color: var(--ink);
+}
+
+@media (min-width: 640px) {
+  .article-content {
+    font-size: 1.15rem; /* ~18.4px */
+  }
 }
 
 .article-content h2 {
   counter-increment: section;
-  position: relative;
-  padding-left: 1.5rem;
 }
 
+/* Numeração das seções, em cobre, acima do título */
 .article-content h2::before {
   content: counter(section, decimal-leading-zero);
-  margin-right: 0.75rem;
-  color: #22c55e;
+  display: block;
+  margin-bottom: 0.4rem;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
   font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--accent);
 }
 
-.article-content h2::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.25rem;
-  bottom: 0.25rem;
-  width: 2px;
-  background: #22c55e;
-}
-
-/* Bullets verdes em listas não-ordenadas dentro do artigo */
 .article-content ul li {
   position: relative;
   padding-left: 1.25rem;
 }
 
 .article-content ul li::before {
-  content: "•";
+  content: "";
   position: absolute;
-  left: 0.25rem;
-  top: 0;
-  color: #22c55e;
-  font-weight: bold;
+  left: 0.15rem;
+  top: 0.8em;
+  width: 0.45rem;
+  height: 1px;
+  background: var(--accent-strong);
 }
 
-/* Garante que ol > li não herda o bullet */
+/* Garante que ol > li não herda o marcador */
 .article-content ol li::before {
   display: none;
 }
 
-/* Animação de entrada dos cards da listagem */
-.post-card {
-  opacity: 0;
-  transform: translateY(1.25rem);
-  transition: opacity 0.45s ease, transform 0.45s ease;
+.article-content figure {
+  margin: 2rem 0;
 }
 
-.post-card.visible {
-  opacity: 1;
-  transform: translateY(0);
+.article-content figcaption {
+  margin-top: 0.6rem;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* Tabelas: rolagem horizontal própria, sem estourar a página */
+.article-content table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 2rem 0;
+  border-collapse: collapse;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.article-content th,
+.article-content td {
+  padding: 0.6rem 1rem 0.6rem 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.article-content th {
+  font-weight: 600;
+  border-bottom-color: var(--line-strong);
+}
+
+/* ── Entrada discreta durante a rolagem ──────────────────────
+ * Só esconde quando o JS está ativo (classe .js no <html>) e o usuário
+ * não pediu movimento reduzido. Sem JS, tudo fica visível.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-reveal] {
+    transition:
+      opacity 400ms cubic-bezier(0.22, 0.61, 0.36, 1),
+      transform 400ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  .js [data-reveal]:not([data-revealed]) {
+    opacity: 0;
+    transform: translateY(16px);
+  }
 }

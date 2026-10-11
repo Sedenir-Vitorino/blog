@@ -46,13 +46,14 @@ function SectionHeader({
     <button
       type="button"
       onClick={onToggle}
-      className="flex w-full items-center justify-between py-2 text-[11px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
+      aria-expanded={open}
+      className="flex w-full items-center justify-between py-2 text-[15px] font-semibold text-ink hover:text-accent transition-colors duration-150"
     >
       {label}
       {open ? (
-        <ChevronDown className="w-3 h-3" />
+        <ChevronDown className="w-3.5 h-3.5 text-muted" />
       ) : (
-        <ChevronRight className="w-3 h-3" />
+        <ChevronRight className="w-3.5 h-3.5 text-muted" />
       )}
     </button>
   );
@@ -127,8 +128,8 @@ function SidebarContent({
   return (
     <div className="flex flex-col gap-1">
       {/* header row */}
-      <div className="mb-3">
-        <span className="text-[11px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+      <div className="mb-2">
+        <span className="text-[18px] font-semibold text-ink">
           {t.blog.filters}
         </span>
       </div>
@@ -137,29 +138,29 @@ function SidebarContent({
         <button
           type="button"
           onClick={clearAll}
-          className="mb-3 w-full text-left text-[11.5px] text-green-500 hover:text-green-400 transition-colors"
+          className="mb-2 w-full text-left text-[14px] font-medium text-accent hover:text-ink transition-colors duration-150"
         >
           {t.blog.clearAll} ×
         </button>
       )}
 
       {/* ARCHIVE */}
-      <div className="border-t border-zinc-200 dark:border-zinc-800 pt-1">
+      <div className="pt-1">
         <SectionHeader
           label={t.blog.archive}
           open={archiveOpen}
           onToggle={() => setArchiveOpen((v) => !v)}
         />
         {archiveOpen && (
-          <ul className="flex flex-col gap-0.5 pb-2">
+          <ul className="flex flex-col gap-0.5 pb-3">
             <li>
               <button
                 type="button"
                 onClick={() => navigate(null, null, active.tags)}
-                className={`w-full text-left px-2 py-1 rounded text-[12.5px] transition-colors ${
+                className={`w-full text-left border-l-2 pl-4 py-1.5 text-[15px] transition-colors duration-150 ${
                   active.year === null
-                    ? "text-green-500 font-semibold"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                    ? "border-accent-strong text-ink font-semibold"
+                    : "border-transparent text-muted hover:text-ink"
                 }`}
               >
                 {t.blog.allPeriods}
@@ -172,49 +173,49 @@ function SidebarContent({
                   <button
                     type="button"
                     onClick={() => selectYear(entry.year)}
-                    className={`flex-1 text-left px-2 py-1 rounded text-[12.5px] transition-colors ${
+                    className={`flex-1 text-left border-l-2 pl-4 py-1.5 text-[15px] transition-colors duration-150 ${
                       active.year === entry.year
-                        ? "text-green-500 font-semibold"
-                        : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                        ? "border-accent-strong text-ink font-semibold"
+                        : "border-transparent text-muted hover:text-ink"
                     }`}
                   >
                     {entry.year}{" "}
-                    <span className="text-zinc-400 dark:text-zinc-600 font-normal">
+                    <span className="text-muted font-normal">
                       ({entry.count})
                     </span>
                   </button>
                   <button
                     type="button"
                     onClick={() => toggleYear(entry.year)}
-                    className="p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+                    className="p-1.5 text-muted hover:text-ink transition-colors duration-150"
                     aria-label={
                       expandedYears.has(entry.year) ? "Recolher" : "Expandir"
                     }
                   >
                     {expandedYears.has(entry.year) ? (
-                      <ChevronDown className="w-3 h-3" />
+                      <ChevronDown className="w-3.5 h-3.5" />
                     ) : (
-                      <ChevronRight className="w-3 h-3" />
+                      <ChevronRight className="w-3.5 h-3.5" />
                     )}
                   </button>
                 </div>
                 {/* Month list */}
                 {expandedYears.has(entry.year) && (
-                  <ul className="ml-3 flex flex-col gap-0.5 border-l border-zinc-200 dark:border-zinc-800 pl-2 mt-0.5 mb-1">
+                  <ul className="ml-4 flex flex-col gap-0.5 border-l border-line pl-1 mt-0.5 mb-1">
                     {entry.months.map((m) => (
                       <li key={m.month}>
                         <button
                           type="button"
                           onClick={() => selectMonth(entry.year, m.month)}
-                          className={`w-full text-left px-2 py-0.5 rounded text-[12px] transition-colors ${
+                          className={`w-full text-left border-l-2 pl-3 py-1 text-[14px] transition-colors duration-150 ${
                             active.year === entry.year &&
                             active.month === m.month
-                              ? "text-green-500 font-semibold"
-                              : "text-zinc-500 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                              ? "border-accent-strong text-ink font-semibold"
+                              : "border-transparent text-muted hover:text-ink"
                           }`}
                         >
                           {monthNames[m.month]}{" "}
-                          <span className="text-zinc-400 dark:text-zinc-600 font-normal">
+                          <span className="text-muted font-normal">
                             ({m.count})
                           </span>
                         </button>
@@ -230,7 +231,7 @@ function SidebarContent({
 
       {/* TAGS */}
       {filterData.tags.length > 0 && (
-        <div className="border-t border-zinc-200 dark:border-zinc-800 pt-1">
+        <div className="border-t border-line mt-2 pt-3">
           <SectionHeader
             label={t.blog.tags}
             open={tagsOpen}
@@ -242,7 +243,7 @@ function SidebarContent({
                 const checked = active.tags.includes(entry.tag);
                 return (
                   <li key={entry.tag}>
-                    <label className="flex items-center gap-2 px-2 py-1 rounded cursor-pointer group hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors">
+                    <label className="flex items-center gap-2.5 py-1.5 rounded-[2px] cursor-pointer group has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-accent-strong">
                       <input
                         type="checkbox"
                         checked={checked}
@@ -250,16 +251,16 @@ function SidebarContent({
                         className="sr-only"
                       />
                       <span
-                        className={`flex-shrink-0 w-3.5 h-3.5 rounded-sm border transition-colors ${
+                        className={`flex-shrink-0 w-4 h-4 rounded-[2px] border transition-colors duration-150 ${
                           checked
-                            ? "bg-green-500 border-green-500"
-                            : "border-zinc-300 dark:border-zinc-600 group-hover:border-green-500/60"
+                            ? "bg-accent border-accent"
+                            : "border-line-strong group-hover:border-accent"
                         }`}
                       >
                         {checked && (
                           <svg
                             viewBox="0 0 10 10"
-                            className="w-full h-full text-white"
+                            className="w-full h-full text-bg"
                           >
                             <path
                               d="M2 5l2.5 2.5L8 3"
@@ -273,14 +274,14 @@ function SidebarContent({
                         )}
                       </span>
                       <span
-                        className={`text-[12.5px] transition-colors ${
+                        className={`text-[15px] transition-colors duration-150 ${
                           checked
-                            ? "text-green-500 font-medium"
-                            : "text-zinc-600 dark:text-zinc-400"
+                            ? "text-ink font-semibold"
+                            : "text-muted group-hover:text-ink"
                         }`}
                       >
                         {entry.tag}{" "}
-                        <span className="text-zinc-400 dark:text-zinc-600 font-normal">
+                        <span className="text-muted font-normal">
                           ({entry.count})
                         </span>
                       </span>
@@ -310,12 +311,12 @@ export default function BlogFilterSidebar(props: Props) {
         <button
           type="button"
           onClick={() => setDrawerOpen(true)}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-[12.5px] text-zinc-600 dark:text-zinc-400 hover:border-green-500/40 transition-colors"
+          className="flex w-full items-center gap-2 px-4 py-3 rounded-[2px] border border-line bg-surface text-[15px] font-medium text-ink hover:border-accent transition-colors duration-150"
         >
-          <SlidersHorizontal className="w-3.5 h-3.5" />
+          <SlidersHorizontal className="w-4 h-4 text-accent" />
           {t.blog.filters}
           {hasActiveFilter && (
-            <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+            <span className="w-1.5 h-1.5 rounded-full bg-accent" />
           )}
         </button>
       </div>
@@ -325,19 +326,16 @@ export default function BlogFilterSidebar(props: Props) {
         <>
           {/* overlay */}
           <div
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-[60] bg-black/50 lg:hidden"
             onClick={() => setDrawerOpen(false)}
           />
           {/* panel */}
-          <div className="fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 overflow-y-auto p-5 lg:hidden">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[11px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
-                {t.blog.filters}
-              </span>
+          <div className="fixed inset-y-0 left-0 z-[70] w-80 max-w-[85vw] bg-bg border-r border-line overflow-y-auto p-6 lg:hidden">
+            <div className="flex items-center justify-end -mb-8">
               <button
                 type="button"
                 onClick={() => setDrawerOpen(false)}
-                className="p-1 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
+                className="p-1.5 text-muted hover:text-ink transition-colors duration-150"
                 aria-label="Fechar filtros"
               >
                 <X className="w-4 h-4" />
@@ -352,7 +350,7 @@ export default function BlogFilterSidebar(props: Props) {
       )}
 
       {/* ── Desktop sidebar ────────────────────────────────── */}
-      <aside className="hidden lg:block w-52 shrink-0 self-start sticky top-24">
+      <aside data-reveal className="hidden lg:block w-56 shrink-0 self-start sticky top-24 border-r border-line pr-8 pb-2">
         <SidebarContent {...props} />
       </aside>
     </>

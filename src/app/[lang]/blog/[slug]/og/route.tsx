@@ -32,12 +32,14 @@ export async function GET(
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "72px 80px",
-          background: "#09090b",
-          color: "#fafafa",
+          background: "#20272D",
+          color: "#F0F2F1",
         }}
       >
-        <div style={{ display: "flex", fontSize: 36, fontWeight: 700, color: "#22c55e" }}>
-          {">_ sedenir.dev"}
+        <div style={{ display: "flex", alignItems: "center", gap: 20, fontSize: 34, fontWeight: 700 }}>
+          <span>sedenir.dev</span>
+          <span style={{ width: 2, height: 30, background: "#3A454E" }} />
+          <span style={{ fontSize: 22, letterSpacing: 5, color: "#C68F63" }}>BLOG</span>
         </div>
         <div
           style={{
@@ -49,7 +51,7 @@ export async function GET(
         >
           {post.title}
         </div>
-        <div style={{ display: "flex", fontSize: 28, color: "#a1a1aa" }}>
+        <div style={{ display: "flex", fontSize: 28, color: "#BCC4CA" }}>
           {`blog.sedenir.dev · ${date}`}
         </div>
       </div>

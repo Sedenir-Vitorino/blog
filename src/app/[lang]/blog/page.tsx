@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAllPosts } from "@/lib/mdx";
+import { getAllPosts, getPostBySlug, getPostImage } from "@/lib/mdx";
 import { deriveBlogFilters, filterPosts } from "@/lib/blog-filters";
 import { getTranslations } from "@/lib/translations";
 import { isValidLang } from "@/lib/i18n";
 import BlogFilterSidebar from "@/components/BlogFilterSidebar";
 import BlogPostsSection from "@/components/BlogPostsSection";
+import NewsletterForm from "@/components/NewsletterForm";
+import { BlogSearchProvider, BlogSearchInput } from "@/components/BlogSearch";
 
 type Params = Promise<{ lang: string }>;
 type SearchParams = Promise<{
@@ -65,33 +67,51 @@ export default async function BlogIndexPage({
 
   const activeFilters = { year: activeYear, month: activeMonth, tags: activeTags };
 
+  // Destaque: não há configuração própria, então usa o post mais recente
+  // (allPosts já vem ordenado por data desc). Só aparece sem filtros ativos.
+  const hasActiveFilter = activeYear !== null || activeTags.length > 0;
+  const featured = hasActiveFilter ? null : (allPosts[0] ?? null);
+  const featuredFull = featured ? await getPostBySlug(lang, featured.slug) : null;
+  const featuredImage = featuredFull ? getPostImage(featuredFull) : null;
+
   return (
-    <main className="max-w-5xl mx-auto px-6 py-16 lg:py-24">
-      <header className="mb-10">
-        <p className="text-[11px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-4">
-          <span className="text-green-500">&gt;_</span>{" "}
-          {t.blog.sectionLabel}
-        </p>
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight text-zinc-900 dark:text-white">
-          {t.blog.title}
-        </h1>
-        <p className="mt-4 text-[14px] text-zinc-600 dark:text-zinc-400 max-w-xl">
-          {t.blog.subtitle}
-        </p>
-      </header>
-
-      {/* Mobile trigger lives inside BlogFilterSidebar */}
-      <div className="flex items-start gap-10">
-        <BlogFilterSidebar
-          filterData={filterData}
-          active={activeFilters}
-          lang={lang}
-        />
-
-        <section className="flex-1 min-w-0">
-          <BlogPostsSection posts={filtered} lang={lang} />
+    <main>
+      <BlogSearchProvider>
+        <section className="bg-band text-band-ink">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-12 sm:pt-14 sm:pb-16">
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,300px)] lg:items-end">
+              <header>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-band-muted">
+                  {t.blog.sectionLabel}
+                </p>
+                <h1 className="mt-4 font-serif text-5xl sm:text-6xl lg:text-7xl font-semibold leading-[1.02] tracking-[-0.02em]">
+                  {t.blog.title}
+                </h1>
+                <p className="mt-4 max-w-xl text-[17px] sm:text-lg leading-relaxed text-band-muted">
+                  {t.blog.subtitle}
+                </p>
+              </header>
+              <BlogSearchInput lang={lang} />
+            </div>
+          </div>
         </section>
-      </div>
+
+        <BlogPostsSection
+          posts={filtered}
+          lang={lang}
+          featured={featured}
+          featuredImage={featuredImage}
+          newsletter={<NewsletterForm lang={lang} variant="section" />}
+          sidebar={
+            <BlogFilterSidebar
+              key="filters"
+              filterData={filterData}
+              active={activeFilters}
+              lang={lang}
+            />
+          }
+        />
+      </BlogSearchProvider>
     </main>
   );
 }

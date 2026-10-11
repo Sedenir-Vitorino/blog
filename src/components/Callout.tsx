@@ -7,30 +7,26 @@ const variants = {
   summary: {
     Icon: Zap,
     defaultTitle: "Quick summary",
-    border: "border-green-500/40",
-    bg: "bg-green-500/5",
-    accent: "text-green-500",
+    border: "border-l-steel dark:border-l-on-steel-muted",
+    accent: "text-ink",
   },
   note: {
     Icon: FileText,
     defaultTitle: "Note",
-    border: "border-green-500/40",
-    bg: "bg-green-500/5",
-    accent: "text-green-500",
+    border: "border-l-steel dark:border-l-on-steel-muted",
+    accent: "text-ink",
   },
   warning: {
     Icon: AlertTriangle,
     defaultTitle: "Warning",
-    border: "border-amber-500/50",
-    bg: "bg-amber-500/5",
-    accent: "text-amber-500",
+    border: "border-l-accent-strong",
+    accent: "text-accent",
   },
   tip: {
     Icon: Lightbulb,
     defaultTitle: "Tip",
-    border: "border-green-500/40",
-    bg: "bg-green-500/5",
-    accent: "text-green-500",
+    border: "border-l-steel dark:border-l-on-steel-muted",
+    accent: "text-ink",
   },
 } as const;
 
@@ -41,15 +37,15 @@ type CalloutProps = {
 };
 
 export default function Callout({ type = "note", title, children }: CalloutProps) {
-  const { Icon, defaultTitle, border, bg, accent } = variants[type];
+  const { Icon, defaultTitle, border, accent } = variants[type];
 
   return (
-    <div className={`my-8 rounded-lg border ${border} ${bg} p-4 sm:p-5`}>
+    <div className={`my-8 rounded-[2px] border border-line border-l-2 ${border} bg-surface px-5 py-4 sm:px-6 sm:py-5`}>
       <div className={`flex items-center gap-2 mb-2 ${accent}`}>
         <Icon className="w-4 h-4 shrink-0" />
-        <span className="text-sm font-semibold">{title ?? defaultTitle}</span>
+        <span className="font-sans text-[15px] font-semibold">{title ?? defaultTitle}</span>
       </div>
-      <div className="text-[13.5px] leading-relaxed text-zinc-700 dark:text-zinc-300 [&>p]:my-0 [&>p+p]:mt-3">
+      <div className="text-[0.94em] leading-relaxed text-ink [&>p]:my-0 [&>p+p]:mt-3 [&>ul]:my-2">
         {children}
       </div>
     </div>

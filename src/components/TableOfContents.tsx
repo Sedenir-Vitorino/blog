@@ -38,29 +38,29 @@ export default function TableOfContents({ items, label }: Props) {
   if (h2Items.length === 0) return null;
 
   return (
-    <nav aria-label={label} className="text-[12px]">
-      <p className="mb-5 uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+    <nav aria-label={label} className="text-[14px]">
+      <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted">
         {label}
       </p>
-      <ul className="space-y-3 border-l border-zinc-200 dark:border-zinc-800">
+      <ul className="space-y-3 border-l border-line">
         {h2Items.map((item, index) => {
           const isActive = activeSlug === item.slug;
           return (
             <li key={item.slug} className="relative">
               {isActive && (
-                <div className="absolute -left-px top-0 bottom-0 w-px bg-green-500" />
+                <div className="absolute -left-px top-0 bottom-0 w-0.5 bg-accent-strong" />
               )}
               <a
                 href={`#${item.slug}`}
-                className={`flex items-baseline gap-2 pl-4 transition-colors ${
+                className={`flex items-baseline gap-2.5 pl-4 leading-snug transition-colors duration-150 ${
                   isActive
-                    ? "text-zinc-900 dark:text-white"
-                    : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                    ? "text-ink font-semibold"
+                    : "text-muted hover:text-ink"
                 }`}
               >
                 <span
-                  className={`shrink-0 tabular-nums ${
-                    isActive ? "text-green-500" : "text-zinc-400 dark:text-zinc-600"
+                  className={`shrink-0 text-[12px] tabular-nums ${
+                    isActive ? "text-accent" : "text-muted"
                   }`}
                 >
                   {String(index + 1).padStart(2, "0")}
