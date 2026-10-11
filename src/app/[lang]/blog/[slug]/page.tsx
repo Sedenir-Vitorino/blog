@@ -11,6 +11,7 @@ import {
   getAllPosts,
   getAdjacentPosts,
   extractToc,
+  getPostImage,
 } from "@/lib/mdx";
 import { getTranslations } from "@/lib/translations";
 import { isValidLang, otherLang, LANGUAGES } from "@/lib/i18n";
@@ -37,6 +38,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   if (!post) return {};
 
   const translated = await findTranslation(lang, otherLang(lang), post.translationKey);
+  const image = getPostImage(post) ?? `/${lang}/blog/${slug}/og`;
 
   return {
     title: post.title,
@@ -56,6 +58,15 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
       type: "article",
       publishedTime: post.date,
       locale: lang === "pt" ? "pt_BR" : "en_US",
+      url: `/${lang}/blog/${slug}`,
+      siteName: "Sedenir.dev",
+      images: [{ url: image, alt: post.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.description,
+      images: [image],
     },
   };
 }

@@ -38,6 +38,7 @@ export type PostFrontmatter = {
   translationKey: string;
   tags?: string[];
   draft?: boolean;
+  image?: string; // imagem de compartilhamento (og:image); se ausente, usa a primeira imagem do post
 };
 
 export type PostMeta = PostFrontmatter & {
@@ -138,6 +139,21 @@ export async function findTranslation(
 ): Promise<PostMeta | null> {
   const posts = await getAllPosts(toLang);
   return posts.find((p) => p.translationKey === translationKey) ?? null;
+}
+
+/**
+ * Imagem usada nas prévias de link (WhatsApp, LinkedIn, X...).
+ * Prioridade: `image` do frontmatter > primeira imagem Markdown do conteúdo.
+ * Links github.com/.../raw/... viram raw.githubusercontent.com, porque alguns crawlers não seguem o redirect.
+ */
+export function getPostImage(post: PostWithContent): string | null {
+  const image =
+    post.image ?? /!\[[^\]]*\]\(\s*([^)\s]+)/.exec(post.content.replace(/```[\s\S]*?```/g, ""))?.[1];
+  if (!image) return null;
+  return image.replace(
+    /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/raw\//,
+    "https://raw.githubusercontent.com/$1/$2/",
+  );
 }
 
 /**
