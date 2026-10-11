@@ -10,6 +10,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
  * - NEWSLETTER_FROM     remetente de um domínio verificado, ex.: "Sedenir.dev <newsletter@sedenir.dev>"
  * - NEWSLETTER_SECRET   segredo para assinar os links de confirmação (string longa e aleatória)
  * - RESEND_SEGMENT_ID   opcional: segmento onde os novos contatos entram
+ * - SITE_URL            opcional: base dos links de confirmação (padrão: https://blog.sedenir.dev)
  */
 
 const RESEND_API = "https://api.resend.com";
@@ -20,7 +21,15 @@ export function newsletterConfig() {
   const from = process.env.NEWSLETTER_FROM;
   const secret = process.env.NEWSLETTER_SECRET;
   if (!apiKey || !from || !secret) return null;
-  return { apiKey, from, secret, segmentId: process.env.RESEND_SEGMENT_ID };
+  return {
+    apiKey,
+    from,
+    secret,
+    segmentId: process.env.RESEND_SEGMENT_ID,
+    // Base fixa: o link do e-mail sempre leva ao site publicado, mesmo se a inscrição
+    // vier de um ambiente local ou de preview
+    siteUrl: (process.env.SITE_URL ?? "https://blog.sedenir.dev").replace(/\/$/, ""),
+  };
 }
 
 export type NewsletterConfig = NonNullable<ReturnType<typeof newsletterConfig>>;

@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     if (contact && !contact.unsubscribed) return Response.json({ status: "already" });
     if (!contact) await createPendingContact(config, email);
 
-    const url = buildConfirmUrl(new URL(req.url).origin, config.secret, email, lang);
+    const url = buildConfirmUrl(config.siteUrl, config.secret, email, lang);
     await sendEmail(config, { to: email, ...confirmationEmail(lang, url) });
     return Response.json({ status: "pending" });
   } catch (err) {
