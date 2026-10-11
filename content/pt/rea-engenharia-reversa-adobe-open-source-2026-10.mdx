@@ -1,0 +1,88 @@
+---
+title: "REA, ArtCraft e o fim do código secreto: a semana em que a engenharia reversa virou coisa de qualquer dev"
+description: "O REA explodiu no GitHub com mais de 94 mil estrelas e, na mesma semana, surgiram clones open source do Photoshop e do Acrobat feitos com IA. O que isso tem de bom, o que preocupa e o que muda para o open source."
+date: 2026-10-11
+lang: pt
+translationKey: "rea-engenharia-reversa-adobe-open-source-2026-10"
+tags: [open-source, engenharia-reversa, inteligência-artificial, agentes-de-ia, adobe]
+draft: false
+---
+
+![REA analisando um binário dentro do Hopper](https://github.com/morluto/rea/raw/main/docs/assets/rea-hopper-analysis.png)
+
+Se você passou pelo GitHub nos últimos dias, deve ter esbarrado no **[REA](https://github.com/morluto/rea)**. O nome vem de *Reverse Engineer Anything*, e a proposta é bem essa: você aponta um app instalado na sua máquina, pergunta pro seu agente de IA como determinada função funciona, e ele abre o binário, segue as chamadas e te devolve a explicação junto com as evidências.
+
+Na mesma semana, um dev chamado Brandon Thomas soltou o **ArtCraft**, um pacote de sete apps open source que imitam Photoshop, Illustrator, Premiere, Lightroom, After Effects, InDesign e Acrobat. Tudo feito com IA. Ele mesmo chegou a dizer que "o software acabou".
+
+As duas coisas juntas dizem bastante sobre pra onde a gente tá indo.
+
+<Warning title="REA e ArtCraft não são a mesma coisa">
+  Muita gente nas redes juntou as duas notícias como se os clones da Adobe tivessem saído do REA. Não há nenhuma confirmação disso. O ArtCraft foi feito com o Claude Opus 5.5 e escrito em Rust, e o próprio REA deixa claro que não recupera código-fonte original nem clona apps automaticamente. Ele ajuda a entender como uma funcionalidade funciona para você construir a sua versão.
+</Warning>
+
+## O que é o REA, na prática
+
+O REA é um servidor MCP e uma ferramenta de linha de comando. Ele conecta agentes como Claude Code, Codex e Cursor a ferramentas clássicas de engenharia reversa (Ghidra, Hopper ou IDA) e faz o trabalho chato de ligar tudo isso.
+
+Ele consegue analisar binários nativos, apps em JavaScript e Electron, assemblies .NET, APKs de Android, sites, firmware e por aí vai. A análise roda **localmente**, o app não vai para servidor nenhum, e o projeto é licenciado em **MIT**.
+
+Para testar, basta ter Node.js instalado:
+
+```bash
+npx rea-agents setup
+```
+
+Depois é só pedir ao agente algo como "entenda como a busca funciona no app X, me mostre as evidências e construa algo parecido no meu projeto".
+
+## Os números da semana
+
+- **REA:** passou de 94 mil estrelas e 21 mil forks no GitHub.
+- **ArtCraft:** sete apps, rodando em Windows, macOS e Linux, alguns também no navegador via WebAssembly.
+- **Paridade prometida:** 100% em um mês, depois revisada para 99% em menos de um ano.
+- **Paridade real hoje:** algo entre 25% e 35%.
+
+## O que me animou
+
+Engenharia reversa sempre foi uma das áreas mais chatas e difíceis da computação. Você precisava conhecer assembly, dominar uma ferramenta específica e ter paciência infinita. O REA não elimina isso, mas joga a barreira de entrada lá embaixo.
+
+Pra quem trabalha com segurança, faz manutenção de sistema legado sem documentação ou só quer entender como um app resolveu um problema, é um ganho real.
+
+E o ArtCraft, mesmo cru, mostra que uma pessoa sozinha consegue em semanas começar algo que antes precisava de um time inteiro por anos. Pra quem paga assinatura da Adobe todo mês e usa 10% do que o programa faz, ter uma alternativa gratuita com a mesma cara é bem atraente.
+
+## O que me preocupa
+
+### Promessa grande, entrega pequena
+
+Recriar a interface é a parte fácil. O difícil é o preenchimento inteligente, a performance com arquivo pesado, os vinte anos de casos extremos que a Adobe já resolveu. Hoje o ArtCraft tem gente reclamando de atalho que não funciona e edição básica travando. É alpha, e alpha bem inicial.
+
+### A zona cinzenta jurídica
+
+O Brandon chama o projeto de *clean-room*, que é quando um time estuda o original e outro reescreve do zero sem copiar nada. Só que quando a mesma IA faz as duas partes, essa separação fica nebulosa. E a Adobe tem milhares de patentes. Duvido que ela fique só olhando.
+
+### Ferramenta de dois gumes
+
+O REA deixa claro que é para pesquisa legal, mas a mesma coisa que te ajuda a entender um app ajuda alguém a achar falha nele. Quem defende sistemas vai ganhar velocidade, e quem ataca também.
+
+<Tip>
+  Se você vende software fechado, vale assumir a partir de agora que qualquer pessoa com um agente consegue entender como ele funciona. Segredo no binário não é mais proteção. Chave de API embutida no app, regra de negócio no front e validação só no cliente viraram risco ainda maior.
+</Tip>
+
+## E o futuro do open source?
+
+Acho que o modelo de "o código é meu segredo" está ficando frágil. Se qualquer um consegue entender seu software olhando o binário, esconder o código protege bem menos do que antes. O valor vai migrar para outras coisas: suporte, dados, comunidade, velocidade de evolução e confiança.
+
+O open source sai fortalecido, mas com um problema novo. Projeto aberto vive de mantenedor, e mantenedor já é pouco. Se agora surgem dez clones por semana gerados por IA, quem vai manter tudo isso daqui a dois anos? Lançar ficou barato. Manter continua caro.
+
+Minha aposta: a gente vai ver muito clone nascendo e morrendo rápido, e poucos sobrevivendo. Os que ficarem vão ser os que tiverem gente de verdade cuidando, não os que tiverem o melhor prompt.
+
+## Fontes
+
+- [GitHub — morluto/rea](https://github.com/morluto/rea)
+- [RuntimeWire — Matthew Berman promove o REA](https://runtimewire.com/article/matthew-berman-rea-ai-reverse-engineering)
+- [Mezha — Clone do Photoshop e outros apps da Adobe com Claude Opus 5.5](https://mezha.ua/en/news/artcraft-adobe-photoshop-clone-315969/amp/)
+- [ProPakistani — Cópias open source de Photoshop, Premiere e Lightroom](https://propakistani.pk/2026/10/09/free-open-source-copies-of-photoshop-premiere-and-lightroom-are-here/)
+- [TweakTown — "Software is over"](https://www.tweaktown.com/news/113989/developer-says-software-is-over-after-using-ai-to-recreate-adobes-entire-creative-cloud-suite-for-free/index.html)
+
+---
+
+A pergunta que fica não é se o software vai acabar, mas **quem vai continuar cuidando dele** quando criar uma cópia custar uma tarde e manter custar uma vida inteira. E você, largaria a Adobe por um ArtCraft da vida quando ele estiver mais maduro?

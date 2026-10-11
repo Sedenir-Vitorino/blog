@@ -207,7 +207,7 @@ Tem zero problema em vibe-codar nessas situações. O problema é confundi-las c
 Inverso vale igualmente:
 
 - **Qualquer coisa que lida com dados de outras pessoas.** Autenticação, autorização, PII, dados financeiros, dados de saúde. O caso da Moltbook é a forma adulta da brincadeira: bastou uma config permissiva esquecida pra expor 1,5 milhão de chaves.
-- **SaaS multi-tenant.** Onde uma falha de isolamento vaza um cliente pra dentro de outro. RLS, escopo de queries, sanitização — coisas que LLM erra com regularidade preocupante (escrevi sobre isso [no post sobre falhas de segurança em SaaS](/blog/saas-crescimento-falhas-seguranca)).
+- **SaaS multi-tenant.** Onde uma falha de isolamento vaza um cliente pra dentro de outro. RLS, escopo de queries, sanitização — coisas que LLM erra com regularidade preocupante (escrevi sobre isso [no post sobre falhas de segurança em SaaS](/pt/blog/saas-crescimento-falhas-seguranca-2026-06)).
 - **Infraestrutura crítica.** Ver rsync acima.
 - **Bibliotecas open-source.** Ver "Eternal September" acima.
 - **Qualquer código que vai ser mantido por alguém em 6, 12, 24 meses** — incluindo você mesmo. Débito técnico de vibe coding compõe a uma taxa estimada de **3x mais rápido** que código tradicional.
