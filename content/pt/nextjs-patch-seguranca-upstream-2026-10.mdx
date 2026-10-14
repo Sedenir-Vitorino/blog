@@ -1,0 +1,74 @@
+---
+title: "Next.js lança patch de segurança fora do calendário: o que checar hoje"
+description: "Três falhas em dependências do Next.js, duas críticas e uma alta, entram na correção de 14 de outubro. Veja o que já foi confirmado, o prazo do Next.js 15 e o que fazer no seu projeto."
+date: 2026-10-14
+lang: pt
+translationKey: "nextjs-patch-seguranca-upstream-2026-10"
+tags: [nextjs, seguranca, devops]
+draft: false
+---
+
+No dia 8 de outubro, o time do Next.js anunciou uma atualização de segurança fora do calendário normal, marcada para 14 de outubro. Ela corrige três vulnerabilidades em dependências de terceiros: duas críticas e uma de severidade alta. Duas delas já tinham sido identificadas em setembro, mas a correção ficou para depois para dar tempo de coordenar a divulgação com os mantenedores dessas bibliotecas.
+
+Se você tem um projeto em Next.js rodando em produção, vale checar hoje mesmo.
+
+<Summary title="Em resumo">
+Patch de segurança com três vulnerabilidades upstream (duas críticas, uma alta) previsto para 14/10. Next.js 15 chega ao fim de vida em 21/10. Atualize para a versão de patch da sua linha e teste rotas sensíveis antes de subir para produção.
+</Summary>
+
+## O que são vulnerabilidades upstream
+
+Uma falha upstream não está no código do próprio framework. Ela está em uma biblioteca que o Next.js usa por baixo, como processamento de imagem, parsers HTTP ou componentes de cache e proxy. A correção precisa acontecer lá primeiro e só depois chegar ao Next.js. Por isso o anúncio falou em coordenação com os autores originais, e por isso a data não foi a de sempre.
+
+Até o momento em que escrevi este texto, o aviso oficial não trazia a lista de pacotes afetados nem os identificadores das falhas. Se alguém citar nomes de bibliotecas ou números de CVE, confira no aviso oficial antes de confiar.
+
+## O que muda com o fim do Next.js 15
+
+O Next.js 15 entra em fim de vida em 21 de outubro de 2026. Até lá, a linha recebe apenas correções críticas e de segurança, sem novidades. Depois dessa data, não há garantia de novos patches. Qualquer correção para versões sem suporte seria uma decisão caso a caso da equipe.
+
+Na prática, o patch de hoje deve ser um dos últimos da linha 15. Se o seu projeto está numa versão anterior à linha 15.5, a recomendação é migrar para a linha 16, que é a LTS ativa.
+
+## O que fazer no seu projeto
+
+**1. Descubra a versão instalada**
+
+```bash
+npm list next
+```
+
+**2. Atualize para a versão de patch da sua linha**
+
+Os números exatos das versões corrigidas ainda não estão nos avisos oficiais que consultei, então não copie versões de posts de terceiros. Quando o aviso sair, use a versão indicada nele. Enquanto isso, a linha geral seria:
+
+```bash
+# Linha 16 (LTS ativa)
+npm install next@latest eslint-config-next@latest
+
+# Linha 15.5 (manutenção até 21/10)
+npm install next@^15.5 eslint-config-next@^15.5
+```
+
+Mantenha o `eslint-config-next` na mesma versão do `next`.
+
+**3. Refaça o build sem apagar o lockfile**
+
+```bash
+rm -rf .next
+npm install
+npm run build
+```
+
+Não apague o `package-lock.json`. Ele garante que todo mundo do time, e o pipeline de deploy, instale as mesmas versões. O `npm install` já atualiza o lock com as novas versões.
+
+**4. Teste antes de subir para produção**
+
+Em staging, passe pelas rotas que mais dependem das áreas afetadas:
+
+* Rotas com `next/image` e a rota `/api/og`, se você usa;
+* Server Actions e Server Functions;
+* Middleware e rotas protegidas por autenticação.
+
+## Fontes
+
+* [Aviso oficial: atualização de segurança upstream de outubro de 2026](https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026)
+* [Blog do Next.js](https://nextjs.org/blog)
