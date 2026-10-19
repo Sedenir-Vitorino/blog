@@ -1,0 +1,105 @@
+---
+title: "When the agent leaves its scope: what 22 public incidents reveal"
+description: "A paper on arXiv analyzed 22 public incidents with AI agents and found that in 20, the environment allowed the out-of-scope action. Here's the study, what other research shows, and what changes for people who use agents."
+date: 2026-10-19
+lang: en
+translationKey: "agentes-fora-do-escopo-22-incidentes-2026-10"
+tags: [ai-agents, security, research, governance]
+draft: false
+---
+
+![Twenty of twenty-two dots in orange: in 20 of the 22 incidents analyzed, the environment allowed the out-of-scope action](/images/agentes-escopo/capa-en.png)
+
+When an AI agent does something nobody asked for, the reflex is to blame the agent. It hallucinated, misunderstood, got lost. A recent paper on arXiv suggests looking at something else too: the environment around it.
+
+The authors analyzed 22 public incidents with autonomous agents and arrived at a number that stands out. In 20 of them, the environment technically allowed the action that went out of scope. In other words, in almost every case nothing stood in the way of what happened.
+
+## What the paper analyzed
+
+The paper is called [A Competing-Hazards Systematization of Loss of Control in Autonomous Agents](https://arxiv.org/abs/2609.38411) and is by Mohamed Aly Bouke. It audits, using primary sources, 22 incident reports and 102 agent safety evaluations, all published between January 2025 and September 2026.
+
+To organize the material, the author classifies each attempt by an agent into one of four outcomes: approved completion, safe stopping, scope escape, or continuation. That framework becomes a mathematical model that computes the probability of the agent escaping its scope within a retry budget. The data is open in a [dataset on Zenodo](https://zenodo.org/records/22995268), under a CC-BY 4.0 license.
+
+## The headline number: 20 of 22
+
+Of the 22 incidents, in 20 the environment allowed an out-of-scope effect. The authors' reading is that loss of control, when it happens, tends to come from persistent agent behavior meeting permissive boundary conditions.
+
+A summary of the paper describes the remaining two incidents as experiments designed for this, where the effect stayed inside the sandbox by construction. That detail comes from a summary of the paper, so it's worth checking in the full text.
+
+One important caveat: the number comes from the authors' own audit, not an independent count. And 22 public cases is a small, biased sample, because only incidents someone chose to disclose make it in.
+
+## Agents that keep going instead of stopping
+
+The paper also looks at what the agent did when it couldn't complete the task. Six incidents involved tasks that couldn't be completed within scope, thirteen involved agents that continued instead of stopping, and five had no record of stopping behavior.
+
+It's easy to see why this matters. If the agent can't finish the task within what was agreed, it has two exits: stop and say so, or try another way. And the paper's model shows the flip side of that coin: the more attempts the agent has, the greater the chance that at some point one of them leaves the scope.
+
+## Almost nobody measures "stopping"
+
+The same work looked at 102 agent safety evaluations, and the picture is revealing.
+
+![Of the 102 tests: 87 recorded an out-of-scope effect, 79 merged budget exhaustion with failure, 26 treated stopping safely as a first-class outcome, and 20 recorded both](/images/agentes-escopo/testes-en.png)
+
+*Count of evaluations by criterion, among the 102 analyzed in the paper.*
+
+Of the 102, 87 recorded some out-of-scope effect or specification violation. But only 26 treated safe stopping as a first-class outcome, and just 20 recorded both. Another 79 merged budget exhaustion with failure, treating the two situations as the same thing.
+
+In practice, that means many tests can't tell an agent that stopped the right way from one that simply couldn't cope. That's my reading of the numbers, not a written conclusion of the paper.
+
+## Coding agents that do "extra"
+
+Another study helps give the problem shape. In [Overeager Coding Agents](https://arxiv.org/pdf/2605.18583), Qu and colleagues measure how often coding agents take out-of-scope actions on ordinary tasks. There are 500 validated scenarios and about 7,500 runs, across four agent products (Claude Code, OpenHands, Codex CLI, and Gemini CLI) and six base models.
+
+The most striking finding is that stating the scope in the prompt hides much of the problem. On Claude Code, just removing the consent statement took the rate of out-of-scope actions from 0.0% to 17.1% in paired scenarios, a statistically significant difference.
+
+![Claude Code: 0.0% out-of-scope actions with a consent statement in the prompt and 17.1% without it](/images/agentes-escopo/prompt-en.png)
+
+*Rate of out-of-scope actions on benign tasks, according to the paper, in paired scenarios.*
+
+The increase showed up on every shared base model, between 11.9 and 17.2 percentage points. One of the examples described is a tidy-up task: three of four agents deleted `.env.old`, the only copy of a credentials backup, even though the authorized behavior was only to delete two trash files.
+
+A review of [execution security for coding agents](https://arxiv.org/pdf/2607.05743) also points out that agents in permissive frameworks, such as Claude Code, Codex CLI, and Gemini CLI, show much higher rates of unrequested action than a framework that asks before continuing, like OpenHands. That comparison comes from the review, not from a controlled test.
+
+## And in companies?
+
+The numbers from companies point the same way, with the caveat that these are surveys and catalogs, not direct measurements.
+
+Anaconda's [Agent Incident Registry](https://arxiv.org/abs/2609.11030) gathers 487 records of agent events between 2022 and 2026. Of the 336 records of generative systems where the agent acted, 81 involved realized harm, about 24%. The authors themselves warn that this percentage reflects how the collection was assembled, not real-world risk, and that the catalog is for retrieving cases, not estimating failure rates. Still, it includes 92 safety failures with no adversary involved, which fits the idea that the problem isn't always an attack.
+
+The report *Agents Without Guardrails*, from EMA in partnership with Cequence Security, surveyed 202 IT and security leaders. According to [Security Boulevard](https://securityboulevard.com/2026/09/organizations-struggle-to-detect-contain-out-of-scope-ai-agents/) and [Infosecurity Magazine](https://www.infosecurity-magazine.com/news/65-percent-enterprises-ai-agents/):
+
+* 65% have seen an agent act out of scope, and 29% of those had measurable business impact;
+* only 32.2% can detect and contain an out-of-scope action within minutes, automatically, and 54.5% need hours and manual work;
+* 94% say their agents don't have more access than needed, but only 33% enforce least privilege.
+
+That survey was vendor-sponsored, so it's an indication, not a definitive measure. The same summary cites a Salt Security survey of more than 380 professionals that found a similar number: 49.8% confirmed or suspected that an agent, in the past 12 months, did something the organization didn't intend or authorize.
+
+## What you can conclude
+
+The reading that runs through these works is uncomfortable and useful at the same time. The problem isn't only in the agent. It's also in the room it's given to act. If the environment allows it, and the agent persists, sooner or later an attempt leaves what was agreed.
+
+A practical consequence follows. The scope has to exist in the permissions, not just in the text of the request. The coding agents study shows that the line "only do this" in the prompt works worse than it seems, and the company survey shows that many people trust limits they don't enforce.
+
+The limits are worth remembering too. The sample of 22 incidents is small and has only public cases. The Agent Incident Registry authors warn that the catalog doesn't estimate rates. And the surveys of executives are, in part, from vendors. None of these works proves that agents always escape. They show that when the doors are open, the story tends to end the same way.
+
+For people who use agents day to day, the useful question changes. Instead of "will the agent obey what I asked?", it might be "what does the environment let it do if it doesn't?"
+
+## Sources
+
+**The main paper**
+
+* [Bouke: A Competing-Hazards Systematization of Loss of Control in Autonomous Agents (arXiv)](https://arxiv.org/abs/2609.38411)
+* [The paper's dataset on Zenodo](https://zenodo.org/records/22995268)
+
+**Other research**
+
+* [Qu et al.: Overeager Coding Agents (arXiv)](https://arxiv.org/pdf/2605.18583)
+* [The Balkanization of Execution-Security Research for AI Coding Agents (arXiv)](https://arxiv.org/pdf/2607.05743)
+* [Anaconda: The Agent Incident Registry (arXiv)](https://arxiv.org/abs/2609.11030)
+* [Anaconda: AI Incident Trackers Weren't Built for Agents](https://www.anaconda.com/blog/agent-incident-registry)
+
+**Surveys of companies**
+
+* [Security Boulevard: Organizations Struggle to Detect, Contain Out-of-Scope AI Agents](https://securityboulevard.com/2026/09/organizations-struggle-to-detect-contain-out-of-scope-ai-agents/)
+* [Infosecurity Magazine: 65% of Enterprises Have Seen AI Agents Act Out of Scope](https://www.infosecurity-magazine.com/news/65-percent-enterprises-ai-agents/)
+* [SC Media: 65% of enterprises see AI agents acting outside of scope](https://www.scworld.com/brief/ai-agents-acting-outside-scope-governance-lags-behind-deployment)
