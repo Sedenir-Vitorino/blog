@@ -1,0 +1,109 @@
+---
+title: "Mais agentes não é mais time: o que o estudo da Vals AI mostrou"
+description: "Equipes de agentes de código custaram de 1,8 a 5,1 vezes mais que um agente sozinho, e só uma de quatro comparações teve ganho significativo. Entenda o estudo, o que outras pesquisas dizem e quando equipes de agentes fazem sentido."
+date: 2026-10-19
+lang: pt
+translationKey: "equipes-agentes-codigo-custo-vals-ai-2026-10"
+tags: [agentes-de-ia, vibe-coding, custos, benchmarks]
+draft: false
+---
+
+![Um agente solo ao lado de uma equipe com um líder e cinco subagentes, com o custo de cada um](/images/vals-ai/capa-pt.png)
+
+A ideia parece lógica. Se um agente de IA escreve código, vários agentes trabalhando juntos, cada um cuidando de uma parte, deveriam escrever melhor e mais rápido. É assim que um time de pessoas funciona, e muita ferramenta de programação com IA hoje vende exatamente essa promessa.
+
+A Vals AI resolveu testar. O resultado, publicado no começo de outubro, é bem menos animador do que a ideia. E ele conversa com outras pesquisas e relatos de quem constrói esses sistemas, que vale a pena colocar lado a lado.
+
+## O que eles testaram
+
+O estudo usou o Vibe Code Bench, um benchmark em que o modelo precisa construir uma aplicação web inteira a partir de uma descrição em texto. Segundo o [artigo que apresenta o benchmark](https://arxiv.org/abs/2603.04601), são 100 especificações de aplicações, com 964 fluxos de uso no navegador e 10.131 subetapas. Um agente autônomo abre o app já no ar, executa esses fluxos e a nota depende de quantas subetapas ele consegue completar.
+
+Foram dois modelos, o GPT-6 Sol e o Claude Opus 5.5, cada um em dois formatos: sozinho e em equipe. A equipe tinha um agente líder que podia repartir o trabalho entre até cinco subagentes ao mesmo tempo. Os subagentes não podiam criar outros. Tudo rodou duas vezes, com esforço de raciocínio médio e com esforço máximo, o que dá quatro comparações entre equipe e agente solo.
+
+## A conta chega mais alta
+
+O primeiro número é o do custo: a equipe saiu entre 1,8 e 5,1 vezes mais cara que o agente sozinho. A manchete que circulou falou em "cinco vezes", mas esse é só o teto da faixa.
+
+![Faixa de custo de uma equipe de agentes, de 1,8 a 5,1 vezes o custo de um agente solo](/images/vals-ai/custo-pt.png)
+
+*O gráfico mostra a faixa medida pelo estudo, em múltiplos do agente solo.*
+
+Boa parte dessa diferença vem dos tokens de entrada. Cada agente precisa receber o contexto de novo a cada chamada, e com vários trabalhando em paralelo esse volume cresce rápido.
+
+Esse padrão não é exclusivo do estudo. Quando a Anthropic descreveu o sistema multiagente que usa para pesquisa, o número que apareceu foi parecido: agentes usam cerca de 4 vezes mais tokens que um chat comum, e sistemas com vários agentes chegam a cerca de 15 vezes. Esses dados vêm de um único sistema e de uma avaliação interna, então servem como referência, não como regra. Os resumos do caso estão no [ByteByteGo](https://blog.bytebytego.com/p/how-anthropic-built-a-multi-agent) e no [ZenML](https://www.zenml.io/llmops-database/building-production-multi-agent-research-systems-with-claude), e a [Augment](https://www.augmentcode.com/guides/multi-agent-cost-compounding) discute como esse custo se acumula.
+
+## E a qualidade melhorou?
+
+Nem tanto. Das quatro comparações, só uma teve melhora estatisticamente significativa: o Sol com esforço médio, que ganhou 7,3 pontos ao trabalhar em equipe. Nas outras três, a diferença não passou no teste estatístico.
+
+Há ainda um detalhe incômodo. Para o Sol, apenas aumentar o esforço de raciocínio rendeu mais do que montar a equipe: +11,4 pontos contra +7,3.
+
+![Ganho do modelo Sol em pontos: 11,4 ao subir o esforço de raciocínio e 7,3 ao montar uma equipe](/images/vals-ai/ganho-pt.png)
+
+*Ganho do Sol sobre o agente solo com esforço médio, segundo os resumos do estudo.*
+
+A maior nota do estudo, 93,2%, veio da combinação de esforço máximo com equipe. Só que ela custou cerca de 30 vezes mais que o agente solo de esforço médio.
+
+## E o tempo?
+
+Nem a velocidade resolve a conta por completo. As equipes do Sol terminaram mais rápido que o Sol sozinho: 28 minutos contra 38, no esforço máximo. Já as equipes do Opus foram na direção oposta e chegaram a levar até 2,3 vezes mais tempo.
+
+## Por que equipes de agentes tropeçam em código
+
+O estudo mede o que aconteceu, mas não explica por quê. Uma explicação conhecida vem da Cognition, empresa por trás do agente Devin, no texto [Don't Build Multi-Agents](https://cognition.com/blog/dont-build-multi-agents). O argumento tem dois princípios: os agentes precisam compartilhar o contexto completo, e não só mensagens soltas, e cada ação carrega decisões implícitas que podem entrar em conflito com as de outro agente.
+
+O exemplo do texto é um jogo no estilo Flappy Bird. Se um subagente cuida do cenário e outro do passarinho, o primeiro pode entregar um fundo no estilo Super Mario e o segundo, um pássaro que não lembra em nada o jogo original. Cada um tomou decisões razoáveis, mas nenhum enxergou as do outro, e o resultado final não combina.
+
+Para a Cognition, o caminho mais simples é um agente único e linear, em que o contexto é contínuo. A limitação, segundo o próprio texto, aparece em tarefas muito grandes, em que a janela de contexto começa a estourar.
+
+Em código, isso faz sentido. Um programa é um conjunto de peças que dependem umas das outras, e dividir o trabalho entre agentes que não veem as decisões dos vizinhos é pedir para que as partes não se encaixem.
+
+## Quando equipes funcionam
+
+O caso a favor também existe. No sistema de pesquisa da Anthropic, a configuração com vários agentes superou um agente único em 90,2% na avaliação interna, e o uso de tokens explicou cerca de 80% da variação de desempenho. Isso pesa nos dois lados: parte do ganho pode ser simplesmente mais tokens gastos.
+
+Os resumos desse caso apontam um padrão. As equipes brilham em problemas que se dividem em frentes independentes e paralelas, como pesquisar vários assuntos ao mesmo tempo, e rendem menos em tarefas fortemente interligadas, como programar. Uma regra prática sugerida por uma fonte de terceiros, a [13labs](https://www.13labs.au/guides/multi-agent-orchestration-what-works), é só usar vários agentes quando as subtarefas não são conhecidas de antemão, o trabalho é quase todo de leitura e o resultado justifica algo como 15 vezes o gasto de tokens. Essa regra é opinião do autor, não da Anthropic.
+
+## O quadro não é unânime
+
+Nem todo trabalho aponta na mesma direção. Alguns exemplos, descritos a partir dos resumos publicados dos artigos:
+
+* Um [artigo de setembro de 2026](https://arxiv.org/pdf/2609.04217) sobre custo de inferência igual concluiu que um time de agentes não superou um agente único, gastando mais chamadas. Os testes foram em tarefas de web e de jogos, não de programação.
+* A [AssetOpsBench](https://arxiv.org/pdf/2605.08518), em outro domínio, encontrou o oposto: execuções de agente único consumiram quase o dobro de tokens das de múltiplos agentes. Os autores atribuem isso à mistura de cenários e alertam contra supor que multiagente é sempre mais caro.
+* Um estudo sobre [agentes de terminal](https://arxiv.org/pdf/2604.00073) comparou um agente único com um desenho de planejador e executor, e o resultado variou com o modelo: com o Claude Opus 4.6 o desenho em dupla ficou um pouco mais barato e um pouco mais preciso, e com o Sonnet 4.6 custou mais.
+
+Ou seja, o custo de uma equipe depende do modelo, da tarefa e de como o trabalho é dividido. O que o estudo da Vals AI mostra é um caso concreto, de aplicações web, e não uma lei geral.
+
+## O que dá para concluir
+
+A própria Vals AI é cautelosa. Para ela, valer a pena ou não depende do modelo, da tarefa e do orçamento, e aumentar o esforço de raciocínio é uma alternativa que merece entrar na conta.
+
+Também vale lembrar os limites. É um único benchmark, de aplicações web. No Opus com esforço máximo, o intervalo do resultado vai de −1,4 a +8,3 pontos, largo demais para dizer qual é o ganho real. O estudo não prova que equipes nunca compensam. Ele mostra que, nesse cenário, elas custam bem mais e entregam menos do que se espera.
+
+Para quem paga a conta de tokens, a pergunta útil muda. Em vez de "quantos agentes eu coloco nisso?", talvez seja "esse dinheiro rende mais em raciocínio ou em paralelismo?".
+
+## Fontes
+
+**O estudo**
+
+* [Vals AI: Do Agent Teams Pay Off? A Case Study on Vibe Code Bench](https://www.vals.ai/blogs/multi-agent-vibe-code-bench)
+* [Vals AI no X: resumo do estudo](https://x.com/ValsAI/status/2108608719420600709)
+* [Vibe Code Bench: Evaluating AI Models on End-to-End Web Application Development (arXiv)](https://arxiv.org/abs/2603.04601)
+* [Vals AI: Vibe Code Bench, metodologia e ranking](https://www.vals.ai/benchmarks/vibe-code)
+
+**Cobertura do estudo**
+
+* [The Decoder: AI agent teams waste massive tokens for barely measurable quality gains](https://the-decoder.com/ai-agent-teams-waste-massive-tokens-for-barely-measurable-quality-gains-research-finds/)
+* [AlphaSignal: Vals AI Finds Multi-Agent Coding Teams Cost 5x More but Rarely Score Better](https://alphasignal.ai/news/vals-ai-finds-multi-agent-coding-teams-cost-5x-more-but-rarely-score-better)
+* [Xenospectrum: Multi-Agent AI Teams Cost 1.8–5.1x More to Build Web Apps](https://xenospectrum.com/en/ai-agent-teams-cost-quality/)
+
+**Contexto e outras pesquisas**
+
+* [Cognition: Don't Build Multi-Agents](https://cognition.com/blog/dont-build-multi-agents)
+* [ByteByteGo: How Anthropic Built a Multi-Agent Research System](https://blog.bytebytego.com/p/how-anthropic-built-a-multi-agent)
+* [ZenML: Building Production Multi-Agent Research Systems with Claude](https://www.zenml.io/llmops-database/building-production-multi-agent-research-systems-with-claude)
+* [Augment: Multi-Agent Cost Compounding](https://www.augmentcode.com/guides/multi-agent-cost-compounding)
+* [13labs: Multi-Agent Orchestration, What Works](https://www.13labs.au/guides/multi-agent-orchestration-what-works)
+* [arXiv: At Equal Inference Cost, Multi-Agent Structure Does Not Beat a Single Frozen Agent](https://arxiv.org/pdf/2609.04217)
+* [arXiv: Results and Retrospective Analysis of the CODS 2025 AssetOpsBench Challenge](https://arxiv.org/pdf/2605.08518)
+* [arXiv: Terminal Agents Suffice for Enterprise Automation](https://arxiv.org/pdf/2604.00073)

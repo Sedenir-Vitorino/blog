@@ -1,0 +1,109 @@
+---
+title: "More agents is not more team: what the Vals AI study showed"
+description: "Teams of coding agents cost 1.8 to 5.1 times more than a single agent, and only one of four comparisons showed a significant gain. Here's the study, what other research says, and when agent teams make sense."
+date: 2026-10-19
+lang: en
+translationKey: "equipes-agentes-codigo-custo-vals-ai-2026-10"
+tags: [ai-agents, vibe-coding, costs, benchmarks]
+draft: false
+---
+
+![A solo agent next to a team with a lead and five subagents, with the cost of each](/images/vals-ai/capa-en.png)
+
+The idea sounds logical. If one AI agent can write code, several agents working together, each handling a piece, should write it better and faster. That's how a team of people works, and plenty of AI coding tools sell exactly that promise today.
+
+Vals AI decided to test it. The result, published in early October, is much less encouraging than the idea. It also lines up with other research and with accounts from people who build these systems, which are worth putting side by side.
+
+## What they tested
+
+The study used Vibe Code Bench, a benchmark where the model has to build an entire web application from a text description. According to the [paper that introduces the benchmark](https://arxiv.org/abs/2603.04601), it has 100 application specifications, with 964 browser workflows and 10,131 substeps. An autonomous agent opens the deployed app, runs those workflows, and the score depends on how many substeps it completes.
+
+There were two models, GPT-6 Sol and Claude Opus 5.5, each in two formats: alone and as a team. The team had a lead agent that could split the work among up to five subagents at the same time. Subagents couldn't spawn others. Everything ran twice, at medium and at max reasoning effort, which gives four comparisons between team and solo agent.
+
+## The bill comes in higher
+
+The first number is cost: the team came out 1.8 to 5.1 times more expensive than the single agent. The headline that went around said "five times," but that's just the top of the range.
+
+![Cost range of an agent team, from 1.8 to 5.1 times the cost of a solo agent](/images/vals-ai/custo-en.png)
+
+*The chart shows the range measured by the study, as multiples of the solo agent.*
+
+A good part of that difference comes from input tokens. Each agent has to receive the context again on every call, and with several working in parallel that volume grows fast.
+
+The pattern isn't unique to this study. When Anthropic described the multi-agent system it uses for research, the number was similar: agents use about 4 times more tokens than a regular chat, and multi-agent systems reach about 15 times. That data comes from a single system and an internal evaluation, so it's a reference point, not a rule. Summaries of the case are on [ByteByteGo](https://blog.bytebytego.com/p/how-anthropic-built-a-multi-agent) and [ZenML](https://www.zenml.io/llmops-database/building-production-multi-agent-research-systems-with-claude), and [Augment](https://www.augmentcode.com/guides/multi-agent-cost-compounding) discusses how that cost compounds.
+
+## Did quality improve?
+
+Not much. Of the four comparisons, only one showed a statistically significant improvement: Sol at medium effort, which gained 7.3 points working as a team. In the other three, the difference didn't pass the statistical test.
+
+There's an uncomfortable detail, too. For Sol, simply raising the reasoning effort paid off more than building the team: +11.4 points versus +7.3.
+
+![Sol's gain in points: 11.4 from raising reasoning effort and 7.3 from building a team](/images/vals-ai/ganho-en.png)
+
+*Sol's gain over the solo agent at medium effort, according to summaries of the study.*
+
+The highest score in the study, 93.2%, came from combining max effort with a team. But it cost about 30 times more than the solo agent at medium effort.
+
+## What about time?
+
+Speed doesn't settle the matter either. Sol's teams finished faster than Sol alone: 28 minutes versus 38, at max effort. Opus's teams went the other way and took up to 2.3 times as long.
+
+## Why agent teams stumble on code
+
+The study measures what happened, but it doesn't explain why. One well-known explanation comes from Cognition, the company behind the Devin agent, in the post [Don't Build Multi-Agents](https://cognition.com/blog/dont-build-multi-agents). The argument has two principles: agents need to share full context, not just loose messages, and every action carries implicit decisions that can conflict with another agent's.
+
+The post's example is a Flappy Bird–style game. If one subagent handles the background and another the bird, the first may deliver a Super Mario–style backdrop and the second a bird that looks and moves nothing like the original game. Each made reasonable decisions, but neither saw the other's, and the final result doesn't fit together.
+
+For Cognition, the simplest path is a single, linear agent, where the context is continuous. The limitation, according to the post itself, shows up on very large tasks, where the context window starts to overflow.
+
+In code, that makes sense. A program is a set of pieces that depend on each other, and splitting the work among agents that can't see their neighbors' decisions is asking for parts that don't fit.
+
+## When teams work
+
+The case in favor exists too. In Anthropic's research system, the multi-agent setup beat a single agent by 90.2% on the internal evaluation, and token usage explained about 80% of the variance in performance. That cuts both ways: part of the gain may simply be more tokens spent.
+
+Summaries of that case point to a pattern. Teams shine on problems that split into independent, parallel strands, like researching several topics at once, and pay off less on tightly interdependent tasks like programming. One practical rule, suggested by a third-party source, [13labs](https://www.13labs.au/guides/multi-agent-orchestration-what-works), is to use several agents only when the subtasks can't be known in advance, the work is mostly read-only, and the outcome justifies something like 15 times the token spend. That rule is the author's opinion, not Anthropic's.
+
+## The picture isn't unanimous
+
+Not all work points the same way. A few examples, described from the published summaries of the papers:
+
+* A [September 2026 paper](https://arxiv.org/pdf/2609.04217) on equal inference cost concluded that a team of agents did not beat a single agent, while using more calls. The tests were on web and game tasks, not programming.
+* [AssetOpsBench](https://arxiv.org/pdf/2605.08518), in a different domain, found the opposite: single-agent runs used nearly twice the tokens of multi-agent runs. The authors attribute this to the scenario mix and warn against assuming multi-agent is always more expensive.
+* A study on [terminal agents](https://arxiv.org/pdf/2604.00073) compared a single agent with a planner-executor design, and the result varied by model: with Claude Opus 4.6 the pair design was slightly cheaper and slightly more accurate, and with Sonnet 4.6 it cost more.
+
+In other words, what a team costs depends on the model, the task, and how the work is split. What the Vals AI study shows is a concrete case, of web applications, not a general law.
+
+## What you can conclude
+
+Vals AI itself is cautious. In its view, whether a team is worth it depends on the model, the task, and the budget, and raising reasoning effort is an alternative worth weighing.
+
+It's also worth remembering the limits. It's a single benchmark, of web applications. For Opus at max effort, the result's interval runs from −1.4 to +8.3 points, too wide to say what the real gain is. The study doesn't prove that teams never pay off. It shows that, in this setup, they cost a lot more and deliver less than you'd expect.
+
+For anyone paying the token bill, the useful question changes. Instead of "how many agents should I put on this?", it might be "does this money go further in reasoning or in parallelism?"
+
+## Sources
+
+**The study**
+
+* [Vals AI: Do Agent Teams Pay Off? A Case Study on Vibe Code Bench](https://www.vals.ai/blogs/multi-agent-vibe-code-bench)
+* [Vals AI on X: study summary](https://x.com/ValsAI/status/2108608719420600709)
+* [Vibe Code Bench: Evaluating AI Models on End-to-End Web Application Development (arXiv)](https://arxiv.org/abs/2603.04601)
+* [Vals AI: Vibe Code Bench, methodology and leaderboard](https://www.vals.ai/benchmarks/vibe-code)
+
+**Coverage of the study**
+
+* [The Decoder: AI agent teams waste massive tokens for barely measurable quality gains](https://the-decoder.com/ai-agent-teams-waste-massive-tokens-for-barely-measurable-quality-gains-research-finds/)
+* [AlphaSignal: Vals AI Finds Multi-Agent Coding Teams Cost 5x More but Rarely Score Better](https://alphasignal.ai/news/vals-ai-finds-multi-agent-coding-teams-cost-5x-more-but-rarely-score-better)
+* [Xenospectrum: Multi-Agent AI Teams Cost 1.8–5.1x More to Build Web Apps](https://xenospectrum.com/en/ai-agent-teams-cost-quality/)
+
+**Context and other research**
+
+* [Cognition: Don't Build Multi-Agents](https://cognition.com/blog/dont-build-multi-agents)
+* [ByteByteGo: How Anthropic Built a Multi-Agent Research System](https://blog.bytebytego.com/p/how-anthropic-built-a-multi-agent)
+* [ZenML: Building Production Multi-Agent Research Systems with Claude](https://www.zenml.io/llmops-database/building-production-multi-agent-research-systems-with-claude)
+* [Augment: Multi-Agent Cost Compounding](https://www.augmentcode.com/guides/multi-agent-cost-compounding)
+* [13labs: Multi-Agent Orchestration, What Works](https://www.13labs.au/guides/multi-agent-orchestration-what-works)
+* [arXiv: At Equal Inference Cost, Multi-Agent Structure Does Not Beat a Single Frozen Agent](https://arxiv.org/pdf/2609.04217)
+* [arXiv: Results and Retrospective Analysis of the CODS 2025 AssetOpsBench Challenge](https://arxiv.org/pdf/2605.08518)
+* [arXiv: Terminal Agents Suffice for Enterprise Automation](https://arxiv.org/pdf/2604.00073)
