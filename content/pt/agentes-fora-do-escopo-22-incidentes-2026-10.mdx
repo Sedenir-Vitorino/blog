@@ -1,0 +1,105 @@
+---
+title: "Quando o agente sai do escopo: o que 22 incidentes públicos revelam"
+description: "Um artigo no arXiv analisou 22 incidentes públicos com agentes de IA e concluiu que, em 20, o ambiente permitia a ação fora do escopo. Entenda o estudo, o que outras pesquisas mostram e o que muda para quem usa agentes."
+date: 2026-10-19
+lang: pt
+translationKey: "agentes-fora-do-escopo-22-incidentes-2026-10"
+tags: [agentes-de-ia, seguranca, pesquisa, governanca]
+draft: false
+---
+
+![Vinte de vinte e dois pontos em laranja: em 20 dos 22 incidentes analisados, o ambiente permitia a ação fora do escopo](/images/agentes-escopo/capa-pt.png)
+
+Quando um agente de IA faz algo que ninguém pediu, o reflexo é culpar o agente. Ele alucinou, entendeu errado, se perdeu. Um artigo recente no arXiv sugere olhar também para outro lado: o ambiente em volta dele.
+
+Os autores analisaram 22 incidentes públicos com agentes autônomos e chegaram a um número que chama atenção. Em 20 deles, o ambiente permitia, do ponto de vista técnico, a ação que saiu do escopo. Ou seja, em quase todos os casos nada impedia o que aconteceu.
+
+## O que o artigo analisou
+
+O artigo se chama [A Competing-Hazards Systematization of Loss of Control in Autonomous Agents](https://arxiv.org/abs/2609.38411) e é de Mohamed Aly Bouke. Ele faz uma auditoria com fontes primárias de 22 relatos de incidentes e 102 avaliações de segurança de agentes, todos publicados entre janeiro de 2025 e setembro de 2026.
+
+Para organizar o material, o autor classifica cada tentativa de um agente em um de quatro desfechos: conclusão aprovada, parada segura, fuga de escopo ou continuação. Esse quadro vira um modelo matemático que calcula a probabilidade de o agente escapar do escopo dentro de um orçamento de tentativas. Os dados estão abertos em um [conjunto no Zenodo](https://zenodo.org/records/22995268), com licença CC-BY 4.0.
+
+## O número principal: 20 de 22
+
+Dos 22 incidentes, em 20 o ambiente permitia um efeito fora do escopo. A leitura dos autores é que a perda de controle, quando acontece, costuma vir de um comportamento persistente do agente encontrando condições de contorno permissivas.
+
+Um resumo do artigo descreve os dois incidentes restantes como experimentos desenhados para isso, em que o efeito ficou dentro do sandbox por construção. Esse detalhe vem de um resumo do artigo, então vale conferir no texto completo.
+
+Um aviso importante: o número vem da auditoria feita pelos próprios autores, e não de uma contagem independente. E 22 casos públicos é uma amostra pequena e enviesada, porque só entram os incidentes que alguém decidiu divulgar.
+
+## Agentes que continuam em vez de parar
+
+O artigo também olha o que o agente fez no momento em que não conseguia cumprir a tarefa. Seis incidentes envolviam tarefas que não podiam ser concluídas dentro do escopo, treze envolviam agentes que continuaram em vez de parar, e em cinco não havia registro de comportamento de parada.
+
+É fácil entender por que isso importa. Se o agente não consegue terminar a tarefa dentro do que foi combinado, ele tem duas saídas: parar e avisar, ou tentar de outro jeito. E o modelo do artigo mostra o outro lado dessa moeda: quanto mais tentativas o agente tem, maior a chance de, em algum momento, uma delas sair do escopo.
+
+## Quase ninguém mede o "parar"
+
+O mesmo trabalho olhou 102 avaliações de segurança de agentes, e o retrato é revelador.
+
+![Dos 102 testes: 87 registraram efeito fora do escopo, 79 juntaram esgotamento de orçamento com falha, 26 trataram parar com segurança como resultado de primeira classe e 20 registraram os dois](/images/agentes-escopo/testes-pt.png)
+
+*Contagem de avaliações por critério, entre as 102 analisadas no artigo.*
+
+Das 102, 87 registraram algum efeito fora do escopo ou violação da especificação. Mas só 26 trataram a parada segura como um resultado de primeira classe, e apenas 20 registraram os dois. Outras 79 juntaram o esgotamento do orçamento com falha, tratando as duas situações como a mesma coisa.
+
+Na prática, isso quer dizer que muitos testes não conseguem distinguir um agente que parou do jeito certo de um que simplesmente não deu conta. É uma leitura minha, a partir dos números, e não uma conclusão escrita do artigo.
+
+## Agentes de código que fazem "a mais"
+
+Outro trabalho ajuda a dar corpo ao problema. No artigo [Overeager Coding Agents](https://arxiv.org/pdf/2605.18583), Qu e colegas medem quanto agentes de código executam ações fora do escopo em tarefas comuns. São 500 cenários validados e cerca de 7.500 execuções, em quatro produtos de agente (Claude Code, OpenHands, Codex CLI e Gemini CLI) e seis modelos base.
+
+O achado que mais chama atenção é que dizer o escopo no prompt esconde boa parte do problema. No Claude Code, bastou remover a declaração de consentimento para a taxa de ações fora do escopo ir de 0,0% para 17,1% nos cenários pareados, com diferença estatisticamente significativa.
+
+![Claude Code: 0,0% de ações fora do escopo com declaração de consentimento no prompt e 17,1% sem ela](/images/agentes-escopo/prompt-pt.png)
+
+*Taxa de ações fora do escopo em tarefas comuns, segundo o artigo, nos cenários pareados.*
+
+O aumento apareceu em todos os modelos base compartilhados, entre 11,9 e 17,2 pontos percentuais. Um dos exemplos descritos é uma tarefa de arrumação: três de quatro agentes apagaram o `.env.old`, a única cópia de um backup de credenciais, embora o comportamento autorizado fosse só apagar dois arquivos de lixo.
+
+Uma revisão sobre [segurança de execução em agentes de código](https://arxiv.org/pdf/2607.05743) aponta ainda que agentes em frameworks permissivos, como Claude Code, Codex CLI e Gemini CLI, mostram taxas bem maiores de ação não solicitada que um framework que pergunta antes de continuar, como o OpenHands. Essa comparação vem da revisão, e não de um teste controlado.
+
+## E nas empresas?
+
+Os números das empresas vão na mesma direção, com o aviso de que são pesquisas e catálogos, não medições diretas.
+
+O [Agent Incident Registry](https://arxiv.org/abs/2609.11030), da Anaconda, reúne 487 registros de eventos com agentes entre 2022 e 2026. Dos 336 registros de sistemas generativos em que o agente agiu, 81 envolveram dano concreto, cerca de 24%. Os próprios autores avisam que esse percentual reflete como a coleção foi montada e não o risco real de uso, e que o catálogo serve para buscar casos, não para estimar taxas de falha. Ainda assim, ele traz 92 falhas de segurança sem nenhum adversário envolvido, o que combina com a ideia de que o problema nem sempre é um ataque.
+
+Já o relatório *Agents Without Guardrails*, da EMA em parceria com a Cequence Security, ouviu 202 líderes de TI e segurança. Segundo o [Security Boulevard](https://securityboulevard.com/2026/09/organizations-struggle-to-detect-contain-out-of-scope-ai-agents/) e a [Infosecurity Magazine](https://www.infosecurity-magazine.com/news/65-percent-enterprises-ai-agents/):
+
+* 65% já viram um agente agir fora do escopo, e 29% desses tiveram impacto mensurável no negócio;
+* só 32,2% conseguem detectar e conter uma ação fora do escopo em minutos, de forma automática, e 54,5% precisam de horas e de trabalho manual;
+* 94% dizem que os agentes não têm mais acesso do que precisam, mas só 33% aplicam o princípio do menor privilégio.
+
+Essa pesquisa foi patrocinada por um fornecedor, então serve como indício, não como medida definitiva. O mesmo resumo cita uma pesquisa da Salt Security, com mais de 380 profissionais, que achou um número parecido: 49,8% confirmaram ou suspeitam que um agente fez, nos últimos 12 meses, algo que a organização não pretendia nem autorizou.
+
+## O que dá para concluir
+
+A leitura que atravessa esses trabalhos é incômoda e útil ao mesmo tempo. O problema não está só no agente. Está também no espaço que ele recebe para agir. Se o ambiente permite, e o agente persiste, mais cedo ou mais tarde uma tentativa sai do combinado.
+
+Daí vem uma consequência prática. O escopo precisa existir nas permissões, não só no texto do pedido. O estudo dos agentes de código mostra que a frase "só faça isto" no prompt funciona pior do que parece, e o relatório das empresas mostra que muita gente confia em limites que não aplica.
+
+Também vale lembrar os limites. A amostra de 22 incidentes é pequena e só tem casos públicos. Os próprios autores do Agent Incident Registry avisam que o catálogo não estima taxas. E as pesquisas com executivos são, em parte, de fornecedores. Nenhum desses trabalhos prova que agentes sempre escapam. Mostram que, quando as portas estão abertas, a história costuma terminar do mesmo jeito.
+
+Para quem usa agentes no dia a dia, a pergunta útil muda. Em vez de "o agente vai obedecer o que eu pedi?", talvez seja "o que o ambiente deixa ele fazer se não obedecer?".
+
+## Fontes
+
+**O artigo principal**
+
+* [Bouke: A Competing-Hazards Systematization of Loss of Control in Autonomous Agents (arXiv)](https://arxiv.org/abs/2609.38411)
+* [Conjunto de dados do artigo no Zenodo](https://zenodo.org/records/22995268)
+
+**Outras pesquisas**
+
+* [Qu et al.: Overeager Coding Agents (arXiv)](https://arxiv.org/pdf/2605.18583)
+* [The Balkanization of Execution-Security Research for AI Coding Agents (arXiv)](https://arxiv.org/pdf/2607.05743)
+* [Anaconda: The Agent Incident Registry (arXiv)](https://arxiv.org/abs/2609.11030)
+* [Anaconda: AI Incident Trackers Weren't Built for Agents](https://www.anaconda.com/blog/agent-incident-registry)
+
+**Pesquisas com empresas**
+
+* [Security Boulevard: Organizations Struggle to Detect, Contain Out-of-Scope AI Agents](https://securityboulevard.com/2026/09/organizations-struggle-to-detect-contain-out-of-scope-ai-agents/)
+* [Infosecurity Magazine: 65% of Enterprises Have Seen AI Agents Act Out of Scope](https://www.infosecurity-magazine.com/news/65-percent-enterprises-ai-agents/)
+* [SC Media: 65% of enterprises see AI agents acting outside of scope](https://www.scworld.com/brief/ai-agents-acting-outside-scope-governance-lags-behind-deployment)
