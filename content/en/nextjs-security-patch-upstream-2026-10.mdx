@@ -1,6 +1,6 @@
 ---
-title: "Next.js ships an out-of-band security patch: what to check today"
-description: "Three vulnerabilities in Next.js dependencies, two critical and one high, are part of the October 14 fix. Here's the timeline of recent patches, the Next.js 15 deadline, and a safe upgrade checklist."
+title: "Next.js 16.4.1 and 15.5.28: the October 14 security patch"
+description: "The out-of-band Next.js update fixes three vulnerabilities, two critical and one high, in versions 16.4.1 and 15.5.28. Here's what each one affects, the Next.js 15 deadline, and an upgrade checklist."
 date: 2026-10-14
 lang: en
 translationKey: "nextjs-patch-seguranca-upstream-2026-10"
@@ -8,40 +8,51 @@ tags: [nextjs, security, devops]
 draft: false
 ---
 
-On October 8, the Next.js team announced a security update outside the usual schedule, set for October 14. It fixes three vulnerabilities in third-party dependencies: two critical and one high severity. Two of them had already been identified in September, but the fix was held back to give time to coordinate disclosure with the maintainers of those libraries.
+On October 14, the Next.js team shipped the out-of-band security update it had announced six days earlier. It landed in versions **16.4.1** (active LTS) and **15.5.28** (maintenance) and fixes three vulnerabilities: two critical and one high severity. Two of them had already been identified in September, but the fix was held back to give time to coordinate disclosure with the maintainers of the libraries involved.
 
-This is the third security patch cycle in roughly a month. If you run a Next.js project in production, it's worth checking your version today.
+According to the notice, every version of the 16 line up to 16.4.0 is affected. If you're on 16.3.8 or anything earlier, you need to move to 16.4.1.
 
 <Summary title="Quick summary">
-Out-of-band security patch with three upstream vulnerabilities (two critical, one high) scheduled for 10/14. Next.js 15 reaches end of life on 10/21. Update to the patch version for your line, deploy, and confirm the version running in production.
+Patched versions: 16.4.1 (16 line) and 15.5.28 (15 line). Three vulnerabilities: two critical (remote code execution) and one high (denial of service). Next.js 15 reaches end of life on 10/21. Update, deploy, and confirm the version running in production.
 </Summary>
+
+*Updated on October 19, after the official notice with the patched versions was published.*
+
+## The three vulnerabilities
+
+According to the official notice and the summaries published about it, they are:
+
+* **Critical, unauthenticated remote code execution in `"use cache"` functions that return typed arrays.** Identifier GHSA-673q-mjm6-r5xr. Affects versions 16.0.0 through 16.4.0.
+* **Critical, remote code execution through the Image Optimization API when processing SVGs on glibc-based Linux.** Identifiers CVE-2026-96889 and GHSA-2464-fhr4-w9xw. The root cause is in an upstream image library. Until you update, a workaround is to use sharp 0.35.5 or later.
+* **High, denial of service through Server Actions in App Router apps.** Identifier GHSA-p3m5-59mp-jv5r. This one is also fixed on the 15 line, in version 15.5.28.
+
+The affected version ranges differ from one vulnerability to the next. Before deciding how urgent this is for your project, read each advisory on GitHub to see whether your setup, such as using `"use cache"` or images, is in scope.
 
 ## Recent timeline
 
 * **September 22:** out-of-band release with versions 16.3.6 and 15.5.26, fixing a critical remote code execution issue in `next/og`. According to Estont's analysis, the 15.x line was not affected by that issue.
-* **September 30:** versions 16.3.8 (active LTS) and 15.5.27 (maintenance). The official notice lists seven vulnerabilities: one high, five medium, and one low. Some third-party sources count nine, including one critical. For the exact affected configurations, read each advisory on the official site.
-* **October 14:** out-of-band update for the three upstream vulnerabilities that were held back from September.
+* **September 30:** versions 16.3.8 and 15.5.27. The official notice lists seven vulnerabilities: one high, five medium, and one low. Some third-party sources count nine, including one critical.
+* **October 8:** Next.js announces the October 14 out-of-band update.
+* **October 14:** 16.4.1 and 15.5.28 are released.
 * **October 21:** Next.js 15 reaches end of life.
-
-The count varies from source to source, but the advice is the same: be on at least 16.3.8 or 15.5.27 before today's update.
 
 ## What upstream vulnerabilities are
 
-An upstream vulnerability isn't in the framework's own code. It lives in a library Next.js relies on underneath, such as image processing, HTTP parsers, or cache and proxy components. The fix has to land in that library first and only then reach Next.js. That's why the announcement mentioned coordinating with the original authors, and why the date wasn't the usual one.
-
-When this was written, the official October 14 notice didn't list the affected packages, the vulnerability identifiers, or the patched versions. If you see library names or CVE numbers elsewhere, check them against the official notice before relying on them.
+An upstream vulnerability isn't in the framework's own code. It lives in a library Next.js relies on underneath, such as image processing. The fix has to land in that library first and only then reach Next.js. That's why two of the fixes were held back after September, and why the date didn't follow the usual schedule.
 
 ## Images: who is most exposed
 
-Among the September fixes, one high-severity issue is an SSRF in Image Optimization, tracked as CVE-2026-94483. According to Netlify and daily.dev, it only affects apps that have `images.remotePatterns` configured. If your config doesn't set that field, your exposure there is lower, but the update is still recommended.
+Among the September fixes, one high-severity issue is an SSRF in Image Optimization, tracked as CVE-2026-94483. According to Netlify and daily.dev, it only affects apps that have `images.remotePatterns` configured.
 
-The cache poisoning issue in SSG and ISR pages affects self-hosted Pages Router apps. According to Netlify, apps hosted on Vercel are not affected by it.
+The October issue in the Image Optimization API is a different one, and involves SVG processing. If your app uses `next/image` or the image optimizer, treat this update as a priority.
+
+The September cache poisoning issue in SSG and ISR pages affects self-hosted Pages Router apps. According to Netlify, apps hosted on Vercel are not affected by it.
 
 ## What the Next.js 15 end of life changes
 
 Next.js 15 reaches end of life on October 21, 2026. Until then, the line only gets critical and security fixes, no new features. After that date there's no guarantee of new patches. Any fix for an unsupported version would be a case-by-case decision by the team.
 
-In practice, today's patch is likely one of the last for the 15 line. If your project is on a version older than 15.5, the recommendation is to migrate to the 16 line. According to endoflife.date, 16.4.0 was released on October 6 and is the most recent 16.x release it lists.
+In practice, 15.5.28 is likely one of the last versions of the 15 line. If your project is on a version older than 15.5, the recommendation is to migrate to the 16 line. According to endoflife.date, 16.4.0 was released on October 6.
 
 ## What to do in your project
 
@@ -59,19 +70,19 @@ Create a branch and note the version running in production. If something breaks,
 git checkout -b nextjs-security-update
 ```
 
-**3. Update to the patch version for your line**
-
-The patched versions for the October 14 notice aren't confirmed yet. When the official notice is out, use the version it lists. Until then, these are the general commands:
+**3. Update to the patched version for your line**
 
 ```bash
 # 16 line (active LTS)
-npm install next@latest eslint-config-next@latest
+npm install next@16.4.1 eslint-config-next@16.4.1
 
-# 15.5 line (maintenance until 10/21)
-npm install next@^15.5 eslint-config-next@^15.5
+# 15 line (maintenance until 10/21)
+npm install next@15.5.28 eslint-config-next@15.5.28
 ```
 
 Keep `eslint-config-next` on the same version as `next`. If you deploy on Netlify, also update the `@netlify/plugin-nextjs` adapter. Netlify recommends version 5.16.1 or later.
+
+A Releasebot summary suggests a 16.4.2 may exist. I couldn't confirm that version or its advisories, so check the [releases page](https://github.com/vercel/next.js/releases) before pinning a version in your project.
 
 **4. Update the lockfile and build**
 
@@ -83,12 +94,14 @@ npm run build
 
 Don't delete `package-lock.json`. It makes sure everyone on the team, and your deploy pipeline, installs the same versions. `npm install` updates the lock with the new versions. Changing only `package.json` isn't enough: the lock has to be committed too.
 
+Some teams configure their package manager to install only versions that are at least a day old. That's a local setting, not a Next.js rule, but it can delay the 16.4.1 install in a project that uses that kind of gate.
+
 **5. Test before shipping to production**
 
 In staging, go through the most exposed areas:
 
 * Routes using `next/image` and the `/api/og` route, if you use them;
-* Server Actions and Server Functions;
+* `"use cache"` functions and Server Actions;
 * Middleware and routes behind authentication;
 * Sensitive flows such as login and checkout, if you have them.
 
@@ -96,15 +109,13 @@ In staging, go through the most exposed areas:
 
 After deploying, confirm that the new build is the one actually serving traffic. A deploy that didn't publish, or a stale cache, can leave a vulnerable version live even though the code is updated.
 
-## Update this post when the notice is out
-
-This post was written before the full October 14 notice was published. Once the patched versions and identifiers are confirmed on the official Next.js site, the version details will be updated.
-
 ## Sources
 
-* [Official notice: upcoming Next.js security update for upstream vulnerabilities (October 2026)](https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026)
+* [Official notice: Next.js security update, October 14, 2026](https://nextjs.org/blog/nextjs-security-update-october-14-2026)
+* [Release v16.4.1 on GitHub](https://github.com/vercel/next.js/releases/tag/v16.4.1)
+* [Pantheon: Next.js security release note](https://docs.pantheon.io/release-notes/2026/10/nextjs-security-release)
+* [Official notice: October 2026 update announcement](https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026)
 * [Official notice: September 2026 security release](https://nextjs.org/blog/september-2026-security-release)
 * [Netlify: Next.js security release, September 2026](https://www.netlify.com/changelog/2026-09-30-nextjs-react-security-vulnerabilities/)
 * [Estont: what to patch in the September 2026 Next.js release](https://estontinc.com/articles/nextjs-security-release-september-2026)
 * [endoflife.date: Next.js](https://endoflife.date/nextjs)
-* [Next.js blog](https://nextjs.org/blog)
