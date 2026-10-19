@@ -13,7 +13,7 @@ On October 14, the Next.js team shipped the out-of-band security update it had a
 According to the notice, every version of the 16 line up to 16.4.0 is affected. If you're on 16.3.8 or anything earlier, you need to move to 16.4.1.
 
 <Summary title="Quick summary">
-Patched versions: 16.4.1 (16 line) and 15.5.28 (15 line). Three vulnerabilities: two critical (remote code execution) and one high (denial of service). Next.js 15 reaches end of life on 10/21. Update, deploy, and confirm the version running in production.
+Patched versions: 16.4.1 (16 line) and 15.5.28 (15 line). Three vulnerabilities: two critical (remote code execution) and one high (denial of service). Next.js 15 reaches end of life on 10/21. Update and test before shipping to production.
 </Summary>
 
 *Updated on October 19, after the official notice with the patched versions was published.*
@@ -104,10 +104,6 @@ In staging, go through the most exposed areas:
 * `"use cache"` functions and Server Actions;
 * Middleware and routes behind authentication;
 * Sensitive flows such as login and checkout, if you have them.
-
-**6. Deploy and confirm the version in production**
-
-After deploying, confirm that the new build is the one actually serving traffic. A deploy that didn't publish, or a stale cache, can leave a vulnerable version live even though the code is updated.
 
 ## Sources
 
