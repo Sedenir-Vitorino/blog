@@ -1,0 +1,63 @@
+---
+title: "More agents is not more team: what the Vals AI study showed"
+description: "Teams of coding agents cost 1.8 to 5.1 times more than a single agent, and only one of four comparisons showed a significant gain. Here's the study and what you can take from it."
+date: 2026-10-19
+lang: en
+translationKey: "equipes-agentes-codigo-custo-vals-ai-2026-10"
+tags: [ai-agents, vibe-coding, costs, benchmarks]
+draft: false
+---
+
+![A solo agent next to a team with a lead and five subagents, with the cost of each](/images/vals-ai/capa-en.png)
+
+The idea sounds logical. If one AI agent can write code, several agents working together, each handling a piece, should write it better and faster. That's how a team of people works, and plenty of AI coding tools sell exactly that promise today.
+
+Vals AI decided to test it. The result, published in early October, is much less encouraging than the idea.
+
+## What they tested
+
+The study used Vibe Code Bench, a benchmark where the model has to build web applications. There were two models, GPT-6 Sol and Claude Opus 5.5, each in two formats: alone and as a team.
+
+The team had a lead agent that could split the work among up to five subagents at the same time. Subagents couldn't spawn others. Everything ran twice, at medium and at max reasoning effort, which gives four comparisons between team and solo agent.
+
+## The bill comes in higher
+
+The first number is cost: the team came out 1.8 to 5.1 times more expensive than the single agent. The headline that went around said "five times," but that's just the top of the range.
+
+![Cost range of an agent team, from 1.8 to 5.1 times the cost of a solo agent](/images/vals-ai/custo-en.png)
+
+*The chart shows the range measured by the study, as multiples of the solo agent.*
+
+A good part of that difference comes from input tokens. Each agent has to receive the context again on every call, and with several working in parallel that volume grows fast.
+
+## Did quality improve?
+
+Not much. Of the four comparisons, only one showed a statistically significant improvement: Sol at medium effort, which gained 7.3 points working as a team. In the other three, the difference didn't pass the statistical test.
+
+There's an uncomfortable detail, too. For Sol, simply raising the reasoning effort paid off more than building the team: +11.4 points versus +7.3.
+
+![Sol's gain in points: 11.4 from raising reasoning effort and 7.3 from building a team](/images/vals-ai/ganho-en.png)
+
+*Sol's gain over the solo agent at medium effort, according to summaries of the study.*
+
+The highest score in the study, 93.2%, came from combining max effort with a team. But it cost about 30 times more than the solo agent at medium effort.
+
+## What about time?
+
+Speed doesn't settle the matter either. Sol's teams finished faster than Sol alone: 28 minutes versus 38, at max effort. Opus's teams went the other way and took up to 2.3 times as long.
+
+## What you can conclude
+
+Vals AI itself is cautious. In its view, whether a team is worth it depends on the model, the task, and the budget, and raising reasoning effort is an alternative worth weighing.
+
+It's also worth remembering the limits. It's a single benchmark, of web applications. For Opus at max effort, the result's interval runs from −1.4 to +8.3 points, too wide to say what the real gain is. The study doesn't prove that teams never pay off. It shows that, in this setup, they cost a lot more and deliver less than you'd expect.
+
+For anyone paying the token bill, the useful question changes. Instead of "how many agents should I put on this?", it might be "does this money go further in reasoning or in parallelism?"
+
+## Sources
+
+* [Vals AI: Do Agent Teams Pay Off? A Case Study on Vibe Code Bench](https://www.vals.ai/blogs/multi-agent-vibe-code-bench)
+* [Vals AI on X: study summary](https://x.com/ValsAI/status/2108608719420600709)
+* [The Decoder: AI agent teams waste massive tokens for barely measurable quality gains](https://the-decoder.com/ai-agent-teams-waste-massive-tokens-for-barely-measurable-quality-gains-research-finds/)
+* [AlphaSignal: Vals AI Finds Multi-Agent Coding Teams Cost 5x More but Rarely Score Better](https://alphasignal.ai/news/vals-ai-finds-multi-agent-coding-teams-cost-5x-more-but-rarely-score-better)
+* [Xenospectrum: Multi-Agent AI Teams Cost 1.8–5.1x More to Build Web Apps](https://xenospectrum.com/en/ai-agent-teams-cost-quality/)
