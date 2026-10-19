@@ -13,7 +13,7 @@ No dia 14 de outubro, o time do Next.js publicou a atualização de segurança f
 Segundo o aviso, todas as versões da linha 16 até a 16.4.0 são afetadas. Quem está na 16.3.8 ou em qualquer versão anterior precisa subir para a 16.4.1.
 
 <Summary title="Em resumo">
-Versões corrigidas: 16.4.1 (linha 16) e 15.5.28 (linha 15). Três falhas: duas críticas (execução remota de código) e uma alta (negação de serviço). Next.js 15 chega ao fim de vida em 21/10. Atualize, faça o deploy e confirme a versão que está rodando em produção.
+Versões corrigidas: 16.4.1 (linha 16) e 15.5.28 (linha 15). Três falhas: duas críticas (execução remota de código) e uma alta (negação de serviço). Next.js 15 chega ao fim de vida em 21/10. Atualize e teste antes de subir para produção.
 </Summary>
 
 *Texto atualizado em 19 de outubro, depois da publicação do aviso oficial com as versões corrigidas.*
@@ -104,10 +104,6 @@ Em staging, passe pelas áreas mais expostas:
 * Funções com `"use cache"` e Server Actions;
 * Middleware e rotas protegidas por autenticação;
 * Fluxos sensíveis, como login e checkout, se existirem.
-
-**6. Faça o deploy e confirme a versão em produção**
-
-Depois do deploy, confirme que o artefato novo é o que está rodando. Um deploy que não foi publicado, ou um cache antigo, pode deixar a versão vulnerável no ar mesmo com o código atualizado.
 
 ## Fontes
 
