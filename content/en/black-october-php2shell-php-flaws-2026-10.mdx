@@ -1,0 +1,214 @@
+---
+title: "Black October: PHP2Shell, the myths, and what really happened"
+description: "Two critical PHP flaws, millions of attack attempts, and governments pulling sites offline. A detailed guide to what's true and what's exaggerated about PHP2Shell, who might be behind it, and how to protect yourself."
+date: 2026-10-26
+lang: en
+translationKey: "outubro-negro-php2shell-2026-10"
+tags: [php, security, php2shell, black-october, vulnerabilities]
+draft: false
+---
+
+![Two critical PHP flaws, CVE-2026-109618 and CVE-2026-109619, both with CVSS 9.2](/images/php2shell/capa-en.png)
+
+In the week of October 20, 2026, the internet went through one of those moments when headlines run faster than facts. Two critical flaws in PHP, the language behind a huge share of the world's websites, leaked before the fix, picked up the nickname **PHP2Shell**, and led governments to pull sites offline. In the noise, there were frightening numbers, hasty accusations, and a few embarrassing corrections.
+
+This piece tries to separate things: what the flaws actually are, what's been confirmed, what's myth or exaggeration, and what is known, and above all not known, about who might be behind the attacks. We call the period **Black October** because that's how the press started to describe it, and below we explain where the name comes from and why it deserves caution.
+
+<Summary title="Quick summary">
+Two remote code execution flaws (CVE-2026-109618 and CVE-2026-109619, CVSS 9.2) affect PHP since version 5.4 and were fixed on 10/21 in versions 8.5.12, 8.4.27, 8.3.36 and 8.2.35. There are millions of exploitation attempts but few confirmed intrusions, and two security companies withdrew early claims. Nobody has claimed responsibility for attacks using these flaws. The only complete protection is updating and restarting PHP processes.
+</Summary>
+
+*Written on October 26, 2026. The situation changes fast, and some details may change.*
+
+## Why "Black October"
+
+The name was born on social media. A post on X on October 22 called the previous 48 hours the worst in the history of information security, and the label spread. There are now reports and lists titled "Black October," like the one from [CNBC](https://www.cnbc.com/2026/10/23/php-vulnerabilities-ai-cybersecurity.html) and the one from [Exchange4media](https://www.exchange4media.com/marketing-news/black-october-2026-is-the-internet-under-attack-as-ai-hacking-sparks-global-fears-159427.html).
+
+It's worth being wary of the idea of a single crisis. [SecurityToday](https://www.securitytoday.de/en/2026/10/22/black-october-many-attacks-had-been-running-for-months/) notes that the surge was mainly in disclosures, and that many attacks had been running for weeks or months. One analysis sums it up well: it's not a virus and it's not an attack on the whole internet. The open question is whether the incidents were connected or several independent crises simply collided.
+
+In this article, "Black October" is just a label for the month. We don't claim there was a coordinated attack.
+
+## What the flaws are
+
+The two vulnerabilities are CVE-2026-109618 and CVE-2026-109619, both scored 9.2 on CVSS v4.0 and capable of allowing unauthenticated remote code execution. [Rapid7](https://www.rapid7.com/blog/post/etr-cve-2026-109618-and-cve-2026-109619-critical-unauthenticated-remote-code-execution-in-php/) describes one as memory corruption in out-of-memory handling and the other as a use-after-free tied to state PHP keeps between requests. The PHP2Shell nickname comes from [Wiz](https://www.wiz.io/blog/php2shell-php-rce).
+
+A few important points:
+
+* **Age:** the vulnerable code goes back to PHP 5.4.0, from 2012. That's why [iTWire](https://itwire.com/business-it-news/security/php2shell-the-14-year-old-bugs-that-pulled-cyber-gov-au-and-government-sites-worldwide-offline) talks about 14-year-old bugs.
+* **Fixed versions:** PHP 8.5.12, 8.4.27, 8.3.36 and 8.2.35, released on October 21. For older versions, the fix comes as source patches rather than a new release.
+* **The third flaw:** CVE-2026-115560, published on October 23, is lower risk. According to [The Next Web](https://thenextweb.com/news/php2shell-third-flaw-php-no-emergency-fix), it only occurs under an unusual combination of configuration and application code, and PHP didn't rush an emergency fix. The suggested interim measure is disabling `session.upload_progress.enabled`.
+
+### Who is most exposed
+
+Exposure depends on how PHP runs. According to analyses by [Sansec](https://sansec.io/research/php2shell) and safeguard.sh, which cite PHP's advisory, Apache's `mod_php` is the highest-risk case.
+
+![Exposure chart by PHP environment: mod_php with RCE validated for both flaws, PHP-FPM with RCE confirmed for CVE-2026-109619, and CLI not verified](/images/php2shell/exposicao-en.png)
+
+*Status of each environment, per PHP's advisory and third-party analyses. The situation changes fast.*
+
+On `mod_php`, RCE was validated for both flaws with default settings. On PHP-FPM, RCE was confirmed for CVE-2026-109619, and for CVE-2026-109618 the environment is susceptible but no complete exploit has been shown yet. FrankenPHP and LiteSpeed are considered likely susceptible. For the command line, cron jobs and workers I found no clear answer, so I treated them as not verified. Details by environment are in [safeguard.sh's analysis](https://safeguard.sh/resources/blog/php2shell-php-fpm-vs-mod-php-exposure).
+
+In some distributions the picture is lighter. [AlmaLinux](https://almalinux.org/blog/2026-10-21-php2shell-cve-2026-109618-cve-2026-109619/) says AlmaLinux 9 and 10 don't ship `mod_php`, and that on 8 it only loads if Apache is on the prefork module. PHP embedded in firewalls, storage devices and control panels, on the other hand, updates on each vendor's timeline.
+
+## The timeline
+
+![PHP2Shell timeline, from August 11 to October 23](/images/php2shell/linha-en.png)
+
+*Key events, not to scale in time between them.*
+
+* **August:** according to [TechTarget](https://www.techtarget.com/cybersecurity/news/366652613/PHP2Shell-disclosure-unravels-after-leaks-forced-early-patch-drop), Calif found the class of flaws on August 11, working with OpenAI's Patch the Planet initiative, and Wiz and OpenAI reached the problem independently in the following weeks. Sources differ on the date of the first discovery, and one mentions July.
+* **October 16:** Chainguard learned that a PHP notice was coming and, that night, independently found the same flaw using an in-house AI toolset and a frontier model.
+* **October 17:** Amazon logged an exploitation attempt on its MadPot honeypot four days before disclosure, per [Infosecurity Magazine](https://www.infosecurity-magazine.com/news/php2shell-exploitation-attempt/).
+* **October 20:** the flaw identifiers started circulating on a forum. At 19:33 UTC, PHP sent an advance notice that it would release fixes the next day. Around 20:00 UTC, Calif mistakenly posted a video of its proof of concept, deleted soon after but already copied on social media.
+* **October 21:** Chainguard published patched images about six hours before the release, and Cloudflare's CTO reported attack attempts hours earlier. The fixes shipped that day.
+* **October 22:** Cisco Talos said most of the activity was scanning. Cloudflare was already talking about millions of attempts.
+* **October 23:** PHP warned about the third flaw.
+
+There's a date discrepancy: the forum post said the release would be on October 22, but according to [Infosecurity Magazine](https://www.infosecurity-magazine.com/news/critical-php-vulnerabilities-leaked/), PHP had already scheduled October 21. The same post cited a CVSS score of 10.0, and PHP rates both flaws at 9.2.
+
+## Myth or fact
+
+### "PHP2Shell takes down 70% of the internet" — exaggeration
+
+The 70% figure comes from PHP usage: according to what Wikipedia reports based on W3Techs, about 69% of websites whose server-side language is known use PHP. That measures how many sites use the language, not how many are vulnerable. To be a target, a site has to run an affected version, unpatched, and meet the exploitation conditions. [TidBITS](https://tidbits.com/2026/10/21/php2shell-vulnerabilities-put-70-of-websites-at-risk/) and [DEV Community](https://dev.to/atec-systems/php2shell-what-remains-after-the-headlines-50h0) make that distinction. Wiz itself estimates PHP is on about 70% of websites, without saying 70% are vulnerable.
+
+### "It's a virus" — myth
+
+PHP2Shell is a software vulnerability, not malicious software that spreads on its own. What exists are programs that look for vulnerable sites and try to exploit them.
+
+### "One request is enough to take over any server" — partly true
+
+Researchers showed single-request exploitation in certain configurations. But success depends on the specific flaw, the environment, and the memory state. According to the description of the case, even a "Hello World" page on a vulnerable version can be a target, because the flaw is in PHP's engine, not in application code. This applies mainly to `mod_php`.
+
+### "AI discovered the flaw" — partly true
+
+Coverage highlights AI's role, as in [Wiz's](https://www.wiz.io/blog/php2shell-php-rce) title, "AI uncovers critical RCE vulnerabilities," and in [Fortune](https://fortune.com/2026/10/21/ai-tools-discovered-the-php-vulnerability-that-could-take-down-70-of-the-internet-now-the-race-is-on-to-patch-it-before-ai-powered-hackers-attack/). An independent review points out, though, that the out-of-memory problem had already been flagged by a PHP core developer in 2024, while handling results from an audit, and that AI helped find exploitable paths. In other words, AI had a real role, but the story isn't just "the machine found it on its own."
+
+### "Attackers are already breaking into everything" — exaggeration, but the risk is real
+
+The attempt numbers are high. Cloudflare reported thousands of attempts in the ten hours before the announcement, hundreds of thousands within two hours after, and eventually millions, per [Nextgov](https://www.nextgov.com/cybersecurity/2026/10/php-flaws-draw-millions-hacking-attempts-amid-global-push-fixes/416771/). But [Cisco Talos](https://blog.talosintelligence.com/two-critical-rces-in-php-core/) said most of it was scanning, with some uncoordinated attempts to deliver programs, and expected more organized campaigns as groups updated their tooling.
+
+There was also back and forth. [The Stack](https://www.thestack.technology/sophos-palo-alto-networks-retract-early-claims-of-php2shell-exploitation-but-attacks-are-starting/) shows Sophos and Palo Alto Networks withdrew early exploitation claims. On the other hand, [BleepingComputer](https://www.bleepingcomputer.com/news/security/php2shell-security-flaws-now-sucessfully-exploited-in-the-wild/) reported, citing a Perplexity researcher, captures of successful exploitation on a honeypot running Apache `mod_php` and PHP 8.4.26. A honeypot is a decoy system, so that confirms the exploitation works, not that a real victim was breached. As of October 22, neither CVE was in the US agency CISA's known exploited vulnerabilities catalog.
+
+### "Governments were hacked" — myth, so far
+
+The site takedowns were precautionary. According to reports, the Netherlands, Finland, Germany, France, Belgium, the Czech Republic and Australia took services offline, and in Nepal thousands of sites went down, per the [Kathmandu Post](https://kathmandupost.com/science-technology/2026/10/25/php2shell-security-flaw-forces-thousands-of-nepali-websites-offline). Finland said it found no exploitation attempt, and Belgium's cybersecurity center said it had recorded no attacks on Belgian sites. Sources disagree on the total number of sites pulled, and some may already be back.
+
+### "One setting fixes it" — myth
+
+The complete fix is updating PHP, or your vendor's package. The cited interim measure is disabling `session.upload_progress.enabled` in the PHP, FPM pool, or server configuration, and restarting the processes. Adjustments made at runtime, with `ini_set()` or `.user.ini`, come too late to help. Another option circulated, `memory_limit=-1`, described as incomplete, and it also removes PHP's protection against scripts that consume unlimited memory.
+
+### "If you use PHP-FPM you're safe" — myth
+
+RCE was confirmed on PHP-FPM for CVE-2026-109619. For the other flaw the environment is susceptible, but no complete exploit has been shown so far.
+
+### "Old versions were left with no way out" — partly true
+
+The official fixed releases cover the supported branches, 8.2 and later. For older ones, the PHP security team offers source patches that someone has to build and install, and vendors like [TuxCare](https://tuxcare.com/blog/php2shell-cve/) sell patched versions of lines PHP has already dropped.
+
+### "Black October was a single, coordinated attack" — no evidence
+
+As we saw, sources disagree, and several note that many incidents began earlier. PHP2Shell is just the most visible event of the month.
+
+## What else happened in October
+
+* **LiteLLM:** malicious 1.107.0 versions of the library reached PyPI and Docker around October 21 and stole cloud, developer and AI-provider credentials. The last safe version is 1.106.2. According to LiteLLM itself, reported by [Help Net Security](https://www.helpnetsecurity.com/2026/10/22/litellm-compromised-supply-chain-attack-pypi-docker/), the attacker used GitHub CLI OAuth tokens from three engineers. It's the project's second compromise in 2026.
+* **Railway:** the platform reported unauthorized access to systems that store customer environment variables and asked everyone to rotate their credentials. A secondary summary mentions up to about 100,000 workspaces, but that number needs to be checked against Railway's own report. There's a [secret rotation checklist](https://brandefense.io/security-news/railway-breach-rotate-secrets-checklist/).
+* **Other items:** the press also listed weak certificate keys at eMudhra and a malware case in the Rank Math PRO plugin. I found no verified details on those two, so I don't develop them here.
+
+## Who might be responsible
+
+One rule for this section: **we only call someone the author of an attack if that person or group claimed responsibility.** As far as I found, nobody has claimed responsibility for attacks using PHP2Shell. What exists are suspicions, and they appear here as suspicions.
+
+### Who found the flaws
+
+Calif, Wiz, and OpenAI, through Patch the Planet, were the researchers who found and reported the problems, and Chainguard reached the same flaw independently. They're the ones who did the disclosure, not the attacking.
+
+### Who leaked
+
+Unknown. We know the identifiers appeared on a forum on October 20, but the sources don't identify who posted them. Calif mistakenly published the proof-of-concept video, and that was a slip by researchers, not an attack.
+
+### The North Korea hypothesis
+
+The company CYFIRMA published an [advisory](https://www.cyfirma.com/research/cyfirma-threat-advisory-suspected-dprk-campaign-staging-php2shell-targeting-against-global-php-infrastructure/) assessing that an operator linked to the North Korean state, from the Lazarus group ecosystem, is staging a global campaign against vulnerable PHP environments. According to [Security Affairs](https://securityaffairs.com/201748/hacking/php2shell-suspected-north-korean-campaign-targets-216-vulnerable-php-hosts.html), the operators supposedly identified 216 hosts that appear unpatched or only partly protected, and run low-volume checks from 21 compromised machines, communicating over a private I2P channel.
+
+There are reasons for caution. It's the assessment of a single company, described as high confidence by it and as moderate in another report, and other outlets haven't independently confirmed it. CYFIRMA didn't name victims, hasn't seen the full target list, and didn't confirm large-scale compromises. And nobody has claimed responsibility. All of that makes the hypothesis a suspicion, not a fact.
+
+### Why attribution is hard
+
+The Palo Alto Networks case shows it. Unit 42 linked an intrusion at a European agency to PHP2Shell, including the claim that an AI agent reached password hashes and authentication secrets within two hours. It later withdrew the update, saying it couldn't confirm that the initial access was associated with the CVEs. [The Hacker News](https://thehackernews.com/2026/10/php2shell-exploitation-hits-government.html) covered the episode.
+
+### Botnets and opportunists
+
+[The Hacker News](https://thehackernews.com/2026/10/php2shell-exploit-attempts-hit-millions.html) also reported attempts to install malware from the Mirai family, unsuccessfully. That kind of botnet tends to be opportunistic and sweeps the internet for any vulnerable target. The source doesn't identify anyone responsible.
+
+### Who claimed other attacks
+
+To show what "claiming" means: ransomware groups that announced attacks in October on their own leak sites include Mimori, which listed OpenText and Aveva, and Gentlemen, which listed MoneyGram, according to news aggregators. Those claims, none of them tied to PHP2Shell, aren't always confirmed by the victims, and MoneyGram, for example, didn't confirm the incident.
+
+## What to do
+
+1. **Find your version and how PHP runs.** Check whether your PHP is below 8.5.12, 8.4.27, 8.3.36 or 8.2.35 and whether it runs as `mod_php`, FPM, FrankenPHP or something else.
+2. **Update** to the fixed version or install your vendor's package. For versions PHP has already dropped, look for the source patches or an extended-support vendor.
+3. **Restart everything.** A PHP-FPM master or a `mod_php` loaded in Apache keeps the old code in memory until it's restarted. Updating the package without restarting doesn't protect you.
+4. **If you can't update right now,** apply the interim measure (`session.upload_progress.enabled=0` in the server or pool configuration, not in `ini_set()` or `.user.ini`) and consider taking the service offline. The NSA, according to reports, advised organizations that can't update immediately to shut systems down.
+5. **Look at what embeds PHP,** such as firewalls, storage devices and hosting panels, and check with the vendor. If you use managed hosting, see your provider's notice. Several, like [SiteGround](https://www.siteground.com/blog/critical-php-vulnerabilities-october-2026) and InMotion, acted before the release.
+
+## What you can conclude
+
+PHP2Shell was serious: critical flaws in an engine present across a huge slice of the web, which leaked before the fix and drew millions of attempts in a few days. But it was also a case where the distance between headline and evidence became visible. Two security companies withdrew claims within hours, and publicly confirmed successful intrusions remain rare, while scanning is enormous.
+
+On who's behind it, the honest answer for now is that nobody has claimed responsibility and that the existing suspicions rest on one or a few sources. It's worth remembering that the absence of confirmed intrusions doesn't prove they didn't happen, only that they haven't been disclosed. The situation changes fast, and this piece is a snapshot of October 26.
+
+For anyone running a PHP site, the useful question isn't whether Black October was the worst month in history. It's whether your version is patched, whether the server was restarted, and whether someone checked the equipment that carries PHP inside.
+
+## Sources
+
+**The flaws and the fix**
+
+* [Rapid7: CVE-2026-109618 and CVE-2026-109619](https://www.rapid7.com/blog/post/etr-cve-2026-109618-and-cve-2026-109619-critical-unauthenticated-remote-code-execution-in-php/)
+* [Wiz: PHP2Shell](https://www.wiz.io/blog/php2shell-php-rce)
+* [watchTowr: PHP2Shell FAQ](https://watchtowr.com/intelligence/php-cve-2026-109618-faq/)
+* [Sansec: PHP2Shell](https://sansec.io/research/php2shell)
+* [safeguard.sh: mod_php, PHP-FPM, php-cgi, FrankenPHP and LiteSpeed](https://safeguard.sh/resources/blog/php2shell-php-fpm-vs-mod-php-exposure)
+* [AlmaLinux: patched packages](https://almalinux.org/blog/2026-10-21-php2shell-cve-2026-109618-cve-2026-109619/)
+* [TuxCare: fixes for dropped versions](https://tuxcare.com/blog/php2shell-cve/)
+* [The Next Web: third flaw, no emergency fix](https://thenextweb.com/news/php2shell-third-flaw-php-no-emergency-fix)
+* [Google Cloud: responding to the flaws](https://cloud.google.com/blog/products/identity-security/responding-to-core-php-vulnerabilities-cve-2026-109618-cve-2026-109619)
+
+**Timeline and leak**
+
+* [TechTarget: disclosure unravels after leaks](https://www.techtarget.com/cybersecurity/news/366652613/PHP2Shell-disclosure-unravels-after-leaks-forced-early-patch-drop)
+* [Infosecurity Magazine: flaws leaked ahead of the patch](https://www.infosecurity-magazine.com/news/critical-php-vulnerabilities-leaked/)
+* [Infosecurity Magazine: attempt four days earlier](https://www.infosecurity-magazine.com/news/php2shell-exploitation-attempt/)
+* [Fortune: AI and the race to patch](https://fortune.com/2026/10/21/ai-tools-discovered-the-php-vulnerability-that-could-take-down-70-of-the-internet-now-the-race-is-on-to-patch-it-before-ai-powered-hackers-attack/)
+
+**Exploitation and myths**
+
+* [Cisco Talos: two critical RCEs in PHP core](https://blog.talosintelligence.com/two-critical-rces-in-php-core/)
+* [Nextgov: millions of attempts](https://www.nextgov.com/cybersecurity/2026/10/php-flaws-draw-millions-hacking-attempts-amid-global-push-fixes/416771/)
+* [BleepingComputer: successful exploitation on a honeypot](https://www.bleepingcomputer.com/news/security/php2shell-security-flaws-now-sucessfully-exploited-in-the-wild/)
+* [The Stack: Sophos and Palo Alto withdraw claims](https://www.thestack.technology/sophos-palo-alto-networks-retract-early-claims-of-php2shell-exploitation-but-attacks-are-starting/)
+* [TidBITS: the 70% figure](https://tidbits.com/2026/10/21/php2shell-vulnerabilities-put-70-of-websites-at-risk/)
+* [DEV Community: what remains after the headlines](https://dev.to/atec-systems/php2shell-what-remains-after-the-headlines-50h0)
+* [The Hacker News: attempts and Mirai](https://thehackernews.com/2026/10/php2shell-exploit-attempts-hit-millions.html)
+
+**Attribution**
+
+* [CYFIRMA: advisory on a suspected North Korean campaign](https://www.cyfirma.com/research/cyfirma-threat-advisory-suspected-dprk-campaign-staging-php2shell-targeting-against-global-php-infrastructure/)
+* [Security Affairs: 216 target hosts](https://securityaffairs.com/201748/hacking/php2shell-suspected-north-korean-campaign-targets-216-vulnerable-php-hosts.html)
+* [The Hacker News: exploitation and suspected North Korean scanning](https://thehackernews.com/2026/10/php2shell-exploitation-hits-government.html)
+
+**Governments and the "Black October" name**
+
+* [Kathmandu Post: thousands of Nepali sites offline](https://kathmandupost.com/science-technology/2026/10/25/php2shell-security-flaw-forces-thousands-of-nepali-websites-offline)
+* [iTWire: 14-year-old bugs and government sites](https://itwire.com/business-it-news/security/php2shell-the-14-year-old-bugs-that-pulled-cyber-gov-au-and-government-sites-worldwide-offline)
+* [CNBC: AI's "Black October"](https://www.cnbc.com/2026/10/23/php-vulnerabilities-ai-cybersecurity.html)
+* [SecurityToday: many attacks had been running for months](https://www.securitytoday.de/en/2026/10/22/black-october-many-attacks-had-been-running-for-months/)
+* [Exchange4media: Black October 2026](https://www.exchange4media.com/marketing-news/black-october-2026-is-the-internet-under-attack-as-ai-hacking-sparks-global-fears-159427.html)
+
+**Other incidents of the month**
+
+* [Help Net Security: LiteLLM](https://www.helpnetsecurity.com/2026/10/22/litellm-compromised-supply-chain-attack-pypi-docker/)
+* [Wiz: LiteLLM compromised](https://www.wiz.io/blog/litellm-compromised-steals-credentials)
+* [Brandefense: Railway and secret rotation](https://brandefense.io/security-news/railway-breach-rotate-secrets-checklist/)
