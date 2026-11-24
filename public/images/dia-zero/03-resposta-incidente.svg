@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="t d"><title id="t">Ciclo de resposta a um incidente</title><desc id="d">Cinco etapas: detectar, conter, eliminar a causa, recuperar e aprender. Antes de mudar qualquer coisa, preservar as evidências.</desc><rect width="1200" height="620" fill="#fcfcfb"/><g font-family="Helvetica, Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif">
+<text x="60" y="64" font-size="34" font-weight="700" fill="#0b0b0b" text-anchor="start">O que fazer quando acontece</text><text x="60" y="102" font-size="21" font-weight="400" fill="#52514e" text-anchor="start">Detectar, conter, eliminar a causa, recuperar e aprender. As etapas se sobrepõem</text>
+<rect x="60" y="140" width="200" height="270" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="76" y="176" font-size="22" font-weight="700" fill="#eb6834" text-anchor="start">1. Detectar</text>
+<text x="76" y="214" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Alertas e logs</text>
+<text x="76" y="241" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Confirmar se é real</text>
+<text x="76" y="268" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Anotar a hora em</text>
+<text x="76" y="295" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">  que soube</text>
+<rect x="280" y="140" width="200" height="270" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="296" y="176" font-size="22" font-weight="700" fill="#eb6834" text-anchor="start">2. Conter</text>
+<text x="296" y="214" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Isolar o sistema da rede</text>
+<text x="296" y="241" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Revogar acessos e chaves</text>
+<text x="296" y="268" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Regra de WAF (patch</text>
+<text x="296" y="295" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">  virtual)</text>
+<text x="296" y="322" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Tirar do ar, se der</text>
+<rect x="500" y="140" width="200" height="270" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="516" y="176" font-size="22" font-weight="700" fill="#eb6834" text-anchor="start">3. Eliminar</text>
+<text x="516" y="214" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Achar como entrou</text>
+<text x="516" y="241" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Remover o acesso</text>
+<text x="516" y="268" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">  do invasor</text>
+<text x="516" y="295" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Aplicar a correção</text>
+<rect x="720" y="140" width="200" height="270" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="736" y="176" font-size="22" font-weight="700" fill="#eb6834" text-anchor="start">4. Recuperar</text>
+<text x="736" y="214" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Restaurar de cópias</text>
+<text x="736" y="241" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">  limpas</text>
+<text x="736" y="268" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Voltar aos poucos</text>
+<text x="736" y="295" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Vigiar de perto</text>
+<rect x="940" y="140" width="200" height="270" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="956" y="176" font-size="22" font-weight="700" fill="#eb6834" text-anchor="start">5. Aprender</text>
+<text x="956" y="214" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• O que falhou</text>
+<text x="956" y="241" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Ajustar controles</text>
+<text x="956" y="268" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Comunicar quem</text>
+<text x="956" y="295" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">  precisa</text>
+<rect x="60" y="436" width="1080" height="76" rx="8" fill="#ffffff" stroke="#eb6834" stroke-width="3"/>
+<text x="84" y="466" font-size="20" font-weight="700" fill="#0b0b0b" text-anchor="start">Antes de mudar qualquer coisa, junte logs, configuração e uma cópia da memória e do disco.</text>
+<text x="84" y="496" font-size="20" font-weight="400" fill="#0b0b0b" text-anchor="start">Aplicar a correção ou desligar a máquina pode apagar o que prova como o ataque ocorreu.</text>
+<text x="60" y="550" font-size="17" font-weight="400" fill="#52514e" text-anchor="start">O NIST SP 800-61 Rev. 3 (2025) reorganiza essas etapas nas funções do CSF 2.0: detectar, responder e recuperar.</text>
+<text x="60" y="574" font-size="17" font-weight="400" fill="#52514e" text-anchor="start">Governar, identificar e proteger são o preparo.</text>
+</g></svg>

@@ -1,0 +1,652 @@
+---
+title: "Zero-days and attack traceability: how an investigation works, from containment to attribution"
+description: "What a zero-day is, where a server keeps traces, how an incident response is run (contain, preserve evidence, eradicate, recover), how attack attribution works, and which deadlines and records matter in Brazil, with log and script examples."
+date: 2026-11-24
+lang: en
+translationKey: "dia-zero-rastreabilidade-ataques-2026-11"
+tags: [security, zero-day, incident-response, forensics, attribution]
+image: /images/dia-zero/capa-en.png
+draft: false
+---
+
+> **Transparency:** this text was written with help from Claude, a model from Anthropic. The facts come from the public sources cited at the end. The content is educational and defensive. The code examples use fictional servers, addresses and files (documentation ranges 203.0.113.0/24 and 198.51.100.0/24, example.com) and include no detail on how to exploit flaws.
+
+*Written on November 24, 2026.*
+
+When a company, a public agency or a blog is attacked, three questions arise almost at once: **how did they get in**, **what did they take or do**, and **who did it**. The third is usually the most discussed and the hardest to answer. Before it comes less glamorous work: containing the damage, preserving the evidence, rebuilding the sequence of events and notifying whoever needs to know.
+
+This article walks through that path from start to finish. It starts with the zero-day, the most uncomfortable case, where no fix exists. Then it shows where a system keeps traces, how an incident is handled, how a timeline is rebuilt, how attribution works and what Brazilian law requires. Along the way there are practical examples of logs, configurations and scripts.
+
+<Summary title="In short">
+A zero-day is a flaw exploited before a public fix exists. With no patch, defense depends on reducing exposure, containing and monitoring. To investigate any attack, three things decide the outcome: having logs stored outside the attacked machine, preserving evidence before changing anything, and rebuilding the timeline by cross-checking several sources. Attribution, knowing who did it, is graded with confidence levels and is much weaker than headlines suggest. In Brazil, the notice to the ANPD (the data protection authority) is due within 3 business days from when the incident becomes known, and the Marco Civil requires keeping records for 1 year (connection) and 6 months (application access).
+</Summary>
+
+## 1. What a zero-day is
+
+![Timeline of a zero-day: the flaw exists, it is discovered, it is exploited with no fix, the fix is published and attacks continue against anyone who has not updated](/images/dia-zero/en/01-dia-zero-linha-do-tempo.svg)
+
+*Timeline with the flaw, the discovery, the zero-day window, the fix and the n-day.*
+
+A **zero-day** is a vulnerability that attackers exploit **before a public fix exists**. The name comes from a simple idea: the vendor had "zero days" to fix it. The Google Threat Intelligence Group (GTIG) uses exactly this definition to count zero-days: a flaw exploited before the patch is publicly available. An **n-day**, on the other hand, is a flaw exploited **after** the fix or the public disclosure, usually against those who have not yet updated. ([Google Cloud: GTIG](https://cloud.google.com/blog/topics/threat-intelligence/agentic-threat-activity-crosses-a-significant-threshold), [ScanTitan](https://scantitan.com/research/zero-day-statistics/))
+
+### The stages of a flaw's life
+
+1. **The flaw exists.** A programming or design error is present in the software, and nobody knows yet.
+2. **Discovery.** Someone finds it: a researcher, the vendor's own team or an attacker.
+3. **Zero-day.** If an attacker exploits it before a fix exists, the zero-day window is open. It can last hours, days or months.
+4. **Fix published.** The vendor releases the patch and usually publishes an advisory. From here on the problem is public.
+5. **N-day.** Anyone who has not updated stays exposed. In practice, most attacks happen here.
+
+### Why the zero-day is especially hard
+
+* **There is no patch.** The main defense, updating, does not exist yet.
+* **There is no signature.** Tools that recognize known attacks may not recognize the new one.
+* **Information is unequal.** The attacker knows the flaw before the defenders, and the investigation often only discovers the zero-day after the attack.
+
+### What the numbers show
+
+* The GTIG counted **90 exploited zero-days in 2025**, with a record **48% in enterprise products**, according to its March 2026 report, via [Stingrai](https://www.stingrai.io/blog/zero-day-statistics-2026).
+* In 2026, from January to August, the average was about **11 zero-days per month**, against 8 per month in 2025, with 22 in August alone.
+* The GTIG itself describes the rise in zero-days as small next to the overall growth in disclosures and exploitation. According to ScanTitan, **most of the growth in exploitation in 2026 came from n-days**, not zero-days.
+
+In other words: the zero-day is the most dramatic case, but most incidents come from flaws that were already fixed and not applied. That changes where to invest effort.
+
+### The role of AI
+
+In May 2026, the GTIG reported the first known case of a **zero-day developed with AI help and used by attackers**: a criminal group reportedly used a language model to write a script that exploited a logic flaw in the two-factor authentication of an open-source administration tool, according to [SC World](https://www.scworld.com/news/google-reports-first-known-ai-assisted-zero-day-exploit-in-the-wild). Google says the group was planning a broad attack and that discovering it early may have prevented that. Sources differ on some details and on when the exploit was created.
+
+On November 13, 2026, Google's Project Zero changed its disclosure policy because of this. Under the "Full X" model, a flaw's details are published after a fixed number of days counted from the report to the vendor, **whether or not a fix has shipped**. The window is 90 days now, drops to 60 days on February 2, 2027 and to 30 days on January 3, 2028. The stated reason is that AI-assisted discovery and exploitation made the earlier deadlines insufficient, according to [Help Net Security](https://www.helpnetsecurity.com/2026/11/16/google-project-zero-disclosure-policy/). Shorter deadlines reduce the time a flaw stays known to only a few, but they also squeeze vendors' time.
+
+## 2. A real case: PHP2Shell
+
+In October 2026, the **PHP2Shell** case, which we covered here, showed several characteristics of a zero-day in practice:
+
+* Researchers found and reported the class of flaws **months earlier**, in August.
+* **Amazon recorded an exploitation attempt on October 17**, four days before public disclosure. So there was activity before any patch existed.
+* On October 20, the flaw identifiers **leaked** on a forum ahead of schedule, and a proof-of-concept video was published by mistake and circulated.
+* Fixes shipped on October 21, and attempts quickly went from thousands to millions, mostly scanning, according to Cisco Talos.
+
+The case shows three lessons: the zero-day window can end earlier than planned when there is a leak, the investigation depends on whoever records attempts (such as Amazon's honeypot), and early claims of successful exploitation can be withdrawn later, as happened with two security companies.
+
+## 3. Where the traces are
+
+![Six layers a request crosses (edge, web server, application, database, operating system and network), all sending logs to a central vault](/images/dia-zero/en/02-rastros-camadas.svg)
+
+*The six layers a request crosses and the central log vault.*
+
+A malicious request does not show up in just one place. It crosses several layers, and each one may keep its own version of what it saw:
+
+* **WAF or proxy (edge):** requests, apparent origin, rules triggered and blocked responses.
+* **Web server:** access log (who asked for what, and when) and error log.
+* **Application:** events such as logins, errors and sensitive actions.
+* **Database:** auditing of queries, accounts and exports.
+* **Operating system and EDR:** new processes, created accounts and changed files.
+* **Network:** connections and volumes of data sent.
+
+The **source IP address** is the first trace and the weakest. Attackers use VPNs, proxies and compromised third-party machines, so the IP is almost never "the attacker". It is a clue to cross-check with others.
+
+### What the log lines of each layer look like
+
+To see how this looks in practice, here is a **fictional** excerpt from three sources about the same incident (times in UTC):
+
+```text
+# WAF / network
+2026-11-24T02:13:07Z waf 203.0.113.50 POST /admin/legacy-upload rule=none status=200
+2026-11-24T02:13:09Z waf 203.0.113.50 POST /admin/legacy-upload rule=none status=500
+2026-11-24T02:31:02Z waf 10.0.0.12 egress 2147483648 bytes to 198.51.100.77:443
+
+# Server
+2026-11-24T02:13:08Z host web01 process started: /tmp/.cache/updater user=www-data
+2026-11-24T02:14:40Z host web01 useradd: new user name=svc-backup2 uid=1004
+2026-11-24T02:30:55Z host web01 file read: /var/www/uploads/export/ (4012 files)
+
+# Application and database
+2026-11-24T02:13:10Z app web01 ERROR out of memory in request handler
+2026-11-24T02:20:12Z db db01 SELECT * FROM customers rows=1204331 user=svc-backup2
+2026-11-24T02:31:01Z app web01 export finished file=/var/www/uploads/export/all.csv
+```
+
+Each signal suggests something, but none proves anything alone:
+
+* A repeated `POST` to an old endpoint, followed by a `500`, shows a service under stress.
+* A **process started in `/tmp` by the web server user** is unusual.
+* A **new account** that, minutes later, runs a **huge query** on the database is a classic collection pattern.
+* A **2 GB upload** to an external address closes the sequence.
+
+### The log vault
+
+The critical point is **where the logs are stored**. If they stay only on the attacked machine, the intruder can erase them. Best practices described in guides that summarize NIST SP 800-92 ("Guide to Computer Security Log Management", from 2006, whose revision has been in draft since October 2023) point to the following:
+
+* **Send logs off the host**, over a secure connection, to storage that the administrators of the source systems **cannot alter or delete**. This ties into control AU-9 of NIST SP 800-53, and the guide notes that NIST 800-92 alone does not require immutable storage.
+* **Synchronize the clocks** of all sources with a trusted time source and standardize the date and time format. Without that, events from different systems cannot be ordered.
+* **Record enough in each line:** date and time, user identity, type of action and result.
+* **Alert when a source stops sending logs, when the audit policy changes or when logs are deleted.** These are common marks of someone trying to hide traces.
+* **Test retention and restoration** at least once a year.
+* **Retention:** several guides cite about one year of total retention, with about three months available for immediate analysis. I could not confirm this number in the NIST document, and other standards set different periods (for example, 12 months in PCI DSS), so treat it as a reference to verify.
+
+Whoever sets this up **before** the incident gains a lot: investigating without logs is rebuilding a scene without cameras.
+
+### Example: sending logs off the machine (rsyslog)
+
+> The configuration examples in this section and in section 4 **have not been tested** by the author. Adjust and validate them in a lab before using them in production.
+
+```conf
+# /etc/rsyslog.d/90-remote-forward.conf
+global(
+  DefaultNetstreamDriver="gtls"
+  DefaultNetstreamDriverCAFile="/etc/ssl/certs/ca-logs.pem"
+)
+
+module(load="imfile")
+input(type="imfile" File="/var/log/nginx/access.log" Tag="nginx-access:")
+
+*.* action(type="omfwd"
+  target="logs.example.com" port="6514" protocol="tcp"
+  StreamDriver="gtls" StreamDriverMode="1"
+  StreamDriverAuthMode="x509/name"
+  StreamDriverPermittedPeers="logs.example.com"
+  action.resumeRetryCount="-1"
+  queue.type="LinkedList" queue.filename="fila_logs"
+  queue.maxdiskspace="1g" queue.saveonshutdown="on")
+```
+
+The point is `omfwd` with TLS: the log leaves the machine as soon as it is generated, so someone who breaks into the server cannot erase what was already sent. The disk queue holds the lines if the vault is unavailable for a while.
+
+### Example: synchronized clock (chrony)
+
+```conf
+# /etc/chrony/chrony.conf
+server a.st1.ntp.br iburst
+server b.st1.ntp.br iburst
+```
+
+```bash
+chronyc tracking     # shows the current offset from the time source
+chronyc sources -v   # lists the sources and whether they are reachable
+timedatectl          # confirms the time zone and whether the clock is synchronized
+```
+
+Without this step, a WAF line and a database line that are 40 seconds apart can invert the order of events.
+
+### Example: recording changes to accounts and executions (auditd)
+
+```conf
+# /etc/audit/rules.d/investigation.rules
+-w /etc/passwd  -p wa -k identity
+-w /etc/shadow  -p wa -k identity
+-w /etc/sudoers -p wa -k privileges
+-a always,exit -F arch=b64 -S execve -F euid=33 -k web_server_exec
+```
+
+```bash
+ausearch -k identity -ts today   # account changes today
+aureport -k --summary            # summary by key
+```
+
+The last rule records every execution by the web server user (UID 33 on Debian and Ubuntu). It is what would make the process in `/tmp` from the previous example show up.
+
+### Example: alerting when a log "goes quiet"
+
+```bash
+# lists the file if nothing was written in the last 10 minutes
+find /var/log/nginx -name 'access.log' -mmin +10 -print
+```
+
+In production this becomes a SIEM alert. The idea is the same: **missing logs are also a signal**.
+
+## 4. When it happens: the response cycle
+
+![Response cycle: detect, contain, eradicate, recover and learn, with the warning to preserve evidence before changing anything](/images/dia-zero/en/03-resposta-incidente.svg)
+
+*Detect, contain, eradicate, recover and learn, with the warning to preserve evidence.*
+
+The most cited guide is **NIST SP 800-61**. Revision 3, published in April 2025, maps incident response onto the six functions of **CSF 2.0**: govern, identify and protect are the **preparation**, and **detect, respond and recover** are the response itself. Many guides still describe the six phases of Revision 2 (preparation, detection and analysis, containment, eradication, recovery and post-incident activity). For practical purposes, the stages below cover the essentials, but remember that they overlap and repeat. ([NIST](https://csrc.nist.gov/projects/incident-response), [Tandem](https://tandem.app/blog/updated-nist-incident-response-guidance-sp-800-61-rev-3))
+
+### 4.1 Detect
+
+* **Confirm** that the incident is real and not a false alarm.
+* **Record the time the team became aware.** This matters for legal deadlines, as we will see.
+* Gather whoever needs to take part: IT, security, legal, communications and leadership.
+
+### 4.2 Contain
+
+Containment seeks to **stop the damage from spreading**, without destroying evidence. Options vary by case, and a practical rule described in zero-day playbooks is: if the fix cannot be applied now, **contain first** (isolation, segmentation, virtual patching or restricting the service) and then check whether the system stayed exposed long enough to require a compromise hunt. ([NHIMG](https://nhimg.org/zero-day-exploitation-playbook))
+
+* **Isolate the network instead of powering off.** Sources converge on preferring network isolation over shutdown, because powering off erases memory. One of them reports that CISA recommends powering a device off only when it cannot be disconnected. Shutdown is left for cases such as ransomware actively encrypting.
+* **Virtual patching and WAF rules.** Blocking the attack pattern at the edge reduces exploitability but, as one guide reminds, **does not confer immunity**. If a credible exploitation path exists, it is better to also isolate the workload or turn the feature off.
+* **Restrict access:** allowlists of IPs, extra authentication in front of the service and, if the function can stop, taking the service offline.
+* **Revoke credentials carefully.** Sources differ on timing. One described path is to revoke during containment only credentials **in active use by the attacker** and easy to replace, and to rotate everything in scope during eradication. There is also a risk described in a vendor playbook: certain credential-stealing programs **watch the stolen token** and wipe the computer if it is revoked. So, in those cases, the sequence is to isolate the device, remove the watching mechanism, preserve the evidence and only then revoke. This comes from vendor playbooks, not an official standard.
+
+### Example: virtual patch while there is no fix
+
+Suppose a flaw in an old endpoint is being exploited and there is no fix yet. In the meantime, the path is blocked:
+
+```nginx
+# nginx: only the team's network reaches the endpoint
+location = /admin/legacy-upload {
+    allow 203.0.113.0/24;   # team network
+    deny  all;
+}
+```
+
+```apacheconf
+# ModSecurity: virtual patch until the fix ships
+SecRule REQUEST_URI "@beginsWith /admin/legacy-upload" \
+  "id:100001,phase:1,deny,status:403,log,\
+   msg:'Virtual patch: legacy endpoint blocked until the fix ships'"
+```
+
+This **reduces exploitability but is not immunity**: if another path to the same flaw exists, the block does not help. That is why the ideal is to combine it with isolation or to turn the feature off, when possible.
+
+### 4.3 Preserve evidence (before changing anything)
+
+This is the step most often lost in the rush. Several guides say to **gather logs, configuration and memory and disk images before applying fixes**, because the patch can erase traces. A cited example of official guidance: in alert ED 25-03 on Cisco ASA devices, CISA asked agencies to collect core dumps and, if compromised, to disconnect the device without powering it off. The details come from secondary summaries.
+
+![Order of volatility: from what disappears first (registers and cache) to what lasts longer (remote logs and copies)](/images/dia-zero/en/04-ordem-volatilidade.svg)
+
+*The order of volatility, from most to least volatile.*
+
+The golden rule is the **order of volatility**, described in **RFC 3227** (IETF, 2002). Collection goes from most volatile to least volatile:
+
+1. Registers and cache (milliseconds).
+2. Network state and process table.
+3. Memory (RAM).
+4. Swap and temporary files.
+5. Disk.
+6. Remote logs and copies.
+
+Sources differ a little on the exact list, but agree on the logic: what disappears at power-off comes first.
+
+* **Every action alters the machine.** So it is recommended to run collection tools from external media (USB or a network share), not from the suspect machine.
+* **Hash and chain of custody.** Each copy should get a **hash** (a mathematical fingerprint). A matching hash is what makes the copy usable as proof of what the original contained. The **chain of custody** records who collected it, when, with what tool and where it was stored.
+* **Preserve the original logs.** They may be needed as evidence.
+* In **cloud and AI** environments, much of the most useful evidence, such as weights, checkpoints and data lineage, sits with the provider. A 2026 paper argues that the order of volatility needs to be adapted to these systems.
+
+### Example: collection in order of volatility (Linux)
+
+Run it from **external media**, after isolating the machine from the network, **without powering it off**. The `/mnt/evidence` directory must be on an external disk, not on the machine itself:
+
+```bash
+E=/mnt/evidence; mkdir -p "$E"
+
+# 1) the time first, in UTC, and the most volatile data
+date -u +"%Y-%m-%dT%H:%M:%SZ" | tee "$E/00-time.txt"
+ps -eo pid,ppid,user,lstart,cmd --sort=start_time > "$E/01-processes.txt"
+ss -tunap                                         > "$E/02-connections.txt"
+who -a                                            > "$E/03-sessions.txt"
+last -n 50 -F                                     > "$E/04-last-logins.txt"
+
+# 2) memory: use a dedicated capture tool (for example, AVML or LiME)
+#    from external media, and record the command used
+
+# 3) logs and temporary files
+journalctl --since "2026-11-24 01:00" --until "2026-11-24 04:00" -o short-iso > "$E/05-journal.txt"
+cp -a /var/log/nginx "$E/06-nginx-logs"
+ls -la /tmp /var/tmp > "$E/07-temp-files.txt"
+
+# 4) hash everything that was collected
+cd "$E" && find . -type f ! -name SHA256SUMS -exec sha256sum {} + > SHA256SUMS
+sha256sum -c SHA256SUMS      # confirms nothing changed afterwards
+```
+
+### Example: disk image
+
+Ideally use a write blocker, in hardware or in software:
+
+```bash
+dd if=/dev/sda of=/mnt/evidence/disk-web01.img bs=4M conv=noerror,sync status=progress
+sha256sum /dev/sda /mnt/evidence/disk-web01.img   # both hashes must be equal
+```
+
+If the hashes match, the copy reproduces the original. That is what "a matching hash" means.
+
+### Example: chain-of-custody record
+
+```yaml
+evidence: disk-web01.img
+sha256: "<paste the hash>"
+collected_by: "Analyst A (security)"
+collected_at: "2026-11-24T04:12:00Z"
+origin: "web01, /dev/sda, after network isolation"
+tool: "dd (coreutils), run from external media"
+stored_in: "evidence-vault/case-0042/ (read-only)"
+transfers: []        # every change of hands goes here, with time and name
+```
+
+### Example: logs that betray tampering (hash chain)
+
+A simple trick: each line gets a hash that depends on the previous one. Changing or deleting a line **breaks everything from there on**:
+
+```python
+#!/usr/bin/env python3
+"""Chains hashes line by line: changing or deleting a line breaks the chain."""
+import hashlib, sys
+
+def chain(path, previous="0" * 64):
+    with open(path, "rb") as f:
+        for line in f:
+            previous = hashlib.sha256(previous.encode() + line).hexdigest()
+            yield previous
+
+if __name__ == "__main__":
+    for h in chain(sys.argv[1]):
+        print(h)
+```
+
+Output on the fictional `app.log`, before and after changing `ERROR` to `WARN` on the first line (first 12 characters of each hash):
+
+```text
+original:   f9022f39c05f  6c9985409e90  68b63b9484e0
+modified:   5c3cf15243dd  dc8133f0545b  43b643379acf
+```
+
+All three changed, even though only one line was edited. Storing the last hash elsewhere lets you prove later that the file was not touched.
+
+### 4.4 Eradicate the cause
+
+* **Find out how the intruder got in** and close that door. Without that, everything happens again.
+* **Remove the intruder's access:** created accounts, keys, scheduled tasks and any other persistence mechanism.
+* **Apply the fix**, when it exists.
+* **Rotate credentials in scope.** One source suggests starting with the most powerful (domain administrators), then service accounts, then users. Another says to go from the most powerful credential to the least and **confirm that each old credential really fails**, rather than just having been replaced. Sources note that the right order depends on each credential's reach.
+
+### 4.5 Recover
+
+* **Restore from backups taken before the compromise**, not from just any backup.
+* In environments with centralized identity, restore services **in dependency order** (for example, certificates, then directory, then identity provider) and **validate each layer** before moving on.
+* Return gradually and **monitor closely**, because the intruder may have left another door.
+
+### 4.6 Learn
+
+* What failed, what worked, which controls to adjust.
+* Update the plan and communicate what needs to be communicated.
+* NIST Rev. 3 stresses that improvement is no longer just a meeting at the end: it is a continuous cycle.
+
+## 5. Rebuilding the timeline
+
+![Records from three layers (network, server and application) ordered by time, showing entry, persistence, collection and exfiltration of data](/images/dia-zero/en/05-linha-do-tempo-forense.svg)
+
+*Records from three layers ordered by time (illustrative example).*
+
+With the logs and images collected, the core investigative work is building a **timeline**: what happened, in what order and from where.
+
+* **Cross-check sources.** An edge log, a server log and a database log, together and ordered by time, tell a story none of them tells alone.
+* **Synchronized clocks.** If the times do not match, the story comes out wrong.
+* **Separate the phases:** entry, persistence, movement, collection and exfiltration of data.
+* **Use indicators.** **Indicators of compromise (IOCs)** are signals such as file hashes, IP addresses and domains. They help look for the same attack elsewhere on the network, but they are fragile, because the attacker changes them easily.
+* **Climb the pyramid of pain.** David Bianco's model orders indicators by the cost to the attacker of changing them, from hashes up to **behavior (TTPs)** at the top. MITRE's guidance is to prefer analysis based on **tactics, techniques and procedures** over fragile indicators. In practice: a hash identifies a file, but a behavior identifies a way of operating. ([MITRE](https://www.mitre.org/sites/default/files/2021-11/prs-19-3892-ttp-based-hunting.pdf))
+* **Hypothesis-driven hunting.** Experienced teams describe a possible intrusion and test that hypothesis against the available data.
+
+### Example: merging the three sources into one
+
+The script below reads several log files, converts the timestamps and prints everything in chronological order:
+
+```python
+#!/usr/bin/env python3
+"""Merges logs from several sources into a single timeline (UTC)."""
+import sys
+from datetime import datetime
+
+def read(path):
+    source = path.rsplit("/", 1)[-1].removesuffix(".log")
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.rstrip("\n")
+            if not line:
+                continue
+            stamp, _, rest = line.partition(" ")
+            yield datetime.fromisoformat(stamp.replace("Z", "+00:00")), source, rest
+
+events = [e for path in sys.argv[1:] for e in read(path)]
+for when, source, rest in sorted(events):
+    print(f"{when:%H:%M:%S}  [{source:<6}] {rest}")
+```
+
+Usage: `python3 merge_logs.py waf.log server.log app.log`. The output with the fictional files from section 3:
+
+```text
+02:13:07  [waf   ] waf 203.0.113.50 POST /admin/legacy-upload rule=none status=200
+02:13:08  [server] host web01 process started: /tmp/.cache/updater user=www-data
+02:13:09  [waf   ] waf 203.0.113.50 POST /admin/legacy-upload rule=none status=500
+02:13:10  [app   ] app web01 ERROR out of memory in request handler
+02:14:40  [server] host web01 useradd: new user name=svc-backup2 uid=1004
+02:20:12  [app   ] db db01 SELECT * FROM customers rows=1204331 user=svc-backup2
+02:30:55  [server] host web01 file read: /var/www/uploads/export/ (4012 files)
+02:31:01  [app   ] app web01 export finished file=/var/www/uploads/export/all.csv
+02:31:02  [waf   ] waf 10.0.0.12 egress 2147483648 bytes to 198.51.100.77:443
+```
+
+Now the story shows: a request, a new process and an error within three seconds (**entry**), an account created (**persistence**), a huge query with that account, the export and the 2 GB upload (**collection and exfiltration**).
+
+### Example: searching for an IOC and measuring what left
+
+With an `access.log` in common format (also fictional):
+
+```bash
+# who appears most in the logs? (the most frequent lines are often the interesting ones)
+awk '{print $1}' access.log | sort | uniq -c | sort -nr
+#       3 203.0.113.50
+#       1 198.51.100.9
+
+# events in a window of minutes
+grep '24/Nov/2026:02:1[3-4]' access.log | wc -l
+# 2
+
+# everything an IOC (here, an IP) did, in short form
+printf '203.0.113.50\n' > iocs.txt
+grep -F -f iocs.txt access.log | awk '{print $4, $7, $9}'
+# [24/Nov/2026:02:13:07 /admin/legacy-upload 200
+# [24/Nov/2026:02:13:09 /admin/legacy-upload 500
+# [24/Nov/2026:02:20:30 /export/all.csv 200
+
+# large responses (here, above 10 MB): possible data exfiltration
+awk '$10 > 10000000 {print $1, $7, $10}' access.log
+# 203.0.113.50 /export/all.csv 98765432
+```
+
+The last command shows the idea of the section: **an isolated IP proves nothing, but the IP plus a large file downloaded minutes later forms a pattern**. And it recalls the pyramid: an IOC is fragile, because the attacker changes IP, but the behavior "create an account, query everything and export" is harder to change.
+
+In the diagram example, the times are fictional. The message is the method: three sources, one order and the phases of the attack showing up.
+
+## 6. Who did it? Attribution
+
+![Attribution in layers, from the IP address (weakest) to the author's identity (hardest), and the low, moderate and high confidence levels](/images/dia-zero/en/06-atribuicao-niveis.svg)
+
+*From the IP address to the author's identity, and the confidence levels.*
+
+Attribution is the most discussed stage and the most fragile. It answers the question "who is behind this?", and practice sources say it is built in **layers of evidence**, from weakest to strongest:
+
+1. **IP address:** abundant and easy to fake.
+2. **Infrastructure:** servers and domains. Harder to change, but ransomware groups use shared infrastructure and stolen tools on purpose, which can create false leads.
+3. **Malware and tools:** reused code, libraries and build artifacts.
+4. **Tactics and techniques (TTPs):** behavior. One source argues it is the most reliable layer, because it is harder to change than tools and infrastructure.
+5. **Author identity:** the hardest, and what headlines usually claim.
+
+### False flags
+
+Attackers can **plant false clues**: language, compile time, copied code snippets or infrastructure patterns. A described example is the Olympic Destroyer attack, in which a Russian unit tried to plant false flags, but reuse of infrastructure led to its identification.
+
+### Confidence levels
+
+Sources describe confidence as **graded**, not binary:
+
+* **Low:** little data and plausible alternatives exist.
+* **Moderate:** the case holds up, but a specific new piece of evidence could overturn it.
+* **High:** several independent lines of evidence converge, and the analyst looked for data that would contradict the conclusion and found none.
+
+One source notes that **omitting the confidence level in a published assessment suggests a certainty the evidence does not support**. I did not find how specific agencies, such as ODNI or the NSA, formally apply these levels, so this text describes community practice, not a single official standard.
+
+### A cluster is not a group
+
+Intelligence companies give **provisional names to activity clusters**. Mandiant, for example, uses "UNC" labels for activity not yet classified, and a cluster can become, years later, a named group (such as FIN11, formerly TEMP.Warlock and UNC902). A UNC is **a group of activity, not an organization**. Vendors draw different boundaries, so aliases do not map one to one. A name with "UNC" is a sign of unfinished work. ([SecurityWeek](https://www.securityweek.com/whats-threat-group-name-inside-look-intricacies-nation-state-attribution/))
+
+### The rule of prudence
+
+In this blog's articles we follow a rule: **we only call someone the author of an attack if that person or group claimed it.** When a vendor or a government attributes an attack, it appears as an **assessment**, with the confidence level and the source. Two recent examples we covered show why:
+
+* The attribution of a PHP2Shell-linked campaign to a state-backed group came from **a single company**, described as high confidence by it and as moderate in another report, with no independent confirmation.
+* Unit 42 at one point linked an intrusion at a European agency to PHP2Shell and then **withdrew the update**, saying it could not confirm the link.
+
+**Claiming is not proving.** A group announcing an attack on a forum does not confirm it happened, as we saw in the São Paulo Civil Police case. And a true claim does not prove, on its own, who is behind a made-up name.
+
+## 7. In Brazil: deadlines and records
+
+![Summary for Brazil: notice to the ANPD and to data subjects within 3 business days from awareness, and retention of connection records for 1 year and application access records for 6 months](/images/dia-zero/en/07-brasil-prazos-e-registros.svg)
+
+*ANPD, data subjects and log retention.*
+
+### Notice to the ANPD: 3 business days from awareness
+
+**CD/ANPD Resolution No. 15/2024** sets a deadline of **three business days** for the controller to notify the ANPD of a security incident, unless a deadline exists in specific legislation. The obligation applies to incidents involving **personal data** that may cause **relevant risk or harm to data subjects**. An attack that does not touch personal data, or that creates no such risk, does not trigger the notice.
+
+The most important point is **when the count starts**: it runs from the date the controller **became aware** of the incident, not from the date the attack occurred. That is why, at the detection stage (section 4.1), it is worth recording precisely when the team found out and who did.
+
+Other points described by legal analyses:
+
+* According to the law firm Souto Correa, the deadline can reach six business days for small-scale processing agents.
+* Notice to the affected **data subjects** also has a three-business-day deadline from awareness.
+* Complementary notices have a 20-business-day deadline.
+* A public agency page treats the three-day deadline as "recommended", while the resolution treats it as mandatory. Check the official text.
+
+([Souto Correa](https://www.soutocorrea.com.br/client-alerts/regulamentacao-de-comunicacao-de-incidente-de-seguranca/), [Machado Meyer](https://www.machadomeyer.com.br/pt/inteligencia-juridica/publicacoes-ij/direito-digital/anpd-publica-regulamento-de-comunicacao-de-incidente-de-seguranca))
+
+How business days are counted, what counts as "awareness" and the exceptions all have legal nuances. On these points, the decision should go through legal counsel and the data protection officer (DPO), not through a rule of thumb.
+
+### Record retention: the Marco Civil da Internet
+
+* **Art. 13:** the administrator of an autonomous system must keep **connection records**, confidentially, in a controlled and secure environment, for **1 year**.
+* **Art. 15:** an internet application provider organized as a legal entity, carrying out the activity in an organized, professional and for-profit way, must keep **application access records** for **6 months**.
+* **Precautionary request:** the police or administrative authority or the Public Prosecutor's Office may require records to be kept for longer. There is no cap on this request, which jurists criticize, and there is also controversy about when the periods start running. A Conjur analysis criticizes the inconsistency between the two periods and notes that the Supreme Court did not address the point. ([Legale](https://legale.com.br/blog/prazo-de-guarda-de-dados-no-marco-civil-regras-e-conflitos-juridicos/), [Conjur](https://www.conjur.com.br/2025-ago-27/incoerencia-dos-prazos-de-guarda-de-dados-no-marco-civil-o-conflito-nao-solucionado-pelo-stf/))
+
+### Where to report
+
+* **CERT.br (private networks and the internet in general):** receives reports by email, at cert@cert.br. The guidance is to notify the contacts of the source network directly and keep CERT.br in copy. It asks for full logs or other evidence, with **date, time and time zone**, and complete incident data. ([CERT.br](https://cert.br/docs/notificacoes/))
+* **CTIR Gov (federal public administration bodies):** the contact point is ctir@ctir.gov.br, through the agency's response team, with the agency name and incident type in the subject. CTIR Gov **is not a police authority and does not carry out criminal investigations**; it acts in technical coordination. ([GSI](https://www.gov.br/gsi/pt-br/assuntos/ctir/operacoes-e-servicos/notificacao-de-incidentes/orientacoes-para-notificacoes-de-incidentes-ciberneticos))
+* **Police:** for crimes, the path is the police authority. One source suggests starting with the cybercrime unit in your region. A Federal Police email address that appears in an article was not confirmed in an official source, so I do not reproduce it.
+
+**Preserving evidence for court purposes** (for example, a notarial record) did not appear in the sources I consulted. Talk to a lawyer before acting, because how the evidence is collected can affect its value.
+
+*This is an informational summary, not legal advice. Check the official text of the resolution and of Law 12,965/2014.*
+
+## 8. Checklists
+
+### Before (preparation)
+
+* Logs sent off the host, to storage that source administrators cannot alter.
+* Clocks synchronized across all systems.
+* Alerts for: a silent log source, an audit policy change, deleted logs.
+* Inventory of what is exposed to the internet and who is responsible for each system.
+* A response plan with names, phone numbers and pre-approved decisions, such as "who can take the service offline".
+* Tested and isolated backups.
+* Contacts already identified: legal, data protection officer (DPO), CERT.br or CTIR Gov, and the police unit.
+
+### During
+
+* Note the **time the team found out**.
+* **Contain without destroying:** isolate the network instead of powering off, with exceptions.
+* **Preserve:** logs, configuration, memory and disk, with hash and chain of custody.
+* Record every action taken, with time and person responsible.
+* Revoke credentials in order and with care.
+* Notify the ANPD and data subjects within the deadline, when personal data is involved.
+
+### After
+
+* Eradicate the cause, restore from clean backups and validate.
+* Monitor closely for a period.
+* Review what failed and adjust controls.
+* Update the plan.
+
+## 9. Myth or fact
+
+### "The zero-day is the most common type of attack" — false
+
+Most of the growth in exploitation in 2026 came from **n-days**, flaws already fixed, according to the analyses cited. Updating quickly remains the most effective defense against most attacks.
+
+### "With no patch, there is nothing to do" — false
+
+You can contain, reduce exposure, apply a virtual patch, segment, restrict access, monitor and hunt for signs of compromise. A virtual patch does not confer immunity, but it reduces risk.
+
+### "The attacker's IP shows who it was" — false
+
+The IP is the weakest evidence in the pyramid and is easy to disguise.
+
+### "Just turn off the compromised server" — not always
+
+Powering off erases memory and can destroy evidence. Generally, it is preferable to isolate the machine from the network. Shutdown is left for specific cases, such as ransomware actively encrypting, or when disconnecting is not possible.
+
+### "Apply the fix first and investigate later" — risky
+
+The patch can erase traces. The ideal is to collect the evidence first, without delaying containment of what is at risk.
+
+### "A group claimed it, so it was them" — false
+
+A claim is not proof. Groups can lie, exaggerate or reuse old data, and an authority cannot treat a claim as confirmation.
+
+### "Attribution is an exact science" — false
+
+It is graded, with confidence levels, and can be revised with new evidence. Serious reports state the level.
+
+### "The ANPD deadline starts when the attack happened" — false
+
+It starts when the controller **becomes aware** of the incident.
+
+## 10. Glossary
+
+* **Zero-day:** a flaw exploited before a public fix exists.
+* **N-day:** a flaw exploited after the fix or disclosure.
+* **Virtual patch:** a protection rule (for example, in a WAF) that blocks the attack pattern without fixing the software.
+* **WAF:** web application firewall.
+* **SIEM:** a system that gathers and correlates logs from several sources.
+* **EDR:** a tool that monitors and responds to activity on workstations and servers.
+* **IOC:** indicator of compromise, such as a hash, IP or domain.
+* **TTP:** tactics, techniques and procedures, that is, the attacker's behavior.
+* **Hash:** a mathematical fingerprint of a file or copy.
+* **Chain of custody:** a record of who handled the evidence, when and how.
+* **Order of volatility:** the order for collecting evidence, from what disappears first to what lasts longest.
+* **False flag:** a clue planted to mislead attribution.
+* **Cluster (UNC):** a provisional grouping of activity, not yet attributed to a named group.
+* **ANPD:** Brazil's National Data Protection Authority.
+* **CTIR Gov / CERT.br:** incident response centers of the federal government and of the Brazilian internet, respectively.
+
+## 11. What we can conclude
+
+An attack, including a zero-day, leaves traces, and the quality of the investigation depends on decisions made **beforehand**: having logs stored outside the attacked machine, synchronized clocks, a plan and contacts ready. During the incident, what decides the outcome most is the order: **contain without destroying, preserve before changing, rebuild with several sources**.
+
+On who did it, the honest answer, most of the time, is "we don't know yet" or "with this level of confidence". Attributing with certainty requires several independent lines of evidence, and even then it can be revised. For anyone reading attack news, the useful question is less "who did it?" and more "what is proven, and what is the confidence level of whoever claims it?".
+
+## Sources
+
+**Zero-days and disclosure**
+
+* [Google Cloud: GTIG, agentic activity crosses a threshold](https://cloud.google.com/blog/topics/threat-intelligence/agentic-threat-activity-crosses-a-significant-threshold)
+* [ScanTitan: zero-day statistics](https://scantitan.com/research/zero-day-statistics/)
+* [Stingrai: zero-day statistics in 2026](https://www.stingrai.io/blog/zero-day-statistics-2026)
+* [SC World: first AI-built zero-day](https://www.scworld.com/news/google-reports-first-known-ai-assisted-zero-day-exploit-in-the-wild)
+* [Help Net Security: Project Zero will disclose flaws after 90 days](https://www.helpnetsecurity.com/2026/11/16/google-project-zero-disclosure-policy/)
+* [Project Zero: Policy and Disclosure, 2026 Edition](https://projectzero.google/2026/11/disclosure-policy.html)
+
+**Incident response and evidence**
+
+* [NIST: incident response (SP 800-61 Rev. 3)](https://csrc.nist.gov/projects/incident-response)
+* [Tandem: what changed in SP 800-61 Rev. 3](https://tandem.app/blog/updated-nist-incident-response-guidance-sp-800-61-rev-3)
+* [NIST SP 800-92 (Wikipedia)](https://en.wikipedia.org/wiki/NIST_SP_800-92)
+* [NHIMG: zero-day exploitation playbook](https://nhimg.org/zero-day-exploitation-playbook)
+* [NHIMG: containment versus eradication](https://nhimg.org/containment-vs-eradication-guide)
+* [SC World: sequencing identity containment and recovery](https://www.scworld.com/tech-explainer/how-to-sequence-identity-containment-and-recovery-in-a-ransomware-incident)
+* [SANS: digital evidence collection](https://www.sans.org/blog/best-practices-in-digital-evidence-collection)
+* [Order of volatility (RFC 3227)](https://getacademy.blog/order-of-volatility-digital-forensics-guide)
+* [MITRE: TTP-based hunting](https://www.mitre.org/sites/default/files/2021-11/prs-19-3892-ttp-based-hunting.pdf)
+
+**Attribution**
+
+* [Forensicspot: attribution in cyber investigations](https://forensicspot.com/topics/cyber-forensics/attribution-in-cyber-investigations)
+* [NHIMG: threat attribution, levels, evidence and confidence](https://nhimg.org/cyber-threat-attribution-guide)
+* [SecurityWeek: what's in a threat group name](https://www.securityweek.com/whats-threat-group-name-inside-look-intricacies-nation-state-attribution/)
+
+**Brazil**
+
+* [Souto Correa: incident notification regulation](https://www.soutocorrea.com.br/client-alerts/regulamentacao-de-comunicacao-de-incidente-de-seguranca/)
+* [Machado Meyer: incident notification regulation](https://www.machadomeyer.com.br/pt/inteligencia-juridica/publicacoes-ij/direito-digital/anpd-publica-regulamento-de-comunicacao-de-incidente-de-seguranca)
+* [Legale: data retention periods in the Marco Civil](https://legale.com.br/blog/prazo-de-guarda-de-dados-no-marco-civil-regras-e-conflitos-juridicos/)
+* [Conjur: inconsistency in data retention periods](https://www.conjur.com.br/2025-ago-27/incoerencia-dos-prazos-de-guarda-de-dados-no-marco-civil-o-conflito-nao-solucionado-pelo-stf/)
+* [CERT.br: notifications](https://cert.br/docs/notificacoes/)
+* [GSI: guidance for notifying incidents to CTIR Gov](https://www.gov.br/gsi/pt-br/assuntos/ctir/operacoes-e-servicos/notificacao-de-incidentes/orientacoes-para-notificacoes-de-incidentes-ciberneticos)

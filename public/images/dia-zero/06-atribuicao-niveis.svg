@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="t d"><title id="t">Níveis de evidência e de confiança na atribuição</title><desc id="d">Do endereço IP à identidade do autor, quanto mais forte a evidência mais difícil de falsificar e de obter. A confiança é baixa, moderada ou alta.</desc><rect width="1200" height="620" fill="#fcfcfb"/><g font-family="Helvetica, Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif">
+<text x="60" y="64" font-size="34" font-weight="700" fill="#0b0b0b" text-anchor="start">Quem foi? A atribuição é graduada</text><text x="60" y="102" font-size="21" font-weight="400" fill="#52514e" text-anchor="start">Quanto mais forte o tipo de evidência, mais difícil de falsificar, e mais difícil de obter</text>
+<rect x="220.0" y="140" width="260" height="48" rx="6" fill="#eb6834"/>
+<text x="234.0" y="162" font-size="18" font-weight="700" fill="#ffffff" text-anchor="start">Identidade do autor</text>
+<text x="234.0" y="180" font-size="14" font-weight="400" fill="#ffffff" text-anchor="start">o mais difícil</text>
+<rect x="180.0" y="198" width="340" height="48" rx="6" fill="#2a78d6"/>
+<text x="194.0" y="220" font-size="18" font-weight="700" fill="#ffffff" text-anchor="start">Táticas e técnicas (TTPs)</text>
+<text x="194.0" y="238" font-size="14" font-weight="400" fill="#ffffff" text-anchor="start">comportamento</text>
+<rect x="140.0" y="256" width="420" height="48" rx="6" fill="#4f78a8"/>
+<text x="154.0" y="278" font-size="18" font-weight="700" fill="#ffffff" text-anchor="start">Malware e ferramentas</text>
+<text x="154.0" y="296" font-size="14" font-weight="400" fill="#ffffff" text-anchor="start">código reutilizado</text>
+<rect x="100.0" y="314" width="500" height="48" rx="6" fill="#6f7e91"/>
+<text x="114.0" y="336" font-size="18" font-weight="700" fill="#ffffff" text-anchor="start">Infraestrutura</text>
+<text x="114.0" y="354" font-size="14" font-weight="400" fill="#ffffff" text-anchor="start">servidores e domínios</text>
+<rect x="60.0" y="372" width="580" height="48" rx="6" fill="#8f8e88"/>
+<text x="74.0" y="394" font-size="18" font-weight="700" fill="#ffffff" text-anchor="start">Endereço IP</text>
+<text x="74.0" y="412" font-size="14" font-weight="400" fill="#ffffff" text-anchor="start">fácil de falsificar</text>
+<rect x="700" y="140" width="440" height="292" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="720" y="174" font-size="21" font-weight="700" fill="#0b0b0b" text-anchor="start">Nível de confiança</text>
+<rect x="720" y="206" width="92" height="34" rx="6" fill="#c9c8c2"/>
+<text x="766" y="229" font-size="17" font-weight="700" fill="#0b0b0b" text-anchor="middle">Baixa</text>
+<text x="824" y="222" font-size="16" font-weight="400" fill="#52514e" text-anchor="start">poucos dados e há</text>
+<text x="824" y="242" font-size="16" font-weight="400" fill="#52514e" text-anchor="start">alternativas plausíveis</text>
+<rect x="720" y="272" width="92" height="34" rx="6" fill="#f6c4ae"/>
+<text x="766" y="295" font-size="17" font-weight="700" fill="#0b0b0b" text-anchor="middle">Moderada</text>
+<text x="824" y="288" font-size="16" font-weight="400" fill="#52514e" text-anchor="start">o caso se sustenta, mas uma</text>
+<text x="824" y="308" font-size="16" font-weight="400" fill="#52514e" text-anchor="start">nova prova pode derrubá-lo</text>
+<rect x="720" y="338" width="92" height="34" rx="6" fill="#eb6834"/>
+<text x="766" y="361" font-size="17" font-weight="700" fill="#0b0b0b" text-anchor="middle">Alta</text>
+<text x="824" y="354" font-size="16" font-weight="400" fill="#52514e" text-anchor="start">várias linhas independentes</text>
+<text x="824" y="374" font-size="16" font-weight="400" fill="#52514e" text-anchor="start">convergem</text>
+<text x="720" y="404" font-size="16" font-weight="700" fill="#eb6834" text-anchor="start">Atacantes podem plantar pistas falsas</text>
+<text x="720" y="424" font-size="16" font-weight="700" fill="#eb6834" text-anchor="start">(falsa bandeira).</text>
+<rect x="60" y="452" width="1080" height="86" rx="8" fill="#ffffff" stroke="#eb6834" stroke-width="3"/>
+<text x="84" y="484" font-size="20" font-weight="700" fill="#0b0b0b" text-anchor="start">Sem reivindicação do próprio grupo ou decisão da Justiça,</text>
+<text x="84" y="512" font-size="20" font-weight="400" fill="#0b0b0b" text-anchor="start">a atribuição é uma avaliação, e não uma confirmação. Relatórios sérios informam o nível de confiança.</text>
+<text x="60" y="580" font-size="17" font-weight="400" fill="#52514e" text-anchor="start">Níveis de confiança conforme artigos de prática em inteligência de ameaças; não é um padrão oficial único</text>
+</g></svg>

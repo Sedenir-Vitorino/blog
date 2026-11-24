@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="690" viewBox="0 0 1200 690" role="img" aria-labelledby="t d"><title id="t">Reconstrução da linha do tempo de um ataque</title><desc id="d">Registros de três camadas, ordenados por hora, formam uma linha do tempo com entrada, permanência, coleta e saída. Exemplo ilustrativo.</desc><rect width="1200" height="690" fill="#fcfcfb"/><g font-family="Helvetica, Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif">
+<text x="60" y="64" font-size="34" font-weight="700" fill="#0b0b0b" text-anchor="start">Montando a linha do tempo</text><text x="60" y="102" font-size="21" font-weight="400" fill="#52514e" text-anchor="start">Os registros de cada camada, juntos e ordenados por hora, mostram o que o invasor fez</text>
+<rect x="60" y="140" width="340" height="150" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="74" y="170" font-size="18" font-weight="700" fill="#52514e" text-anchor="start">WAF / rede</text>
+<text x="74" y="201" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:13:07 requisição incomum</text>
+<rect x="68" y="212" width="324" height="28" rx="4" fill="#f6c4ae"/>
+<text x="74" y="233" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:13:09 resposta 500</text>
+<text x="74" y="265" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:31:02 envio de 2 GB</text>
+<rect x="430" y="140" width="340" height="150" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="444" y="170" font-size="18" font-weight="700" fill="#52514e" text-anchor="start">Servidor</text>
+<text x="444" y="201" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:13:08 processo novo</text>
+<rect x="438" y="212" width="324" height="28" rx="4" fill="#f6c4ae"/>
+<text x="444" y="233" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:14:40 conta criada</text>
+<text x="444" y="265" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:30:55 leitura de arquivos</text>
+<rect x="800" y="140" width="340" height="150" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="814" y="170" font-size="18" font-weight="700" fill="#52514e" text-anchor="start">Aplicação / banco</text>
+<text x="814" y="201" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:13:10 erro de memória</text>
+<rect x="808" y="212" width="324" height="28" rx="4" fill="#f6c4ae"/>
+<text x="814" y="233" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:20:12 consulta em massa</text>
+<text x="814" y="265" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:31:01 exportação</text>
+<line x1="600" y1="296" x2="600" y2="340" stroke="#eb6834" stroke-width="3"/><polygon points="600,346 593,332 607,332" fill="#eb6834"/>
+<rect x="60" y="350" width="1080" height="190" rx="10" fill="#ffffff" stroke="#eb6834" stroke-width="3"/>
+<text x="84" y="386" font-size="21" font-weight="700" fill="#eb6834" text-anchor="start">Linha do tempo reconstruída (exemplo ilustrativo)</text>
+<text x="84" y="426" font-size="19" font-weight="700" fill="#0b0b0b" text-anchor="start">Entrada</text>
+<text x="250" y="426" font-size="17" font-weight="400" fill="#52514e" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:13:07 a 02:13:10</text>
+<text x="480" y="426" font-size="19" font-weight="400" fill="#0b0b0b" text-anchor="start">requisição incomum, processo novo, erro de memória</text>
+<text x="84" y="462" font-size="19" font-weight="700" fill="#0b0b0b" text-anchor="start">Permanência</text>
+<text x="250" y="462" font-size="17" font-weight="400" fill="#52514e" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:14:40</text>
+<text x="480" y="462" font-size="19" font-weight="400" fill="#0b0b0b" text-anchor="start">conta criada</text>
+<text x="84" y="498" font-size="19" font-weight="700" fill="#0b0b0b" text-anchor="start">Coleta e saída</text>
+<text x="250" y="498" font-size="17" font-weight="400" fill="#52514e" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:20:12 a 02:31:02</text>
+<text x="480" y="498" font-size="19" font-weight="400" fill="#0b0b0b" text-anchor="start">consulta em massa, exportação e envio de 2 GB</text>
+<text x="60" y="578" font-size="19" font-weight="700" fill="#0b0b0b" text-anchor="start">Os horários precisam estar sincronizados entre os sistemas.</text>
+<text x="60" y="606" font-size="19" font-weight="400" fill="#0b0b0b" text-anchor="start">Sinais como arquivos, endereços e domínios (indicadores de comprometimento)</text>
+<text x="60" y="632" font-size="19" font-weight="400" fill="#0b0b0b" text-anchor="start">ajudam a procurar o mesmo ataque em outros lugares.</text>
+<text x="60" y="670" font-size="17" font-weight="400" fill="#52514e" text-anchor="start">Exemplo ilustrativo, com horários fictícios</text>
+</g></svg>

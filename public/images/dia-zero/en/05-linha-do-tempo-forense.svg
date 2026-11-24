@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="690" viewBox="0 0 1200 690" role="img" aria-labelledby="t d"><title id="t">Rebuilding an attack timeline</title><desc id="d">Records from three layers, ordered by time, form a timeline with entry, persistence, collection and exit. Illustrative example.</desc><rect width="1200" height="690" fill="#fcfcfb"/><g font-family="Helvetica, Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif">
+<text x="60" y="64" font-size="34" font-weight="700" fill="#0b0b0b" text-anchor="start">Building the timeline</text><text x="60" y="102" font-size="21" font-weight="400" fill="#52514e" text-anchor="start">Records from each layer, merged and ordered by time, show what the intruder did</text>
+<rect x="60" y="140" width="340" height="150" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="74" y="170" font-size="18" font-weight="700" fill="#52514e" text-anchor="start">WAF / network</text>
+<text x="74" y="201" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:13:07 unusual request</text>
+<rect x="68" y="212" width="324" height="28" rx="4" fill="#f6c4ae"/>
+<text x="74" y="233" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:13:09 response 500</text>
+<text x="74" y="265" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:31:02 2 GB sent out</text>
+<rect x="430" y="140" width="340" height="150" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="444" y="170" font-size="18" font-weight="700" fill="#52514e" text-anchor="start">Server</text>
+<text x="444" y="201" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:13:08 new process</text>
+<rect x="438" y="212" width="324" height="28" rx="4" fill="#f6c4ae"/>
+<text x="444" y="233" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:14:40 account created</text>
+<text x="444" y="265" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:30:55 files read</text>
+<rect x="800" y="140" width="340" height="150" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="814" y="170" font-size="18" font-weight="700" fill="#52514e" text-anchor="start">Application / database</text>
+<text x="814" y="201" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:13:10 memory error</text>
+<rect x="808" y="212" width="324" height="28" rx="4" fill="#f6c4ae"/>
+<text x="814" y="233" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:20:12 bulk query</text>
+<text x="814" y="265" font-size="16" font-weight="400" fill="#0b0b0b" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:31:01 export</text>
+<line x1="600" y1="296" x2="600" y2="340" stroke="#eb6834" stroke-width="3"/><polygon points="600,346 593,332 607,332" fill="#eb6834"/>
+<rect x="60" y="350" width="1080" height="190" rx="10" fill="#ffffff" stroke="#eb6834" stroke-width="3"/>
+<text x="84" y="386" font-size="21" font-weight="700" fill="#eb6834" text-anchor="start">Rebuilt timeline (illustrative example)</text>
+<text x="84" y="426" font-size="19" font-weight="700" fill="#0b0b0b" text-anchor="start">Entry</text>
+<text x="250" y="426" font-size="17" font-weight="400" fill="#52514e" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:13:07 to 02:13:10</text>
+<text x="480" y="426" font-size="19" font-weight="400" fill="#0b0b0b" text-anchor="start">unusual request, new process, memory error</text>
+<text x="84" y="462" font-size="19" font-weight="700" fill="#0b0b0b" text-anchor="start">Persistence</text>
+<text x="250" y="462" font-size="17" font-weight="400" fill="#52514e" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:14:40</text>
+<text x="480" y="462" font-size="19" font-weight="400" fill="#0b0b0b" text-anchor="start">account created</text>
+<text x="84" y="498" font-size="19" font-weight="700" fill="#0b0b0b" text-anchor="start">Exfiltration</text>
+<text x="250" y="498" font-size="17" font-weight="400" fill="#52514e" text-anchor="start" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">02:20:12 to 02:31:02</text>
+<text x="480" y="498" font-size="19" font-weight="400" fill="#0b0b0b" text-anchor="start">bulk query, export and 2 GB sent out</text>
+<text x="60" y="578" font-size="19" font-weight="700" fill="#0b0b0b" text-anchor="start">Clocks must be synchronized across systems.</text>
+<text x="60" y="606" font-size="19" font-weight="400" fill="#0b0b0b" text-anchor="start">Signals such as files, addresses and domains (indicators of compromise)</text>
+<text x="60" y="632" font-size="19" font-weight="400" fill="#0b0b0b" text-anchor="start">help look for the same attack elsewhere.</text>
+<text x="60" y="670" font-size="17" font-weight="400" fill="#52514e" text-anchor="start">Illustrative example, fictional times</text>
+</g></svg>

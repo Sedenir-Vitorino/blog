@@ -1,0 +1,652 @@
+---
+title: "Dia zero e rastreabilidade de ataques: como funciona a investigação, da contenção à atribuição"
+description: "O que é um dia zero, como um servidor guarda rastros, como se conduz uma resposta a incidente (conter, preservar evidências, eliminar, recuperar), como funciona a atribuição de um ataque e quais prazos e registros pesam no Brasil, com exemplos de logs e scripts."
+date: 2026-11-24
+lang: pt
+translationKey: "dia-zero-rastreabilidade-ataques-2026-11"
+tags: [seguranca, dia-zero, resposta-a-incidentes, forense, atribuicao]
+image: /images/dia-zero/capa-pt.png
+draft: false
+---
+
+> **Transparência:** este texto foi escrito com ajuda do Claude, um modelo da Anthropic. Os fatos vêm de fontes públicas citadas no fim. O conteúdo é educativo e defensivo. Os exemplos de código usam servidores, endereços e arquivos fictícios (faixas de documentação 203.0.113.0/24 e 198.51.100.0/24, example.com) e não trazem detalhes de como explorar falhas.
+
+*Texto escrito em 24 de novembro de 2026.*
+
+Quando uma empresa, um órgão público ou um blog é atacado, três perguntas surgem quase ao mesmo tempo: **como entraram**, **o que levaram ou fizeram** e **quem foi**. A terceira costuma ser a mais comentada e a mais difícil de responder. Antes dela vêm trabalhos menos glamorosos: conter o dano, preservar as provas, reconstruir a sequência de eventos e comunicar quem precisa saber.
+
+Este artigo explica esse caminho do começo ao fim. Começa pelo dia zero, o caso mais incômodo, em que não existe correção. Depois mostra onde um sistema guarda rastros, como se responde a um incidente, como se reconstrói uma linha do tempo, como funciona a atribuição e o que a lei brasileira exige. No meio do caminho há exemplos práticos de logs, configurações e scripts.
+
+<Summary title="Em resumo">
+Um dia zero é uma falha explorada antes de existir correção pública. Como não há patch, a defesa depende de reduzir exposição, conter e vigiar. Para investigar qualquer ataque, três coisas decidem o resultado: ter registros (logs) guardados fora da máquina atacada, preservar as evidências antes de mudar qualquer coisa e reconstruir a linha do tempo cruzando várias fontes. A atribuição, saber quem foi, é graduada, com níveis de confiança, e é muito mais fraca do que parece nas manchetes. No Brasil, o aviso à ANPD tem prazo de 3 dias úteis a partir da ciência do incidente, e o Marco Civil exige guarda de registros por 1 ano (conexão) e 6 meses (acesso a aplicações).
+</Summary>
+
+## 1. O que é um dia zero
+
+![Linha do tempo de um dia zero: a falha existe, é descoberta, é explorada sem correção, a correção é publicada e o ataque continua contra quem não atualizou](/images/dia-zero/01-dia-zero-linha-do-tempo.svg)
+
+*Linha do tempo com a falha, a descoberta, a janela do dia zero, a correção e o n-day.*
+
+Um **dia zero** (zero-day) é uma vulnerabilidade que atacantes exploram **antes de existir uma correção pública**. O nome vem de uma ideia simples: o fabricante teve "zero dias" para corrigir. O Google Threat Intelligence Group (GTIG) usa exatamente essa definição para contar dias zero: uma falha explorada antes de o patch estar publicamente disponível. Já um **n-day** é uma falha explorada **depois** da correção ou da divulgação pública, normalmente contra quem ainda não atualizou. ([Google Cloud: GTIG](https://cloud.google.com/blog/topics/threat-intelligence/agentic-threat-activity-crosses-a-significant-threshold), [ScanTitan](https://scantitan.com/research/zero-day-statistics/))
+
+### As etapas da vida de uma falha
+
+1. **A falha existe.** Um erro de programação ou de projeto está presente no software, e ninguém sabe ainda.
+2. **Descoberta.** Alguém a encontra: um pesquisador, a própria equipe do fabricante ou um atacante.
+3. **Dia zero.** Se um atacante a explora antes de existir correção, a janela do dia zero está aberta. Pode durar horas, dias ou meses.
+4. **Correção publicada.** O fabricante lança o patch e, em geral, divulga o aviso. A partir daqui o problema é público.
+5. **N-day.** Quem não atualizou continua exposto. Na prática, a maior parte dos ataques acontece aqui.
+
+### Por que o dia zero é especialmente difícil
+
+* **Não há patch.** A principal defesa, atualizar, ainda não existe.
+* **Não há assinatura.** Ferramentas que reconhecem ataques conhecidos podem não reconhecer o novo.
+* **A informação é desigual.** O atacante conhece a falha antes dos defensores, e a investigação muitas vezes só descobre o dia zero depois do ataque.
+
+### O que os números mostram
+
+* O GTIG contou **90 dias zero explorados em 2025**, com um recorde de **48% em produtos corporativos**, segundo o relatório de março de 2026, via [Stingrai](https://www.stingrai.io/blog/zero-day-statistics-2026).
+* Em 2026, de janeiro a agosto, a média foi de cerca de **11 dias zero por mês**, contra 8 por mês em 2025, com 22 só em agosto.
+* O próprio GTIG descreve o aumento de dias zero como pequeno diante do crescimento geral de divulgações e de explorações. Segundo o ScanTitan, **a maior parte do crescimento de explorações em 2026 veio de n-days**, e não de dias zero.
+
+Em outras palavras: o dia zero é o caso mais dramático, mas a maioria dos incidentes vem de falhas já corrigidas e não aplicadas. Isso muda onde investir esforço.
+
+### O papel da IA
+
+Em maio de 2026, o GTIG relatou o primeiro caso conhecido de um **dia zero desenvolvido com ajuda de IA e usado por atacantes**: um grupo criminoso teria usado um modelo de linguagem para escrever um script que explorava uma falha de lógica na autenticação em dois fatores de uma ferramenta administrativa de código aberto, segundo a [SC World](https://www.scworld.com/news/google-reports-first-known-ai-assisted-zero-day-exploit-in-the-wild). O Google diz que o grupo planejava um ataque amplo e que sua descoberta antecipada pode ter evitado isso. As fontes divergem sobre alguns detalhes e sobre quando o exploit foi criado.
+
+Em 13 de novembro de 2026, o Project Zero, do Google, mudou sua política de divulgação por causa disso. Pelo modelo "Full X", os detalhes de uma falha passam a ser publicados após um número fixo de dias contados do aviso ao fabricante, **tenha ou não saído a correção**. A janela é de 90 dias agora, cai para 60 dias em 2 de fevereiro de 2027 e para 30 dias em 3 de janeiro de 2028. O motivo declarado é que a descoberta e a exploração assistidas por IA tornaram insuficientes os prazos anteriores, segundo o [Help Net Security](https://www.helpnetsecurity.com/2026/11/16/google-project-zero-disclosure-policy/). Os prazos mais curtos reduzem o tempo em que uma falha fica conhecida só por poucos, mas também apertam o tempo dos fabricantes.
+
+## 2. Um caso real: o PHP2Shell
+
+Em outubro de 2026, o caso do **PHP2Shell**, que cobrimos aqui, mostrou várias características de um dia zero na prática:
+
+* Os pesquisadores encontraram e reportaram a classe de falhas **meses antes**, em agosto.
+* A **Amazon registrou uma tentativa de exploração em 17 de outubro**, quatro dias antes da divulgação pública. Ou seja, havia atividade antes de existir patch.
+* Em 20 de outubro, os identificadores das falhas **vazaram** em um fórum antes da data prevista, e um vídeo de prova de conceito foi publicado por engano e circulou.
+* As correções saíram em 21 de outubro, e o número de tentativas passou rapidamente de milhares para milhões, sendo a maior parte varredura, segundo a Cisco Talos.
+
+O caso mostra três lições: a janela do dia zero pode terminar antes do planejado quando há vazamento, a investigação depende de quem registra tentativas (como o honeypot da Amazon) e as alegações iniciais de exploração com sucesso podem ser retiradas depois, como aconteceu com duas empresas de segurança.
+
+## 3. Onde ficam os rastros
+
+![Seis camadas que uma requisição atravessa (borda, servidor web, aplicação, banco de dados, sistema operacional e rede), todas enviando logs para um cofre central](/images/dia-zero/02-rastros-camadas.svg)
+
+*As seis camadas que a requisição atravessa e o cofre de logs central.*
+
+Uma requisição maliciosa não aparece em um lugar só. Ela atravessa várias camadas, e cada uma pode guardar sua versão do que viu:
+
+* **WAF ou proxy (borda):** requisições, origem aparente, regras acionadas e respostas bloqueadas.
+* **Servidor web:** log de acesso (quem pediu o quê e quando) e de erros.
+* **Aplicação:** eventos como logins, erros e ações sensíveis.
+* **Banco de dados:** auditoria de consultas, contas e exportações.
+* **Sistema operacional e EDR:** processos novos, contas criadas e arquivos alterados.
+* **Rede:** conexões e volumes de dados enviados.
+
+O **endereço IP de origem** é o primeiro rastro e o mais fraco. Atacantes usam VPNs, proxies e máquinas de terceiros comprometidas, então o IP quase nunca é "o atacante". É uma pista para cruzar com outras.
+
+### Como são as linhas de log de cada camada
+
+Para ver como isso fica na prática, este é um trecho **fictício** de três fontes sobre o mesmo incidente (os horários são UTC):
+
+```text
+# WAF / rede
+2026-11-24T02:13:07Z waf 203.0.113.50 POST /admin/legacy-upload rule=none status=200
+2026-11-24T02:13:09Z waf 203.0.113.50 POST /admin/legacy-upload rule=none status=500
+2026-11-24T02:31:02Z waf 10.0.0.12 egress 2147483648 bytes to 198.51.100.77:443
+
+# Servidor
+2026-11-24T02:13:08Z host web01 process started: /tmp/.cache/updater user=www-data
+2026-11-24T02:14:40Z host web01 useradd: new user name=svc-backup2 uid=1004
+2026-11-24T02:30:55Z host web01 file read: /var/www/uploads/export/ (4012 files)
+
+# Aplicação e banco
+2026-11-24T02:13:10Z app web01 ERROR out of memory in request handler
+2026-11-24T02:20:12Z db db01 SELECT * FROM customers rows=1204331 user=svc-backup2
+2026-11-24T02:31:01Z app web01 export finished file=/var/www/uploads/export/all.csv
+```
+
+Cada sinal sugere algo, mas sozinho não prova nada:
+
+* Um `POST` repetido em um endpoint antigo, seguido de `500`, mostra um serviço sob estresse.
+* Um **processo iniciado em `/tmp` pelo usuário do servidor web** é incomum.
+* Uma **conta nova** que, minutos depois, faz uma **consulta enorme** no banco é um padrão clássico de coleta.
+* Um **envio de 2 GB** para um endereço externo fecha a sequência.
+
+### O cofre de logs
+
+O ponto crítico é **onde os logs ficam guardados**. Se ficam só na máquina atacada, o invasor pode apagá-los. As boas práticas descritas em guias que resumem o NIST SP 800-92 ("Guide to Computer Security Log Management", de 2006, cuja revisão ainda está em rascunho desde outubro de 2023) apontam o seguinte:
+
+* **Enviar os logs para fora do host**, por conexão segura, para um armazenamento que os administradores dos sistemas de origem **não consigam alterar nem apagar**. Isso se liga ao controle AU-9 do NIST SP 800-53, e o guia diz que o NIST 800-92 por si só não exige armazenamento imutável.
+* **Sincronizar os relógios** de todas as fontes com uma fonte de tempo confiável e padronizar o formato de data e hora. Sem isso, não dá para ordenar eventos de sistemas diferentes.
+* **Registrar o suficiente em cada linha:** data e hora, identidade do usuário, tipo de ação e resultado.
+* **Alertar quando uma fonte para de enviar logs, quando a política de auditoria muda ou quando os logs são apagados.** Essas são marcas comuns de quem tenta esconder rastros.
+* **Testar a retenção e a restauração** pelo menos uma vez por ano.
+* **Retenção:** vários guias citam cerca de um ano de retenção total, com cerca de três meses disponíveis para análise imediata. Não consegui confirmar esse número no documento do NIST, e outros padrões fixam prazos diferentes (por exemplo, 12 meses no PCI DSS), então trate-o como referência a verificar.
+
+Quem monta isso **antes** do incidente ganha muito: investigar sem logs é reconstruir uma cena sem câmeras.
+
+### Exemplo: enviar logs para fora da máquina (rsyslog)
+
+> Os exemplos de configuração desta seção e da seção 4 **não foram testados** pelo autor. Ajuste e valide em laboratório antes de usar em produção.
+
+```conf
+# /etc/rsyslog.d/90-envio-remoto.conf
+global(
+  DefaultNetstreamDriver="gtls"
+  DefaultNetstreamDriverCAFile="/etc/ssl/certs/ca-logs.pem"
+)
+
+module(load="imfile")
+input(type="imfile" File="/var/log/nginx/access.log" Tag="nginx-access:")
+
+*.* action(type="omfwd"
+  target="logs.example.com" port="6514" protocol="tcp"
+  StreamDriver="gtls" StreamDriverMode="1"
+  StreamDriverAuthMode="x509/name"
+  StreamDriverPermittedPeers="logs.example.com"
+  action.resumeRetryCount="-1"
+  queue.type="LinkedList" queue.filename="fila_logs"
+  queue.maxdiskspace="1g" queue.saveonshutdown="on")
+```
+
+O ponto é o `omfwd` com TLS: o log sai da máquina assim que é gerado, então quem invade o servidor não consegue apagar o que já foi enviado. A fila em disco segura as linhas se o cofre ficar indisponível por um tempo.
+
+### Exemplo: relógio sincronizado (chrony)
+
+```conf
+# /etc/chrony/chrony.conf
+server a.st1.ntp.br iburst
+server b.st1.ntp.br iburst
+```
+
+```bash
+chronyc tracking     # mostra o desvio atual em relação à fonte de tempo
+chronyc sources -v   # lista as fontes e se estão alcançáveis
+timedatectl          # confirma fuso e se o relógio está sincronizado
+```
+
+Sem esse passo, uma linha de WAF e uma de banco com 40 segundos de diferença podem inverter a ordem dos fatos.
+
+### Exemplo: registrar mudanças em contas e execuções (auditd)
+
+```conf
+# /etc/audit/rules.d/investigacao.rules
+-w /etc/passwd  -p wa -k identidade
+-w /etc/shadow  -p wa -k identidade
+-w /etc/sudoers -p wa -k privilegios
+-a always,exit -F arch=b64 -S execve -F euid=33 -k exec_servidor_web
+```
+
+```bash
+ausearch -k identidade -ts today   # alterações em contas hoje
+aureport -k --summary              # resumo por chave
+```
+
+A última regra registra toda execução feita pelo usuário do servidor web (UID 33 no Debian e no Ubuntu). É o que faria aparecer o processo em `/tmp` do exemplo anterior.
+
+### Exemplo: alertar quando um log "fica mudo"
+
+```bash
+# lista o arquivo se não houve escrita nos últimos 10 minutos
+find /var/log/nginx -name 'access.log' -mmin +10 -print
+```
+
+Em produção isso vira um alerta no SIEM. A ideia é a mesma: **a falta de log também é um sinal**.
+
+## 4. Quando acontece: o ciclo de resposta
+
+![Ciclo de resposta: detectar, conter, eliminar, recuperar e aprender, com o alerta para preservar evidências antes de mudar qualquer coisa](/images/dia-zero/03-resposta-incidente.svg)
+
+*Detectar, conter, eliminar, recuperar e aprender, com o alerta de preservar evidências.*
+
+O guia mais citado é o **NIST SP 800-61**. A Revisão 3, publicada em abril de 2025, passou a mapear a resposta a incidentes nas seis funções do **CSF 2.0**: governar, identificar e proteger são o **preparo**, e **detectar, responder e recuperar** são a resposta propriamente dita. Muitos guias ainda descrevem seis fases da Revisão 2 (preparação, detecção e análise, contenção, erradicação, recuperação e atividades pós-incidente). Para fins práticos, as etapas abaixo cobrem o essencial, mas lembre que elas se sobrepõem e se repetem. ([NIST](https://csrc.nist.gov/projects/incident-response), [Tandem](https://tandem.app/blog/updated-nist-incident-response-guidance-sp-800-61-rev-3))
+
+### 4.1 Detectar
+
+* **Confirmar** que o incidente é real e não um falso alarme.
+* **Registrar a hora em que a equipe tomou conhecimento.** Isso importa para os prazos legais, como veremos.
+* Reunir quem precisa participar: TI, segurança, jurídico, comunicação e a direção.
+
+### 4.2 Conter
+
+A contenção busca **parar o avanço do dano**, sem destruir provas. As opções variam com o caso, e uma regra prática descrita em playbooks de dia zero é: se não dá para aplicar a correção agora, **contenha primeiro** (isolamento, segmentação, patch virtual ou restrição do serviço) e depois verifique se o sistema ficou exposto por tempo suficiente para exigir uma caça por comprometimento. ([NHIMG](https://nhimg.org/zero-day-exploitation-playbook))
+
+* **Isolar a rede em vez de desligar.** As fontes convergem em preferir o isolamento de rede ao desligamento, porque desligar apaga a memória. Uma delas relata que a CISA recomenda desligar um dispositivo só quando não é possível desconectá-lo. O desligamento fica para casos como ransomware criptografando ativamente.
+* **Patch virtual e regras de WAF.** Bloquear o padrão de ataque na borda reduz a explorabilidade, mas, como lembra um guia, **não confere imunidade**. Se há caminho de exploração crível, é melhor também isolar a carga ou desligar o recurso.
+* **Restringir o acesso:** listas de IPs permitidos, autenticação adicional na frente do serviço e, se a função puder parar, tirar o serviço do ar.
+* **Revogar credenciais com cuidado.** As fontes divergem sobre o momento. Um caminho descrito é revogar na contenção apenas credenciais **em uso ativo pelo atacante** e fáceis de substituir, e rotacionar tudo o que estava no escopo na etapa de eliminação. Há também um risco descrito em um playbook de fornecedor: certos programas que roubam credenciais **vigiam o token roubado** e apagam o computador se ele for revogado. Por isso, nesses casos, a sequência é isolar o equipamento, remover o mecanismo de vigilância, preservar as evidências e só então revogar. Isso vem de playbooks de fornecedores, e não de um padrão oficial.
+
+### Exemplo: patch virtual enquanto não há correção
+
+Suponha que uma falha em um endpoint antigo está sendo explorada e ainda não há correção. Enquanto isso, bloqueia-se o caminho:
+
+```nginx
+# nginx: só a rede da equipe acessa o endpoint
+location = /admin/legacy-upload {
+    allow 203.0.113.0/24;   # rede da equipe
+    deny  all;
+}
+```
+
+```apacheconf
+# ModSecurity: patch virtual até a correção sair
+SecRule REQUEST_URI "@beginsWith /admin/legacy-upload" \
+  "id:100001,phase:1,deny,status:403,log,\
+   msg:'Patch virtual: endpoint legado bloqueado até a correção'"
+```
+
+Isso **reduz a explorabilidade, mas não é imunidade**: se existir outro caminho para a mesma falha, o bloqueio não ajuda. Por isso o ideal é combinar com isolamento ou desligar o recurso, quando for possível.
+
+### 4.3 Preservar evidências (antes de mudar qualquer coisa)
+
+Este é o passo que mais se perde na pressa. Vários guias dizem para **juntar logs, configuração e imagens de memória e disco antes de aplicar correções**, porque o patch pode apagar vestígios. Um exemplo citado de orientação oficial: no alerta ED 25-03 sobre equipamentos Cisco ASA, a CISA pediu que órgãos coletassem os core dumps e, havendo comprometimento, desconectassem o equipamento sem desligá-lo. Os detalhes vêm de resumos secundários.
+
+![Ordem de volatilidade: do que some primeiro (registradores e cache) ao que dura mais (logs remotos e cópias)](/images/dia-zero/04-ordem-volatilidade.svg)
+
+*A ordem de volatilidade, do mais volátil ao menos volátil.*
+
+A regra de ouro é a **ordem de volatilidade**, descrita na **RFC 3227** (IETF, 2002). Coleta-se do mais volátil ao menos volátil:
+
+1. Registradores e cache (milissegundos).
+2. Estado da rede e tabela de processos.
+3. Memória (RAM).
+4. Swap e arquivos temporários.
+5. Disco.
+6. Logs remotos e cópias.
+
+As fontes diferem um pouco na lista exata, mas concordam na lógica: o que some ao desligar vem primeiro.
+
+* **Cada ação altera a máquina.** Por isso, recomenda-se rodar as ferramentas de coleta a partir de mídia externa (USB ou compartilhamento de rede), e não da máquina suspeita.
+* **Hash e cadeia de custódia.** Cada cópia deve receber um **hash** (uma impressão digital matemática). Um hash que bate é o que torna a cópia utilizável como prova do que o original continha. A **cadeia de custódia** registra quem coletou, quando, com que ferramenta e onde guardou.
+* **Preserve os logs originais.** Eles podem ser necessários como evidência.
+* Em ambientes de **nuvem e de IA**, boa parte das evidências mais úteis, como pesos, pontos de salvamento e linhagem de dados, fica com o provedor. Um artigo de 2026 defende que a ordem de volatilidade precisa ser adaptada a esses sistemas.
+
+### Exemplo: coleta em ordem de volatilidade (Linux)
+
+Rode de **mídia externa**, depois de isolar a máquina da rede, **sem desligá-la**. O diretório `/mnt/evidencias` deve estar em um disco externo, e não na própria máquina:
+
+```bash
+E=/mnt/evidencias; mkdir -p "$E"
+
+# 1) a hora primeiro, em UTC, e o que é mais volátil
+date -u +"%Y-%m-%dT%H:%M:%SZ" | tee "$E/00-hora.txt"
+ps -eo pid,ppid,user,lstart,cmd --sort=start_time > "$E/01-processos.txt"
+ss -tunap                                         > "$E/02-conexoes.txt"
+who -a                                            > "$E/03-sessoes.txt"
+last -n 50 -F                                     > "$E/04-ultimos-logins.txt"
+
+# 2) memória: use uma ferramenta própria de captura (por exemplo, AVML ou LiME)
+#    a partir de mídia externa, e registre o comando usado
+
+# 3) logs e arquivos temporários
+journalctl --since "2026-11-24 01:00" --until "2026-11-24 04:00" -o short-iso > "$E/05-journal.txt"
+cp -a /var/log/nginx "$E/06-logs-nginx"
+ls -la /tmp /var/tmp > "$E/07-temporarios.txt"
+
+# 4) hash de tudo que foi coletado
+cd "$E" && find . -type f ! -name SHA256SUMS -exec sha256sum {} + > SHA256SUMS
+sha256sum -c SHA256SUMS      # confirma que nada mudou depois
+```
+
+### Exemplo: imagem do disco
+
+O ideal é usar bloqueio de escrita, em hardware ou em software:
+
+```bash
+dd if=/dev/sda of=/mnt/evidencias/disco-web01.img bs=4M conv=noerror,sync status=progress
+sha256sum /dev/sda /mnt/evidencias/disco-web01.img   # os dois hashes devem ser iguais
+```
+
+Se os hashes baterem, a cópia reproduz o original. É isso que significa "um hash que bate".
+
+### Exemplo: registro da cadeia de custódia
+
+```yaml
+evidencia: disco-web01.img
+sha256: "<colar o hash>"
+coletado_por: "Analista A (segurança)"
+coletado_em: "2026-11-24T04:12:00Z"
+origem: "web01, /dev/sda, depois do isolamento de rede"
+ferramenta: "dd (coreutils), executado de mídia externa"
+guardado_em: "cofre-evidencias/caso-0042/ (somente leitura)"
+transferencias: []        # cada mudança de mãos entra aqui, com hora e nome
+```
+
+### Exemplo: logs que denunciam adulteração (cadeia de hashes)
+
+Um truque simples: cada linha recebe um hash que depende do da linha anterior. Mudar ou apagar uma linha **quebra tudo daí para a frente**:
+
+```python
+#!/usr/bin/env python3
+"""Encadeia hashes linha a linha: alterar ou apagar uma linha quebra a cadeia."""
+import hashlib, sys
+
+def encadear(caminho, anterior="0" * 64):
+    with open(caminho, "rb") as f:
+        for linha in f:
+            anterior = hashlib.sha256(anterior.encode() + linha).hexdigest()
+            yield anterior
+
+if __name__ == "__main__":
+    for h in encadear(sys.argv[1]):
+        print(h)
+```
+
+Saída no `app.log` fictício, antes e depois de trocar `ERROR` por `WARN` na primeira linha (primeiros 12 caracteres de cada hash):
+
+```text
+original:   f9022f39c05f  6c9985409e90  68b63b9484e0
+alterado:   5c3cf15243dd  dc8133f0545b  43b643379acf
+```
+
+As três mudaram, embora só uma linha tenha sido editada. Guardar o último hash em outro lugar permite provar depois que o arquivo não foi tocado.
+
+### 4.4 Eliminar a causa
+
+* **Descobrir como o invasor entrou** e fechar essa porta. Sem isso, tudo volta a acontecer.
+* **Remover os acessos do invasor:** contas criadas, chaves, tarefas agendadas e qualquer outro mecanismo de permanência.
+* **Aplicar a correção**, quando existir.
+* **Rotacionar credenciais em escopo.** Uma fonte sugere começar pela mais poderosa (administradores de domínio), depois contas de serviço, depois usuários. Outra diz para ir da credencial mais poderosa à menos e **confirmar que cada credencial antiga realmente falha**, e não apenas foi substituída. As fontes lembram que a ordem certa depende do alcance de cada credencial.
+
+### 4.5 Recuperar
+
+* **Restaurar a partir de cópias anteriores ao comprometimento**, e não de qualquer cópia.
+* Em ambientes com identidade centralizada, restaurar serviços **na ordem de dependência** (por exemplo, certificados, depois diretório, depois provedor de identidade) e **validar cada camada** antes de seguir.
+* Voltar aos poucos e **vigiar de perto**, porque o invasor pode ter deixado outra porta.
+
+### 4.6 Aprender
+
+* O que falhou, o que funcionou, que controles ajustar.
+* Atualizar o plano e comunicar o que precisa ser comunicado.
+* O NIST Rev. 3 destaca que a melhoria deixou de ser só uma reunião no final: é um ciclo contínuo.
+
+## 5. Reconstruindo a linha do tempo
+
+![Registros de três camadas (rede, servidor e aplicação) ordenados por hora, mostrando entrada, permanência, coleta e saída de dados](/images/dia-zero/05-linha-do-tempo-forense.svg)
+
+*Registros de três camadas ordenados por hora (exemplo ilustrativo).*
+
+Com os logs e as imagens coletadas, o trabalho central da investigação é montar uma **linha do tempo**: o que aconteceu, em que ordem e a partir de onde.
+
+* **Cruzar fontes.** Um log de borda, um de servidor e um de banco, juntos e ordenados por hora, mostram uma história que nenhum deles conta sozinho.
+* **Relógios sincronizados.** Se os horários não batem, a história sai errada.
+* **Separar as fases:** entrada, permanência, movimentação, coleta e saída dos dados.
+* **Usar indicadores.** Os **indicadores de comprometimento (IOCs)** são sinais como hashes de arquivos, endereços IP e domínios. Servem para procurar o mesmo ataque em outros lugares da rede, mas são frágeis, porque o atacante os troca com facilidade.
+* **Subir na pirâmide da dor.** O modelo de David Bianco ordena os indicadores pelo custo que o atacante tem para mudá-los, de hashes até **comportamento (TTPs)**, no topo. A orientação do MITRE é preferir análises baseadas em **táticas, técnicas e procedimentos** a indicadores frágeis. Na prática: um hash identifica um arquivo, mas um comportamento identifica um modo de agir. ([MITRE](https://www.mitre.org/sites/default/files/2021-11/prs-19-3892-ttp-based-hunting.pdf))
+* **Caça por hipótese.** Equipes experientes descrevem uma possível intrusão e testam essa hipótese nos dados disponíveis.
+
+### Exemplo: juntar as três fontes em uma só
+
+O script abaixo lê vários arquivos de log, converte os horários e imprime tudo em ordem cronológica:
+
+```python
+#!/usr/bin/env python3
+"""Junta logs de várias fontes em uma linha do tempo única (UTC)."""
+import sys
+from datetime import datetime
+
+def ler(caminho):
+    fonte = caminho.rsplit("/", 1)[-1].removesuffix(".log")
+    with open(caminho, encoding="utf-8") as f:
+        for linha in f:
+            linha = linha.rstrip("\n")
+            if not linha:
+                continue
+            carimbo, _, resto = linha.partition(" ")
+            yield datetime.fromisoformat(carimbo.replace("Z", "+00:00")), fonte, resto
+
+eventos = [e for caminho in sys.argv[1:] for e in ler(caminho)]
+for quando, fonte, resto in sorted(eventos):
+    print(f"{quando:%H:%M:%S}  [{fonte:<6}] {resto}")
+```
+
+Uso: `python3 merge_logs.py waf.log server.log app.log`. A saída com os arquivos fictícios da seção 3:
+
+```text
+02:13:07  [waf   ] waf 203.0.113.50 POST /admin/legacy-upload rule=none status=200
+02:13:08  [server] host web01 process started: /tmp/.cache/updater user=www-data
+02:13:09  [waf   ] waf 203.0.113.50 POST /admin/legacy-upload rule=none status=500
+02:13:10  [app   ] app web01 ERROR out of memory in request handler
+02:14:40  [server] host web01 useradd: new user name=svc-backup2 uid=1004
+02:20:12  [app   ] db db01 SELECT * FROM customers rows=1204331 user=svc-backup2
+02:30:55  [server] host web01 file read: /var/www/uploads/export/ (4012 files)
+02:31:01  [app   ] app web01 export finished file=/var/www/uploads/export/all.csv
+02:31:02  [waf   ] waf 10.0.0.12 egress 2147483648 bytes to 198.51.100.77:443
+```
+
+Agora a história aparece: uma requisição, um processo novo e um erro em três segundos (**entrada**), uma conta criada (**permanência**), uma consulta enorme com essa conta, a exportação e o envio de 2 GB (**coleta e saída**).
+
+### Exemplo: procurar um IOC e medir o que saiu
+
+Com um `access.log` de formato comum (também fictício):
+
+```bash
+# quem mais aparece nos logs? (as linhas mais frequentes costumam interessar)
+awk '{print $1}' access.log | sort | uniq -c | sort -nr
+#       3 203.0.113.50
+#       1 198.51.100.9
+
+# eventos em uma janela de minutos
+grep '24/Nov/2026:02:1[3-4]' access.log | wc -l
+# 2
+
+# tudo o que um IOC (aqui, um IP) fez, em forma resumida
+printf '203.0.113.50\n' > iocs.txt
+grep -F -f iocs.txt access.log | awk '{print $4, $7, $9}'
+# [24/Nov/2026:02:13:07 /admin/legacy-upload 200
+# [24/Nov/2026:02:13:09 /admin/legacy-upload 500
+# [24/Nov/2026:02:20:30 /export/all.csv 200
+
+# respostas grandes (aqui, acima de 10 MB): possível saída de dados
+awk '$10 > 10000000 {print $1, $7, $10}' access.log
+# 203.0.113.50 /export/all.csv 98765432
+```
+
+O último comando mostra a ideia da seção: **um IP isolado não prova nada, mas o IP somado a um arquivo grande baixado minutos depois forma um padrão**. E lembra a pirâmide: um IOC é frágil, porque o atacante troca de IP, mas o comportamento "criar conta, consultar tudo e exportar" é mais difícil de mudar.
+
+No exemplo do diagrama, os horários são fictícios. A mensagem é o método: três fontes, uma ordem e as fases do ataque aparecendo.
+
+## 6. Quem foi? A atribuição
+
+![A atribuição em camadas, do endereço IP (mais fraco) à identidade do autor (mais difícil), e os níveis de confiança baixa, moderada e alta](/images/dia-zero/06-atribuicao-niveis.svg)
+
+*Do endereço IP à identidade do autor, e os níveis de confiança.*
+
+A atribuição é a etapa mais comentada e a mais frágil. Responde à pergunta "quem está por trás?", e as fontes de prática dizem que ela se constrói em **camadas de evidência**, da mais fraca à mais forte:
+
+1. **Endereço IP:** abundante e fácil de falsificar.
+2. **Infraestrutura:** servidores e domínios. É mais difícil de mudar, mas grupos de ransomware usam infraestrutura compartilhada e ferramentas roubadas de propósito, o que pode criar falsas pistas.
+3. **Malware e ferramentas:** código reutilizado, bibliotecas e artefatos de compilação.
+4. **Táticas e técnicas (TTPs):** o comportamento. Uma fonte argumenta que é a camada mais confiável, porque é mais difícil de mudar do que ferramentas e infraestrutura.
+5. **Identidade do autor:** o mais difícil, e o que as manchetes costumam afirmar.
+
+### Falsa bandeira
+
+Atacantes podem **plantar pistas falsas**: idioma, horário de compilação, trechos de código copiados ou padrões de infraestrutura. Um exemplo descrito é o ataque Olympic Destroyer, em que uma unidade russa tentou plantar falsas bandeiras, mas a reutilização de infraestrutura levou à sua identificação.
+
+### Níveis de confiança
+
+As fontes descrevem a confiança como **graduada**, e não binária:
+
+* **Baixa:** poucos dados e há alternativas plausíveis.
+* **Moderada:** o caso se sustenta, mas uma prova nova específica pode derrubá-lo.
+* **Alta:** várias linhas independentes de evidência convergem, e o analista procurou dados que contradissessem a conclusão e não achou.
+
+Uma fonte lembra que **omitir o nível de confiança em uma avaliação publicada sugere uma certeza que a evidência não sustenta**. Não encontrei como agências específicas, como ODNI ou NSA, aplicam esses níveis formalmente, então este texto descreve a prática da comunidade, e não um padrão oficial único.
+
+### Cluster não é grupo
+
+Empresas de inteligência dão **nomes provisórios a clusters de atividade**. A Mandiant, por exemplo, usa rótulos "UNC" para atividade ainda não classificada, e um cluster pode virar, anos depois, um grupo nomeado (como o FIN11, antes TEMP.Warlock e UNC902). Um UNC é **um grupo de atividade, e não uma organização**. Fornecedores traçam limites diferentes, por isso os apelidos não se correspondem um a um. Um nome com "UNC" é um sinal de trabalho inacabado. ([SecurityWeek](https://www.securityweek.com/whats-threat-group-name-inside-look-intricacies-nation-state-attribution/))
+
+### A regra da prudência
+
+Nos artigos deste blog adotamos uma regra: **só chamamos alguém de autor de um ataque se essa pessoa ou grupo assumiu a autoria.** Quando um fornecedor ou um governo atribui um ataque, isso aparece como **avaliação**, com o nível de confiança e a fonte. Dois exemplos recentes que cobrimos mostram por quê:
+
+* A atribuição de uma campanha ligada ao PHP2Shell a um grupo estatal veio de **uma única empresa**, descrita como de confiança alta por ela e como moderada em outro relato, sem confirmação independente.
+* A Unit 42 chegou a ligar uma invasão a um órgão europeu ao PHP2Shell e depois **retirou a atualização**, dizendo que não podia confirmar a ligação.
+
+**Reivindicar não é provar.** Um grupo anunciar um ataque em um fórum não confirma que ele ocorreu, como vimos no caso da Polícia Civil de São Paulo. E uma reivindicação verdadeira não prova, sozinha, quem está por trás de um nome falso.
+
+## 7. No Brasil: prazos e registros
+
+![Resumo no Brasil: aviso à ANPD e aos titulares em 3 dias úteis a partir da ciência, e guarda de registros de conexão por 1 ano e de acesso a aplicações por 6 meses](/images/dia-zero/07-brasil-prazos-e-registros.svg)
+
+*ANPD, titulares e guarda de logs.*
+
+### Aviso à ANPD: 3 dias úteis a partir da ciência
+
+A **Resolução CD/ANPD nº 15/2024** fixa o prazo de **três dias úteis** para o controlador comunicar à ANPD um incidente de segurança, ressalvada a existência de prazo previsto em legislação específica. A obrigação vale para incidentes que envolvem **dados pessoais** e que possam acarretar **risco ou dano relevante aos titulares**. Um ataque que não toca dados pessoais, ou que não gera esse risco, não dispara a comunicação.
+
+O ponto mais importante é o **começo da contagem**: ela parte da data em que o controlador **tomou conhecimento** do incidente, e não da data em que o ataque ocorreu. Por isso, na etapa de detecção (seção 4.1), vale anotar com precisão a hora em que a equipe soube e quem soube.
+
+Outros pontos descritos por análises jurídicas:
+
+* Segundo o escritório Souto Correa, o prazo pode chegar a seis dias úteis para agentes de tratamento de pequeno porte.
+* A comunicação aos **titulares** afetados também tem prazo de três dias úteis a partir do conhecimento.
+* Comunicações complementares têm prazo de 20 dias úteis.
+* Uma página de um órgão público trata o prazo de três dias como "recomendado", enquanto a resolução o trata como obrigatório. Confira o texto oficial.
+
+([Souto Correa](https://www.soutocorrea.com.br/client-alerts/regulamentacao-de-comunicacao-de-incidente-de-seguranca/), [Machado Meyer](https://www.machadomeyer.com.br/pt/inteligencia-juridica/publicacoes-ij/direito-digital/anpd-publica-regulamento-de-comunicacao-de-incidente-de-seguranca))
+
+A contagem de dias úteis, o que conta como "ciência" e as exceções têm nuances jurídicas. Nesses pontos, a decisão deve passar pelo jurídico e pelo encarregado de dados (DPO), e não por uma regra de bolso.
+
+### Guarda de registros: Marco Civil da Internet
+
+* **Art. 13:** o administrador de sistema autônomo deve manter os **registros de conexão**, sob sigilo, em ambiente controlado e seguro, por **1 ano**.
+* **Art. 15:** o provedor de aplicações de internet constituído como pessoa jurídica, que exerça a atividade de forma organizada, profissional e com fins econômicos, deve guardar os **registros de acesso a aplicações** por **6 meses**.
+* **Pedido cautelar:** a autoridade policial ou administrativa ou o Ministério Público pode requerer que os registros sejam guardados por prazo maior. Não há teto para esse pedido, o que é criticado por juristas, e também há controvérsia sobre a partir de quando os prazos correm. Uma análise da Conjur critica a incoerência entre os dois prazos e observa que o STF não enfrentou o ponto. ([Legale](https://legale.com.br/blog/prazo-de-guarda-de-dados-no-marco-civil-regras-e-conflitos-juridicos/), [Conjur](https://www.conjur.com.br/2025-ago-27/incoerencia-dos-prazos-de-guarda-de-dados-no-marco-civil-o-conflito-nao-solucionado-pelo-stf/))
+
+### Onde notificar
+
+* **CERT.br (redes privadas e internet em geral):** recebe relatos por e-mail, em cert@cert.br. A orientação é notificar diretamente os contatos da rede de origem e manter o CERT.br em cópia. Pede logs completos ou outras evidências, com **data, horário e fuso horário**, e dados completos do incidente. ([CERT.br](https://cert.br/docs/notificacoes/))
+* **CTIR Gov (órgãos da Administração Pública Federal):** o ponto de contato é ctir@ctir.gov.br, por meio da equipe de resposta do órgão, com o nome do órgão e o tipo do incidente no assunto. O CTIR Gov **não é autoridade policial nem realiza investigação criminal**, e atua na coordenação técnica. ([GSI](https://www.gov.br/gsi/pt-br/assuntos/ctir/operacoes-e-servicos/notificacao-de-incidentes/orientacoes-para-notificacoes-de-incidentes-ciberneticos))
+* **Polícia:** para crimes, o caminho é a autoridade policial. Uma fonte sugere começar pela delegacia especializada em crimes cibernéticos da sua região. Um endereço de e-mail da Polícia Federal que aparece em um artigo não foi confirmado em fonte oficial, então não o reproduzo.
+
+**Preservação de provas para fins judiciais** (por exemplo, ata notarial) não apareceu nas fontes que consultei. Converse com um advogado antes de agir, porque a forma de coletar pode afetar o valor da prova.
+
+*Este é um resumo informativo, e não aconselhamento jurídico. Confira o texto oficial da resolução e da Lei 12.965/2014.*
+
+## 8. Checklists
+
+### Antes (preparo)
+
+* Logs enviados para fora do host, em armazenamento que os administradores de origem não alteram.
+* Relógios sincronizados em todos os sistemas.
+* Alertas para: fonte de log silenciosa, mudança de política de auditoria, logs apagados.
+* Inventário do que está exposto à internet e de quem é responsável por cada sistema.
+* Plano de resposta com nomes, telefones e decisões pré-aprovadas, como "quem pode tirar o serviço do ar".
+* Cópias de segurança testadas e isoladas.
+* Contatos já levantados: jurídico, encarregado de dados (DPO), CERT.br ou CTIR Gov e delegacia.
+
+### Durante
+
+* Anotar a **hora em que a equipe soube**.
+* **Conter sem destruir:** isolar a rede, em vez de desligar, salvo exceções.
+* **Preservar:** logs, configuração, memória e disco, com hash e cadeia de custódia.
+* Registrar cada ação tomada, com hora e responsável.
+* Revogar credenciais com ordem e cuidado.
+* Avisar a ANPD e os titulares dentro do prazo, quando houver dados pessoais envolvidos.
+
+### Depois
+
+* Eliminar a causa, restaurar de cópias limpas e validar.
+* Vigiar de perto por um período.
+* Revisar o que falhou e ajustar controles.
+* Atualizar o plano.
+
+## 9. Mito ou verdade
+
+### "Dia zero é o tipo mais comum de ataque" — falso
+
+A maior parte do crescimento de explorações em 2026 veio de **n-days**, falhas já corrigidas, segundo as análises citadas. Atualizar rápido continua sendo a defesa mais eficaz contra a maioria.
+
+### "Sem patch, não há nada a fazer" — falso
+
+Há conter, reduzir a exposição, aplicar patch virtual, segmentar, restringir acesso, vigiar e caçar sinais de comprometimento. O patch virtual não confere imunidade, mas reduz o risco.
+
+### "O IP do atacante mostra quem foi" — falso
+
+O IP é a evidência mais fraca da pirâmide e é fácil de disfarçar.
+
+### "Basta desligar o servidor invadido" — nem sempre
+
+Desligar apaga a memória e pode destruir provas. Em geral, é preferível isolar a máquina da rede. O desligamento fica para casos específicos, como ransomware criptografando ativamente, ou quando não é possível desconectar.
+
+### "Aplicar a correção primeiro e investigar depois" — arriscado
+
+O patch pode apagar vestígios. O ideal é coletar as evidências antes, sem atrasar a contenção do que está em risco.
+
+### "Um grupo reivindicou, então foi ele" — falso
+
+Reivindicação não é prova. Grupos podem mentir, exagerar ou reaproveitar dados antigos, e a autoridade não pode tratá-la como confirmação.
+
+### "A atribuição é uma ciência exata" — falso
+
+É graduada, com níveis de confiança, e pode ser revista com novas provas. Relatórios sérios informam o nível.
+
+### "O prazo da ANPD começa quando o ataque ocorreu" — falso
+
+Começa quando o controlador **toma conhecimento** do incidente.
+
+## 10. Glossário
+
+* **Dia zero (zero-day):** falha explorada antes de existir correção pública.
+* **N-day:** falha explorada depois da correção ou divulgação.
+* **Patch virtual:** regra de proteção (por exemplo, em um WAF) que bloqueia o padrão de ataque sem corrigir o software.
+* **WAF:** firewall de aplicação web.
+* **SIEM:** sistema que reúne e correlaciona logs de várias fontes.
+* **EDR:** ferramenta que monitora e responde a atividades em estações e servidores.
+* **IOC:** indicador de comprometimento, como um hash, IP ou domínio.
+* **TTP:** táticas, técnicas e procedimentos, ou seja, o comportamento do atacante.
+* **Hash:** impressão digital matemática de um arquivo ou cópia.
+* **Cadeia de custódia:** registro de quem manuseou a evidência, quando e como.
+* **Ordem de volatilidade:** ordem de coleta de evidências, do que some primeiro ao que dura mais.
+* **Falsa bandeira:** pista plantada para enganar a atribuição.
+* **Cluster (UNC):** agrupamento provisório de atividade, ainda não atribuído a um grupo nomeado.
+* **ANPD:** Autoridade Nacional de Proteção de Dados.
+* **CTIR Gov / CERT.br:** centros de resposta a incidentes, do governo federal e da internet brasileira, respectivamente.
+
+## 11. O que dá para concluir
+
+Um ataque, inclusive um dia zero, deixa rastros, e a qualidade da investigação depende de decisões tomadas **antes**: ter logs guardados fora da máquina atacada, relógios sincronizados, um plano e contatos prontos. Durante o incidente, o que mais decide o resultado é a ordem: **conter sem destruir, preservar antes de mudar, reconstruir com várias fontes**.
+
+Sobre quem foi, a resposta honesta, na maioria das vezes, é "ainda não sabemos" ou "com este nível de confiança". Atribuir com segurança exige várias linhas de evidência independentes, e mesmo assim pode ser revisto. Para quem lê notícias de ataque, a pergunta útil é menos "quem foi?" e mais "o que está comprovado, e qual é o nível de confiança de quem afirma?".
+
+## Fontes
+
+**Dia zero e disclosure**
+
+* [Google Cloud: GTIG, atividade de agentes cruza um limite](https://cloud.google.com/blog/topics/threat-intelligence/agentic-threat-activity-crosses-a-significant-threshold)
+* [ScanTitan: estatísticas de dia zero](https://scantitan.com/research/zero-day-statistics/)
+* [Stingrai: estatísticas de dia zero em 2026](https://www.stingrai.io/blog/zero-day-statistics-2026)
+* [SC World: primeiro dia zero feito com IA](https://www.scworld.com/news/google-reports-first-known-ai-assisted-zero-day-exploit-in-the-wild)
+* [Help Net Security: Project Zero divulgará falhas após 90 dias](https://www.helpnetsecurity.com/2026/11/16/google-project-zero-disclosure-policy/)
+* [Project Zero: Policy and Disclosure, 2026 Edition](https://projectzero.google/2026/11/disclosure-policy.html)
+
+**Resposta a incidentes e evidências**
+
+* [NIST: resposta a incidentes (SP 800-61 Rev. 3)](https://csrc.nist.gov/projects/incident-response)
+* [Tandem: o que mudou na SP 800-61 Rev. 3](https://tandem.app/blog/updated-nist-incident-response-guidance-sp-800-61-rev-3)
+* [NIST SP 800-92 (Wikipedia)](https://en.wikipedia.org/wiki/NIST_SP_800-92)
+* [NHIMG: playbook de exploração de dia zero](https://nhimg.org/zero-day-exploitation-playbook)
+* [NHIMG: contenção versus erradicação](https://nhimg.org/containment-vs-eradication-guide)
+* [SC World: sequência de contenção de identidade e recuperação](https://www.scworld.com/tech-explainer/how-to-sequence-identity-containment-and-recovery-in-a-ransomware-incident)
+* [SANS: coleta de evidências digitais](https://www.sans.org/blog/best-practices-in-digital-evidence-collection)
+* [Ordem de volatilidade (RFC 3227)](https://getacademy.blog/order-of-volatility-digital-forensics-guide)
+* [MITRE: caça baseada em TTPs](https://www.mitre.org/sites/default/files/2021-11/prs-19-3892-ttp-based-hunting.pdf)
+
+**Atribuição**
+
+* [Forensicspot: atribuição em investigações cibernéticas](https://forensicspot.com/topics/cyber-forensics/attribution-in-cyber-investigations)
+* [NHIMG: atribuição de ameaças, níveis, evidências e confiança](https://nhimg.org/cyber-threat-attribution-guide)
+* [SecurityWeek: o que há em um nome de grupo](https://www.securityweek.com/whats-threat-group-name-inside-look-intricacies-nation-state-attribution/)
+
+**Brasil**
+
+* [Souto Correa: regulamento de comunicação de incidente](https://www.soutocorrea.com.br/client-alerts/regulamentacao-de-comunicacao-de-incidente-de-seguranca/)
+* [Machado Meyer: regulamento de comunicação de incidente](https://www.machadomeyer.com.br/pt/inteligencia-juridica/publicacoes-ij/direito-digital/anpd-publica-regulamento-de-comunicacao-de-incidente-de-seguranca)
+* [Legale: prazo de guarda de dados no Marco Civil](https://legale.com.br/blog/prazo-de-guarda-de-dados-no-marco-civil-regras-e-conflitos-juridicos/)
+* [Conjur: incoerência dos prazos de guarda de dados](https://www.conjur.com.br/2025-ago-27/incoerencia-dos-prazos-de-guarda-de-dados-no-marco-civil-o-conflito-nao-solucionado-pelo-stf/)
+* [CERT.br: notificações](https://cert.br/docs/notificacoes/)
+* [GSI: orientações para notificação de incidentes ao CTIR Gov](https://www.gov.br/gsi/pt-br/assuntos/ctir/operacoes-e-servicos/notificacao-de-incidentes/orientacoes-para-notificacoes-de-incidentes-ciberneticos)
