@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="580" viewBox="0 0 1200 580" role="img" aria-labelledby="t d"><title id="t">Where an attack leaves traces</title><desc id="d">A request crosses six layers, and each one can record what it saw. The records go to a central vault outside the attacked machine.</desc><rect width="1200" height="580" fill="#fcfcfb"/><g font-family="Helvetica, Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif">
+<text x="60" y="64" font-size="34" font-weight="700" fill="#0b0b0b" text-anchor="start">Where the traces are</text><text x="60" y="102" font-size="21" font-weight="400" fill="#52514e" text-anchor="start">Each layer can record what it saw, and the records should go to a vault outside the attacked machine</text>
+<rect x="60" y="150" width="160" height="92" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="140.0" y="192" font-size="18" font-weight="700" fill="#0b0b0b" text-anchor="middle">Attacker</text>
+<text x="140.0" y="220" font-size="16" font-weight="400" fill="#52514e" text-anchor="middle">apparent origin</text>
+<line x1="223" y1="196" x2="241" y2="196" stroke="#52514e" stroke-width="3"/><polygon points="241,196 231,190 231,202" fill="#52514e"/>
+<rect x="244" y="150" width="160" height="92" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="324.0" y="192" font-size="18" font-weight="700" fill="#0b0b0b" text-anchor="middle">Internet</text>
+<text x="324.0" y="220" font-size="16" font-weight="400" fill="#52514e" text-anchor="middle">providers</text>
+<line x1="407" y1="196" x2="425" y2="196" stroke="#52514e" stroke-width="3"/><polygon points="425,196 415,190 415,202" fill="#52514e"/>
+<rect x="428" y="150" width="160" height="92" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="508.0" y="192" font-size="18" font-weight="700" fill="#0b0b0b" text-anchor="middle">WAF or proxy</text>
+<text x="508.0" y="220" font-size="16" font-weight="400" fill="#52514e" text-anchor="middle">edge log</text>
+<line x1="591" y1="196" x2="609" y2="196" stroke="#52514e" stroke-width="3"/><polygon points="609,196 599,190 599,202" fill="#52514e"/>
+<line x1="508.0" y1="242" x2="508.0" y2="330" stroke="#2a78d6" stroke-width="3" stroke-dasharray="6 6"/>
+<polygon points="508.0,336 501.0,322 515.0,322" fill="#2a78d6"/>
+<rect x="612" y="150" width="160" height="92" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="692.0" y="192" font-size="18" font-weight="700" fill="#0b0b0b" text-anchor="middle">Web server</text>
+<text x="692.0" y="220" font-size="16" font-weight="400" fill="#52514e" text-anchor="middle">access log</text>
+<line x1="775" y1="196" x2="793" y2="196" stroke="#52514e" stroke-width="3"/><polygon points="793,196 783,190 783,202" fill="#52514e"/>
+<line x1="692.0" y1="242" x2="692.0" y2="330" stroke="#2a78d6" stroke-width="3" stroke-dasharray="6 6"/>
+<polygon points="692.0,336 685.0,322 699.0,322" fill="#2a78d6"/>
+<rect x="796" y="150" width="160" height="92" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="876.0" y="192" font-size="18" font-weight="700" fill="#0b0b0b" text-anchor="middle">Application</text>
+<text x="876.0" y="220" font-size="16" font-weight="400" fill="#52514e" text-anchor="middle">event log</text>
+<line x1="959" y1="196" x2="977" y2="196" stroke="#52514e" stroke-width="3"/><polygon points="977,196 967,190 967,202" fill="#52514e"/>
+<line x1="876.0" y1="242" x2="876.0" y2="330" stroke="#2a78d6" stroke-width="3" stroke-dasharray="6 6"/>
+<polygon points="876.0,336 869.0,322 883.0,322" fill="#2a78d6"/>
+<rect x="980" y="150" width="160" height="92" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="1060.0" y="192" font-size="18" font-weight="700" fill="#0b0b0b" text-anchor="middle">Database</text>
+<text x="1060.0" y="220" font-size="16" font-weight="400" fill="#52514e" text-anchor="middle">audit</text>
+<line x1="1060.0" y1="242" x2="1060.0" y2="330" stroke="#2a78d6" stroke-width="3" stroke-dasharray="6 6"/>
+<polygon points="1060.0,336 1053.0,322 1067.0,322" fill="#2a78d6"/>
+<rect x="60" y="340" width="1080" height="110" rx="10" fill="#ffffff" stroke="#2a78d6" stroke-width="3"/>
+<text x="600" y="386" font-size="24" font-weight="700" fill="#2a78d6" text-anchor="middle">Log vault (SIEM or central storage)</text>
+<text x="600" y="420" font-size="19" font-weight="400" fill="#0b0b0b" text-anchor="middle">Timestamped records kept outside the attacked machine, so nobody can erase them later</text>
+<text x="60" y="490" font-size="20" font-weight="700" fill="#0b0b0b" text-anchor="start">The source IP address is only the first trace, and it is easy to disguise.</text>
+<text x="60" y="520" font-size="20" font-weight="400" fill="#0b0b0b" text-anchor="start">The investigation cross-checks records from several layers to rebuild what happened.</text>
+<text x="60" y="560" font-size="17" font-weight="400" fill="#52514e" text-anchor="start">Educational content, general level</text>
+</g></svg>

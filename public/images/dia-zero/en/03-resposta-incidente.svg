@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="t d"><title id="t">Incident response cycle</title><desc id="d">Five stages: detect, contain, eradicate the cause, recover and learn. Before changing anything, preserve the evidence.</desc><rect width="1200" height="620" fill="#fcfcfb"/><g font-family="Helvetica, Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif">
+<text x="60" y="64" font-size="34" font-weight="700" fill="#0b0b0b" text-anchor="start">What to do when it happens</text><text x="60" y="102" font-size="21" font-weight="400" fill="#52514e" text-anchor="start">Detect, contain, eradicate the cause, recover and learn. The stages overlap</text>
+<rect x="60" y="140" width="200" height="270" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="76" y="176" font-size="22" font-weight="700" fill="#eb6834" text-anchor="start">1. Detect</text>
+<text x="76" y="214" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Alerts and logs</text>
+<text x="76" y="241" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Confirm it is real</text>
+<text x="76" y="268" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Note the time</text>
+<text x="76" y="295" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">  you found out</text>
+<rect x="280" y="140" width="200" height="270" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="296" y="176" font-size="22" font-weight="700" fill="#eb6834" text-anchor="start">2. Contain</text>
+<text x="296" y="214" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Isolate the system</text>
+<text x="296" y="241" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Revoke access and keys</text>
+<text x="296" y="268" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• WAF rule (virtual</text>
+<text x="296" y="295" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">  patch)</text>
+<text x="296" y="322" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Take offline if possible</text>
+<rect x="500" y="140" width="200" height="270" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="516" y="176" font-size="22" font-weight="700" fill="#eb6834" text-anchor="start">3. Eradicate</text>
+<text x="516" y="214" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Find how they got in</text>
+<text x="516" y="241" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Remove the intruder's</text>
+<text x="516" y="268" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">  access</text>
+<text x="516" y="295" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Apply the fix</text>
+<rect x="720" y="140" width="200" height="270" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="736" y="176" font-size="22" font-weight="700" fill="#eb6834" text-anchor="start">4. Recover</text>
+<text x="736" y="214" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Restore from clean</text>
+<text x="736" y="241" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">  backups</text>
+<text x="736" y="268" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Return gradually</text>
+<text x="736" y="295" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Monitor closely</text>
+<rect x="940" y="140" width="200" height="270" rx="8" fill="#ffffff" stroke="#dcdbd6" stroke-width="2"/>
+<text x="956" y="176" font-size="22" font-weight="700" fill="#eb6834" text-anchor="start">5. Learn</text>
+<text x="956" y="214" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• What failed</text>
+<text x="956" y="241" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Adjust controls</text>
+<text x="956" y="268" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">• Notify whoever</text>
+<text x="956" y="295" font-size="15" font-weight="400" fill="#52514e" text-anchor="start">  needs to know</text>
+<rect x="60" y="436" width="1080" height="76" rx="8" fill="#ffffff" stroke="#eb6834" stroke-width="3"/>
+<text x="84" y="466" font-size="20" font-weight="700" fill="#0b0b0b" text-anchor="start">Before changing anything, gather logs, configuration and a copy of memory and disk.</text>
+<text x="84" y="496" font-size="20" font-weight="400" fill="#0b0b0b" text-anchor="start">Applying the fix or powering off the machine can erase what proves how the attack happened.</text>
+<text x="60" y="550" font-size="17" font-weight="400" fill="#52514e" text-anchor="start">NIST SP 800-61 Rev. 3 (2025) reorganizes these stages into CSF 2.0 functions: detect, respond and recover.</text>
+<text x="60" y="574" font-size="17" font-weight="400" fill="#52514e" text-anchor="start">Govern, identify and protect are the preparation.</text>
+</g></svg>

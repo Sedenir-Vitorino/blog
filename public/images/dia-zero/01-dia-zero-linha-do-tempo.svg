@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="t d"><title id="t">Linha do tempo de um dia zero</title><desc id="d">Cinco etapas: a falha existe, é descoberta, é explorada sem correção (dia zero), a correção é publicada e o ataque continua contra quem não atualizou (n-day).</desc><rect width="1200" height="520" fill="#fcfcfb"/><g font-family="Helvetica, Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif">
+<text x="60" y="64" font-size="34" font-weight="700" fill="#0b0b0b" text-anchor="start">O que é um dia zero</text><text x="60" y="102" font-size="21" font-weight="400" fill="#52514e" text-anchor="start">Uma falha explorada antes de existir correção pública: o fabricante teve zero dias para corrigir</text>
+<line x1="70" y1="230" x2="1130" y2="230" stroke="#dcdbd6" stroke-width="6"/>
+<rect x="600" y="214" width="235" height="32" rx="16" fill="#f6c4ae"/>
+<text x="717" y="206" font-size="18" font-weight="700" fill="#eb6834" text-anchor="middle">Janela do dia zero</text>
+<circle cx="130" cy="230" r="14" fill="#0b0b0b"/>
+<text x="130" y="290" font-size="23" font-weight="700" fill="#0b0b0b" text-anchor="middle">A falha existe</text>
+<text x="130" y="322" font-size="18" font-weight="400" fill="#52514e" text-anchor="middle">Ninguém sabe ainda</text>
+<circle cx="365" cy="230" r="14" fill="#0b0b0b"/>
+<text x="365" y="290" font-size="23" font-weight="700" fill="#0b0b0b" text-anchor="middle">Descoberta</text>
+<text x="365" y="322" font-size="18" font-weight="400" fill="#52514e" text-anchor="middle">Por um pesquisador</text>
+<text x="365" y="346" font-size="18" font-weight="400" fill="#52514e" text-anchor="middle">ou por um atacante</text>
+<circle cx="600" cy="230" r="14" fill="#eb6834"/>
+<text x="600" y="290" font-size="23" font-weight="700" fill="#eb6834" text-anchor="middle">Dia zero</text>
+<text x="600" y="322" font-size="18" font-weight="400" fill="#52514e" text-anchor="middle">Ataques sem correção</text>
+<text x="600" y="346" font-size="18" font-weight="400" fill="#52514e" text-anchor="middle">disponível</text>
+<circle cx="835" cy="230" r="14" fill="#0b0b0b"/>
+<text x="835" y="290" font-size="23" font-weight="700" fill="#0b0b0b" text-anchor="middle">Correção publicada</text>
+<text x="835" y="322" font-size="18" font-weight="400" fill="#52514e" text-anchor="middle">O alerta vira público</text>
+<circle cx="1070" cy="230" r="14" fill="#0b0b0b"/>
+<text x="1070" y="290" font-size="23" font-weight="700" fill="#0b0b0b" text-anchor="middle">N-day</text>
+<text x="1070" y="322" font-size="18" font-weight="400" fill="#52514e" text-anchor="middle">Ataques contra quem</text>
+<text x="1070" y="346" font-size="18" font-weight="400" fill="#52514e" text-anchor="middle">ainda não atualizou</text>
+<rect x="60" y="400" width="1080" height="70" rx="8" fill="#ffffff" stroke="#eb6834" stroke-width="2"/>
+<text x="84" y="430" font-size="20" font-weight="700" fill="#0b0b0b" text-anchor="start">O risco maior:</text>
+<text x="228" y="430" font-size="20" font-weight="400" fill="#0b0b0b" text-anchor="start">na janela laranja não existe patch. A defesa depende de reduzir a exposição, vigiar e conter.</text>
+<text x="84" y="458" font-size="20" font-weight="400" fill="#0b0b0b" text-anchor="start">Depois da correção, a corrida vira atualizar antes de o atacante chegar.</text>
+<text x="60" y="505" font-size="17" font-weight="400" fill="#52514e" text-anchor="start">Definição: falha explorada antes de existir correção pública (Google Threat Intelligence Group)</text>
+</g></svg>
